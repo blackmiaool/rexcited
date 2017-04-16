@@ -41,12 +41,13 @@ gulp.task('reload', () => {
 gulp.task('react-dom-pre', function () {
     return rollup({
         entry: 'src/react-dom/react-dom.js',
-        plugins: [resolve(), commonjs()]
+        //        plugins: [resolve(), commonjs()]
     }).then(function (bundle) {
         return bundle.write({
             format: "umd",
             moduleName: "ReactDOM",
             context: "window",
+            treeshake: false,
             dest: 'dist/react-dom-pre.js'
         });
     });
@@ -55,12 +56,16 @@ gulp.task('react-dom-pre', function () {
 gulp.task('react-pre', function () {
     return rollup({
         entry: 'src/react/react.js',
-        plugins: [resolve(), commonjs()]
+        //        plugins: [resolve(), commonjs()]
     }).then(function (bundle) {
         return bundle.write({
+            globals: {
+                jquery: 'jQuery',
+            },
             format: "umd",
             moduleName: "React",
             context: "window",
+            treeshake: false,
             dest: 'dist/react-pre.js'
         });
     });
@@ -105,7 +110,10 @@ gulp.task('test', () => {
         .pipe(gulp.dest(distFolder))
         .pipe(livereload());
 });
-
+gulp.task('reload', () => {
+    return gulp.src('')
+        .pipe(livereload());
+});
 
 livereload.listen();
 
@@ -113,3 +121,4 @@ livereload.listen();
 gulp.watch('src/react/*', ['react']);
 gulp.watch('src/react-dom/*', ['react-dom']);
 gulp.watch('test/**/*', ['test'])
+gulp.watch('src/*.html', ['reload']);

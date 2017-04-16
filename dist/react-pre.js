@@ -1,14 +1,42 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-	typeof define === 'function' && define.amd ? define(factory) :
-	(global.React = factory());
-}(this, (function () { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('jquery')) :
+	typeof define === 'function' && define.amd ? define(['jquery'], factory) :
+	(global.React = factory(global.jQuery));
+}(this, (function (jquery) { 'use strict';
 
-function createElement() {
-    console.log("createElement", arguments);
+jquery = 'default' in jquery ? jquery['default'] : jquery;
+
+//import $ from "jquery";
+
+
+
+
+
+
+function createElement(type, config, ...children) {
+    if (!config) {
+        config = {};
+    }
+
+    const instance = {
+        type,
+        props: config
+    };
+    if (children) {
+        instance.props.children = children;
+    }
+    return instance;
+}
+
+
+//window.React = exports;
+
+class Component {
+
 }
 const exports$1 = {
-    createElement
+    createElement,
+    Component
 };
 
 //window.React = exports;

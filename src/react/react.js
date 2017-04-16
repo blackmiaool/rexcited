@@ -1,8 +1,12 @@
-function createElement() {
-    console.log("createElement", arguments);
+import $ from "jquery";
+import createElement from "./createElement";
+
+class Component {
+
 }
 const exports = {
-    createElement
+    createElement,
+    Component
 }
 export default exports;
 //window.React = exports;
