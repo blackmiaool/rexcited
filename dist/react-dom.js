@@ -16,80 +16,62 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         $dom.attr("class", value);
     });
     regiterAttr("children", function ($dom, value) {
-        console.log("children", value);
         value.forEach(function (child) {
-            if (typeof child === "string") {
+            if (typeof child === "string" || typeof child === "number") {
                 var content = document.createTextNode(child);
                 $dom.append(content);
+            } else if (Array.isArray(child)) {
+                child.forEach(function (ele) {
+                    $dom.append(create(ele));
+                });
             } else {
-                $dom.append(update(undefined, child));
+                $dom.append(create(child));
             }
         });
     });
 
-    function update(component, element) {
-        if (component) {
-            var instance = component[internalInstanceKey];
-        } else {
-            console.trace("element", element);
-            var type = element.type,
-                props = element.props;
+    function create(element) {
+        var type = element.type,
+            props = element.props;
 
-
-            if (typeof type === "string") {
-                var $dom = $(document.createElement(type));
-                for (var attrName in props) {
-                    if (attrMap[attrName]) {
-                        attrMap[attrName]($dom, props[attrName], attrName);
-                    } else {
-                        $dom.attr(attrName, props[attrName]);
-                    }
+        var dom = void 0;
+        if (typeof type === "string") {
+            var $dom = $(document.createElement(type));
+            for (var attrName in props) {
+                if (attrMap[attrName]) {
+                    attrMap[attrName]($dom, props[attrName], attrName);
+                } else {
+                    $dom.attr(attrName, props[attrName]);
                 }
-
-                console.log($dom);
-                return $dom;
-            } else {
-                console.log("type", type);
-                return new element.type().render();
             }
+            dom = $dom[0];
+        } else {
+            dom = create(new type().render());
         }
+        console.log(dom, element);
+        dom[internalInstanceKey] = {
+            _currentElement: element
+        };
+        return dom;
+    }
+
+    function update(dom, element) {
+        var instance = dom[internalInstanceKey];
+        console.log("instance", instance);
     }
 
     function render(element, target) {
         //    $dom.attr("data-reactroot", "");
-
-        console.log("none");
         if (target.childNodes[0]) {
             update(target.childNodes[0], element);
         } else {
-            target.appendChild(update(undefined, element)[0]);
+            var created = create(element);
+            created.setAttribute('data-reactroot', "");
+            target.appendChild(created);
         }
 
-        var targetInstance = target.childNodes[0][internalInstanceKey];
-        console.log(targetInstance);
-        //    target.appendChild($dom[0]);
-        //    console.log("render", arguments);
-        //    if (typeof tag === "string") {
-        //        instance.name = tag;
-        //        const $dom = $(document.createElement(tag));
-        //        for (const attrName in attrs) {
-        //            if (attrMap[attrName]) {
-        //                attrMap[attrName]($dom, attrs[attrName], attrName);
-        //            } else {
-        //                $dom.attr(attrName, attrs[attrName]);
-        //            }
-        //        }
-        //        children.forEach(function (child) {
-        //            if (typeof child === "string") {
-        //                let content = document.createTextNode(child);
-        //                $dom.append(content);
-        //            } else {
-        //                $dom.append(child);
-        //            }
-        //        });
-        //        console.log($dom);
-        //        return $dom;
-        //    }
+        //    const targetInstance = target.childNodes[0][internalInstanceKey];
+        //    console.log(targetInstance)
     }
     var exports$1 = {
         render: render

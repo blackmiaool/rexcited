@@ -18,12 +18,12 @@ var B = function (_React$Component) {
     }
 
     _createClass(B, [{
-        key: "render",
+        key: 'render',
         value: function render() {
             return React.createElement(
-                "div",
+                'div',
                 null,
-                "B"
+                'B'
             );
         }
     }]);
@@ -35,31 +35,30 @@ console.log(B);
 
 function tick() {
     var element = React.createElement(
-        "div",
+        'div',
         null,
         React.createElement(B, null),
         React.createElement(
-            "h1",
+            'h1',
             null,
-            "Hello, world!"
+            'Hello, world!'
         ),
         [1, 2, 3].map(function (number) {
             return React.createElement(
-                "span",
+                'span',
                 null,
                 number
             );
         }),
         React.createElement(
-            "h2",
+            'h2',
             null,
-            "It is ",
+            'It is ',
             new Date().toLocaleTimeString(),
-            "."
+            '.'
         )
     );
-    console.log("element", element);
     ReactDOM.render(element, document.getElementById('root'));
 }
 tick();
-//setInterval(tick, 1000);
+setInterval(tick, 1000);

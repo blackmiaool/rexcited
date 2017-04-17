@@ -11,86 +11,63 @@ regiterAttr("className", function ($dom, value) {
     $dom.attr("class", value);
 });
 regiterAttr("children", function ($dom, value) {
-    console.log("children", value);
     value.forEach(function (child) {
-        if (typeof child === "string") {
+        if (typeof child === "string" || typeof child === "number") {
             let content = document.createTextNode(child);
             $dom.append(content);
+        } else if (Array.isArray(child)) {
+            child.forEach((ele) => {
+                $dom.append(create(ele));
+            });
         } else {
-            $dom.append(update(undefined, child));
+            $dom.append(create(child));
         }
     });
 });
 
-
-function update(component, element) {
-    if (component) {
-        const instance = component[internalInstanceKey];
-    } else {
-        console.trace("element", element);
-        const {
-            type,
-            props
-        } = element;
-
-        if (typeof type === "string") {
-            const $dom = $(document.createElement(type));
-            for (const attrName in props) {
-                if (attrMap[attrName]) {
-                    attrMap[attrName]($dom, props[attrName], attrName);
-                } else {
-                    $dom.attr(attrName, props[attrName]);
-                }
+function create(element) {
+    const {
+        type,
+        props
+    } = element;
+    let dom;
+    if (typeof type === "string") {
+        const $dom = $(document.createElement(type));
+        for (const attrName in props) {
+            if (attrMap[attrName]) {
+                attrMap[attrName]($dom, props[attrName], attrName);
+            } else {
+                $dom.attr(attrName, props[attrName]);
             }
-
-            console.log($dom);
-            return $dom;
-        } else {
-            console.log("type", type);
-            return (new element.type()).render();
         }
+        dom = $dom[0];
+    } else {
+        dom = create((new type()).render());
     }
+    console.log(dom, element);
+    dom[internalInstanceKey] = {
+        _currentElement: element
+    }
+    return dom;
+}
 
+function update(dom, element) {
+    const instance = dom[internalInstanceKey];
+    console.log("instance", instance);
 }
 
 function render(element, target) {
     //    $dom.attr("data-reactroot", "");
-
-    console.log("none");
     if (target.childNodes[0]) {
         update(target.childNodes[0], element);
     } else {
-        target.appendChild(update(undefined, element)[0]);
+        const created = create(element);
+        created.setAttribute('data-reactroot', "");
+        target.appendChild(created);
     }
 
-
-
-
-    const targetInstance = target.childNodes[0][internalInstanceKey];
-    console.log(targetInstance)
-        //    target.appendChild($dom[0]);
-        //    console.log("render", arguments);
-        //    if (typeof tag === "string") {
-        //        instance.name = tag;
-        //        const $dom = $(document.createElement(tag));
-        //        for (const attrName in attrs) {
-        //            if (attrMap[attrName]) {
-        //                attrMap[attrName]($dom, attrs[attrName], attrName);
-        //            } else {
-        //                $dom.attr(attrName, attrs[attrName]);
-        //            }
-        //        }
-        //        children.forEach(function (child) {
-        //            if (typeof child === "string") {
-        //                let content = document.createTextNode(child);
-        //                $dom.append(content);
-        //            } else {
-        //                $dom.append(child);
-        //            }
-        //        });
-        //        console.log($dom);
-        //        return $dom;
-        //    }
+    //    const targetInstance = target.childNodes[0][internalInstanceKey];
+    //    console.log(targetInstance)
 }
 const exports = {
     render

@@ -54,21 +54,24 @@ gulp.task('react-dom-pre', function () {
 });
 
 gulp.task('react-pre', function () {
-    return rollup({
-        entry: 'src/react/react.js',
-        //        plugins: [resolve(), commonjs()]
-    }).then(function (bundle) {
-        return bundle.write({
-            globals: {
-                jquery: 'jQuery',
-            },
-            format: "umd",
-            moduleName: "React",
-            context: "window",
-            treeshake: false,
-            dest: 'dist/react-pre.js'
+    setTimeout(function () {
+        return rollup({
+            entry: 'src/react/react.js',
+            //        plugins: [resolve(), commonjs()]
+        }).then(function (bundle) {
+            return bundle.write({
+                globals: {
+                    jquery: 'jQuery',
+                },
+                format: "umd",
+                moduleName: "React",
+                context: "window",
+                treeshake: false,
+                dest: 'dist/react-pre.js'
+            });
         });
-    });
+    }, 200)
+
 });
 
 
