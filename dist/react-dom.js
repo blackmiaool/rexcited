@@ -12,52 +12,163 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     }
     var attrMap = {};
 
-    regiterAttr("className", function ($dom, value) {
-        $dom.attr("class", value);
+    function isText(key) {
+        return typeof key === "string" || typeof key === "number";
+    }
+
+    regiterAttr("className", function (value, dom) {
+        dom.setAttribute("class", value);
     });
-    regiterAttr("children", function ($dom, value) {
-        value.forEach(function (child) {
-            if (typeof child === "string" || typeof child === "number") {
-                var content = document.createTextNode(child);
-                $dom.append(content);
-            } else if (Array.isArray(child)) {
-                child.forEach(function (ele) {
-                    $dom.append(create(ele));
-                });
-            } else {
-                $dom.append(create(child));
+    regiterAttr("children", function (value, dom) {});
+
+    function getChildren(children, old) {
+        var _renderedChildren = {};
+        var arr = [];
+        children.forEach(function (child, i) {
+            function append(child, preKey, index) {
+                if (isText(child)) {
+                    var value = void 0;
+
+                    if (!old) {
+                        var node = document.createTextNode(child);
+                        arr.push(node);
+                        value = node;
+                    } else {
+                        value = child;
+                    }
+                    _renderedChildren['' + preKey + index] = value;
+                } else if (Array.isArray(child)) {
+                    child.forEach(function (ele, j) {
+                        append(ele, '' + preKey + index + ':', j);
+                    });
+                } else {
+                    var _value = void 0;
+                    if (!old) {
+                        var _node = create(child);
+                        arr.push(_node);
+                        _value = _node;
+                    } else {
+                        _value = child;
+                    }
+                    if (isText(child.props.key)) {
+                        _renderedChildren[preKey + '$' + child.props.key] = _value;
+                    } else {
+                        _renderedChildren['' + preKey + index] = _value;
+                    }
+                }
             }
+            append(child, ".", i);
         });
-    });
+        return {
+            children: _renderedChildren,
+            arr: arr
+        };
+    }
 
     function create(element) {
         var type = element.type,
             props = element.props;
 
+
         var dom = void 0;
-        if (typeof type === "string") {
-            var $dom = $(document.createElement(type));
-            for (var attrName in props) {
-                if (attrMap[attrName]) {
-                    attrMap[attrName]($dom, props[attrName], attrName);
-                } else {
-                    $dom.attr(attrName, props[attrName]);
-                }
-            }
-            dom = $dom[0];
-        } else {
-            dom = create(new type().render());
-        }
-        console.log(dom, element);
-        dom[internalInstanceKey] = {
+        var instance = {
             _currentElement: element
         };
+        var children = [];
+        if (props.children) {
+            var result = getChildren(props.children, false);
+            children = result.arr;
+            instance._renderedChildren = result.children;
+        }
+
+        if (typeof type === "string") {
+            dom = document.createElement(type);
+            for (var attrName in props) {
+                if (attrMap[attrName]) {
+                    attrMap[attrName](props[attrName], dom, instance, attrName);
+                } else {
+                    dom.setAttribute(attrName, props[attrName]);
+                }
+            }
+        } else {
+            instance.component = new type();
+            dom = create(instance.component.render());
+        }
+        instance._hostNode = dom;
+
+        children.forEach(function (child) {
+            dom.appendChild(child);
+        });
+        //    console.log(dom, element);
+
+
+        dom[internalInstanceKey] = instance;
         return dom;
     }
 
     function update(dom, element) {
         var instance = dom[internalInstanceKey];
-        console.log("instance", instance);
+        var element0 = instance._currentElement;
+        console.log("instance", element0, "to", element);
+        if (element.type !== element0.type) {
+            dom.parentElement.removeChild(dom);
+            dom.appendChild(create(element));
+            return;
+        }
+        console.log();
+        if (element.props.children) {
+            console.log();
+        }
+        var oldChildren = instance._renderedChildren;
+        var newChildren = getChildren(element.props.children, oldChildren).children;
+
+        for (var i in oldChildren) {
+            if (!newChildren[i]) {
+                oldChildren[i].parentElement.removeChild(oldChildren[i]);
+                delete oldChildren[i];
+            }
+        }
+        console.log(oldChildren, newChildren);
+        //    const keys = dom.childrenNode.map(function (child, i) {
+        //        if (child.props.key) {
+        //            return child.props.key;
+        //        } else {
+        //            return internalInstanceKey + i;
+        //        }
+        //    });
+        //    let keys0 = [];
+        //    [].slice.call(dom.childNodes).forEach(function (node, i) {
+        //        if (node.nodeType === 1) {
+        //            const key = node[internalInstanceKey]._currentElement.props.key;
+        //            console.log(key)
+        //            if (typeof key === "string" || typeof key === "number") {
+        //                return key;
+        //            } else {
+        //                return undefined;
+        //            }
+        //        } else {
+        //            return undefined;
+        //        }
+        //    });
+
+        //    const keys = element.props.children.map(function (child, i) {
+        //        if (typeof child === "string") {
+        //            return undefined;
+        //        } else if (Array.isArray(child)) {
+        //            return undefined;
+        //        } else if (typeof child === "boolean") {
+        //            return undefined;
+        //        } else if (typeof child === "object" && child) {
+        //            if (child.props.key) {
+        //                return child.props.key;
+        //            } else {
+        //                return undefined;
+        //            }
+        //        } else {
+        //            return i;
+        //        }
+        //    });
+        //    console.log("key", keys0, "to", keys);
     }
 
     function render(element, target) {

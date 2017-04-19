@@ -14,16 +14,24 @@ var B = function (_React$Component) {
     function B(props) {
         _classCallCheck(this, B);
 
-        return _possibleConstructorReturn(this, (B.__proto__ || Object.getPrototypeOf(B)).call(this, props));
+        var _this = _possibleConstructorReturn(this, (B.__proto__ || Object.getPrototypeOf(B)).call(this, props));
+
+        console.log("constructor  B");
+        return _this;
     }
 
     _createClass(B, [{
-        key: 'render',
+        key: "componentDidMount",
+        value: function componentDidMount() {
+            //        console.log("did");
+        }
+    }, {
+        key: "render",
         value: function render() {
             return React.createElement(
-                'div',
+                "div",
                 null,
-                'B'
+                "B"
             );
         }
     }]);
@@ -31,34 +39,77 @@ var B = function (_React$Component) {
     return B;
 }(React.Component);
 
-console.log(B);
+var A = function (_React$Component2) {
+    _inherits(A, _React$Component2);
+
+    function A(props) {
+        _classCallCheck(this, A);
+
+        var _this2 = _possibleConstructorReturn(this, (A.__proto__ || Object.getPrototypeOf(A)).call(this, props));
+
+        console.log("constructor  A");
+        return _this2;
+    }
+
+    _createClass(A, [{
+        key: "render",
+        value: function render() {
+            return React.createElement(
+                "div",
+                null,
+                "A"
+            );
+        }
+    }]);
+
+    return A;
+}(React.Component);
+
+//console.log(B)
+
+
+var i = 0;
 
 function tick() {
-    var element = React.createElement(
-        'div',
-        null,
-        React.createElement(B, null),
-        React.createElement(
-            'h1',
+    i++;
+    var date = "It is " + new Date().toLocaleTimeString();
+    var element = void 0;
+    if (i % 2) {
+        element = React.createElement(
+            "div",
             null,
-            'Hello, world!'
-        ),
-        [1, 2, 3].map(function (number) {
-            return React.createElement(
-                'span',
+            [1, 2, 3].map(function (number, i) {
+                return ["a", 'b', 'c'].map(function (v, j) {
+                    return React.createElement(A, { key: i + j });
+                });
+            }),
+            React.createElement(B, { key: "2", b: "1" }),
+            React.createElement(B, { key: 1 })
+        );
+    } else {
+        element = React.createElement(
+            "div",
+            null,
+            React.createElement("h1", null),
+            [1, 2, 3].map(function (number, i) {
+                return ["a", 'b', 'c'].map(function (v, j) {
+                    return React.createElement(A, { key: i + j });
+                });
+            }),
+            React.createElement(
+                "h1",
                 null,
-                number
-            );
-        }),
-        React.createElement(
-            'h2',
-            null,
-            'It is ',
-            new Date().toLocaleTimeString(),
-            '.'
-        )
-    );
+                "Hello, world!"
+            ),
+            "abc",
+            React.createElement(B, { key: "bbbbbbbbbbbbb", b: "2" }),
+            React.createElement(B, { key: "1" })
+        );
+    }
+
+    console.log(element.props.children);
     ReactDOM.render(element, document.getElementById('root'));
 }
+
 tick();
-setInterval(tick, 1000);
+setTimeout(tick, 100);
