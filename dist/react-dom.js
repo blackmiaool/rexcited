@@ -21,47 +21,88 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     });
     regiterAttr("children", function (value, dom) {});
 
-    function getChildren(children, old) {
+    function insertAfter(newNode, referenceNode) {
+        referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+    }
+
+    function getChildren(parent, children) {
+        var old = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
         var _renderedChildren = {};
-        var arr = [];
+
+        var prependParent = true;
+        var lastNode = void 0;
+
+        function append(node, key) {
+            if (prependParent) {
+                if (parent.firstChild) {
+                    parent.insertBefore(node, parent.firstChild);
+                } else {
+                    parent.appendChild(node);
+                }
+
+                lastNode = node;
+                prependParent = false;
+            } else {
+                insertAfter(node, lastNode);
+                lastNode = node;
+            }
+        }
+
         children.forEach(function (child, i) {
-            function append(child, preKey, index) {
+            function recursion(child, preKey, index) {
+                var key = '' + preKey + index;
+
                 if (isText(child)) {
                     var value = void 0;
 
-                    if (!old) {
+                    if (!old[key]) {
                         var node = document.createTextNode(child);
-                        arr.push(node);
                         value = node;
+                        append(value, key);
                     } else {
+                        lastNode = old[key];
                         value = child;
+
+                        if (old[key].textContent !== value) {
+                            old[key].textContent = value;
+                        }
                     }
-                    _renderedChildren['' + preKey + index] = value;
+                    _renderedChildren[key] = value;
                 } else if (Array.isArray(child)) {
                     child.forEach(function (ele, j) {
-                        append(ele, '' + preKey + index + ':', j);
+                        recursion(ele, key + ':', j);
                     });
                 } else {
                     var _value = void 0;
-                    if (!old) {
-                        var _node = create(child);
-                        arr.push(_node);
-                        _value = _node;
-                    } else {
-                        _value = child;
-                    }
+
                     if (isText(child.props.key)) {
-                        _renderedChildren[preKey + '$' + child.props.key] = _value;
-                    } else {
-                        _renderedChildren['' + preKey + index] = _value;
+                        key = preKey + '$' + child.props.key;
                     }
+                    //                console.log(key, old[[key]]);
+                    if (!old[key]) {
+                        var _node = create(child);
+                        _value = _node;
+                        append(_value, key);
+                    } else {
+
+                        lastNode = old[key];
+                        _value = old[key];
+                        update(old[key], child);
+                    }
+                    _renderedChildren[key] = _value;
                 }
             }
-            append(child, ".", i);
+            recursion(child, ".", i);
         });
+        //    for (const i in old) {
+        //        if (!_renderedChildren[i]) {
+        //            console.log(old[i], old[i].parentElement);
+        //            old[i].parentElement.removeChild(old[i]);
+        //        }
+        //    }
         return {
-            children: _renderedChildren,
-            arr: arr
+            children: _renderedChildren
         };
     }
 
@@ -74,12 +115,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         var instance = {
             _currentElement: element
         };
-        var children = [];
-        if (props.children) {
-            var result = getChildren(props.children, false);
-            children = result.arr;
-            instance._renderedChildren = result.children;
-        }
 
         if (typeof type === "string") {
             dom = document.createElement(type);
@@ -94,6 +129,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             instance.component = new type();
             dom = create(instance.component.render());
         }
+
+        var children = [];
+        if (props.children) {
+            var result = getChildren(dom, props.children, {});
+            instance._renderedChildren = result.children;
+        }
+
         instance._hostNode = dom;
 
         children.forEach(function (child) {
@@ -109,26 +151,27 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     function update(dom, element) {
         var instance = dom[internalInstanceKey];
         var element0 = instance._currentElement;
-        console.log("instance", element0, "to", element);
+        //    console.log("instance", element0, "to", element);
         if (element.type !== element0.type) {
             dom.parentElement.removeChild(dom);
             dom.appendChild(create(element));
             return;
         }
-        console.log();
+
         if (element.props.children) {
-            console.log();
+            //        console.log();
         }
         var oldChildren = instance._renderedChildren;
-        var newChildren = getChildren(element.props.children, oldChildren).children;
+        var newChildren = getChildren(dom, element.props.children, oldChildren).children;
 
+        //    console.log(oldChildren, "oldChildren");
         for (var i in oldChildren) {
             if (!newChildren[i]) {
                 oldChildren[i].parentElement.removeChild(oldChildren[i]);
                 delete oldChildren[i];
             }
         }
-        console.log(oldChildren, newChildren);
+        //    console.log(oldChildren, newChildren);
         //    const keys = dom.childrenNode.map(function (child, i) {
         //        if (child.props.key) {
         //            return child.props.key;

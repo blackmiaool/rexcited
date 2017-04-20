@@ -21,50 +21,94 @@ regiterAttr("className", function (value, dom) {
 });
 regiterAttr("children", function (value, dom) {});
 
-function getChildren(children, old) {
+
+function insertAfter(newNode, referenceNode) {
+    referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+}
+
+function getChildren(parent, children, old = {}) {
     const _renderedChildren = {};
-    const arr = [];
+
+    let prependParent = true;
+    let lastNode;
+
+    function append(node, key) {
+        if (prependParent) {
+            if (parent.firstChild) {
+                parent.insertBefore(node, parent.firstChild);
+            } else {
+                parent.appendChild(node);
+            }
+
+            lastNode = node;
+            prependParent = false;
+        } else {
+            insertAfter(node, lastNode);
+            lastNode = node;
+        }
+
+    }
+
+
     children.forEach(function (child, i) {
-        function append(child, preKey, index) {
+        function recursion(child, preKey, index) {
+            let key = `${preKey}${index}`;
+
             if (isText(child)) {
                 let value;
 
-                if (!old) {
+                if (!old[key]) {
                     const node = document.createTextNode(child);
-                    arr.push(node);
                     value = node;
+                    append(value, key);
                 } else {
+                    lastNode = old[key];
                     value = child;
+
+                    if (old[key].textContent !== value) {
+                        old[key].textContent = value;
+                    }
                 }
-                _renderedChildren[`${preKey}${index}`] = value;
+                _renderedChildren[key] = value;
 
             } else if (Array.isArray(child)) {
                 child.forEach((ele, j) => {
-                    append(ele, `${preKey}${index}:`, j);
+                    recursion(ele, `${key}:`, j);
                 });
             } else {
                 let value;
-                if (!old) {
+
+
+                if (isText(child.props.key)) {
+                    key = `${preKey}\$${child.props.key}`;
+
+                }
+                //                console.log(key, old[[key]]);
+                if (!old[key]) {
                     const node = create(child);
-                    arr.push(node);
                     value = node;
+                    append(value, key);
 
                 } else {
-                    value = child;
+
+                    lastNode = old[key];
+                    value = old[key];
+                    update(old[key], child);
                 }
-                if (isText(child.props.key)) {
-                    _renderedChildren[`${preKey}\$${child.props.key}`] = value;
-                } else {
-                    _renderedChildren[`${preKey}${index}`] = value;
-                }
+                _renderedChildren[key] = value;
 
             }
         }
-        append(child, ".", i);
+        recursion(child, ".", i);
     });
+    //    for (const i in old) {
+    //        if (!_renderedChildren[i]) {
+    //            console.log(old[i], old[i].parentElement);
+    //            old[i].parentElement.removeChild(old[i]);
+    //        }
+    //    }
     return {
         children: _renderedChildren,
-        arr
     };
 }
 
@@ -78,12 +122,6 @@ function create(element) {
     const instance = {
         _currentElement: element,
     };
-    let children = [];
-    if (props.children) {
-        let result = getChildren(props.children,false);
-        children = result.arr;
-        instance._renderedChildren = result.children;
-    }
 
     if (typeof type === "string") {
         dom = document.createElement(type);
@@ -99,6 +137,13 @@ function create(element) {
         instance.component = new type();
         dom = create(instance.component.render());
     }
+
+    let children = [];
+    if (props.children) {
+        let result = getChildren(dom, props.children, {});
+        instance._renderedChildren = result.children;
+    }
+
     instance._hostNode = dom;
 
 
@@ -115,26 +160,27 @@ function create(element) {
 function update(dom, element) {
     const instance = dom[internalInstanceKey];
     const element0 = instance._currentElement;
-    console.log("instance", element0, "to", element);
+    //    console.log("instance", element0, "to", element);
     if (element.type !== element0.type) {
         dom.parentElement.removeChild(dom);
         dom.appendChild(create(element));
         return;
     }
-    console.log();
+
     if (element.props.children) {
-        console.log();
+        //        console.log();
     }
     const oldChildren = instance._renderedChildren;
-    const newChildren = getChildren(element.props.children, oldChildren).children;
+    const newChildren = getChildren(dom, element.props.children, oldChildren).children;
 
+    //    console.log(oldChildren, "oldChildren");
     for (const i in oldChildren) {
         if (!newChildren[i]) {
             oldChildren[i].parentElement.removeChild(oldChildren[i]);
             delete oldChildren[i];
         }
     }
-    console.log(oldChildren, newChildren);
+    //    console.log(oldChildren, newChildren);
     //    const keys = dom.childrenNode.map(function (child, i) {
     //        if (child.props.key) {
     //            return child.props.key;
