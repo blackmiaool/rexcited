@@ -25,9 +25,41 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
     }
 
+    function equals(x, y) {
+        for (var p in y) {
+            switch (_typeof(y[p])) {
+                case 'object':
+                    if (!equals(x[p], y[p])) {
+                        return false;
+                    };
+                    break;
+                case 'function':
+                    if (typeof x[p] == 'undefined' || p != 'equals' && y[p].toString() != x[p].toString()) {
+                        return false;
+                    };
+                    break;
+                default:
+                    if (y[p] != x[p]) {
+                        return false;
+                    }
+            }
+        }
+
+        for (var p in x) {
+            if (typeof y[p] == 'undefined') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     function getChildren(parent, children) {
         var old = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
+        if (!children) {
+            return [];
+        }
         var _renderedChildren = {};
 
         var prependParent = true;
@@ -110,7 +142,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         var type = element.type,
             props = element.props;
 
-
         var dom = void 0;
         var instance = {
             _currentElement: element
@@ -126,8 +157,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
                 }
             }
         } else {
-            instance.component = new type();
-            dom = create(instance.component.render());
+            var component = new type(element.props);
+            if (Object instanceof React.Component) {
+                instance.component = component;
+                dom = create(instance.component.render());
+            } else {
+                dom = create(component);
+            }
         }
 
         var children = [];
@@ -151,11 +187,14 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     function update(dom, element) {
         var instance = dom[internalInstanceKey];
         var element0 = instance._currentElement;
-        //    console.log("instance", element0, "to", element);
+        console.log("instance", element0, "to", element);
         if (element.type !== element0.type) {
-            dom.parentElement.removeChild(dom);
-            dom.appendChild(create(element));
+            dom.parentElement.replaceChild(dom, create(element));
             return;
+        }
+
+        if (!equals(element0.props, element.props)) {
+            console.log(123);
         }
 
         if (element.props.children) {

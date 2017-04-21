@@ -14,7 +14,7 @@ function createElement(type, config, ...children) {
         type,
         props: config
     };
-    if (children) {
+    if (children.length) {
         instance.props.children = children;
     }
     return instance;

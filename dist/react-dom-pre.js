@@ -26,7 +26,39 @@ function insertAfter(newNode, referenceNode) {
     referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
 }
 
+function equals(x, y) {
+    for (var p in y) {
+        switch (typeof (y[p])) {
+            case 'object':
+                if (!equals(x[p],y[p])) {
+                    return false
+                };
+                break;
+            case 'function':
+                if (typeof (x[p]) == 'undefined' || (p != 'equals' && y[p].toString() != x[p].toString())) {
+                    return false;
+                };
+                break;
+            default:
+                if (y[p] != x[p]) {
+                    return false;
+                }
+        }
+    }
+
+    for (var p in x) {
+        if (typeof (y[p]) == 'undefined') {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 function getChildren(parent, children, old = {}) {
+    if (!children) {
+        return [];
+    }
     const _renderedChildren = {};
 
     let prependParent = true;
@@ -117,7 +149,6 @@ function create(element) {
         type,
         props
     } = element;
-
     let dom;
     const instance = {
         _currentElement: element,
@@ -134,8 +165,15 @@ function create(element) {
         }
 
     } else {
-        instance.component = new type();
-        dom = create(instance.component.render());
+        const component = new type(element.props);
+        if (Object instanceof React.Component) {
+            instance.component = component;
+            dom = create(instance.component.render());
+        } else {
+            dom = create(component);
+        }
+
+
     }
 
     let children = [];
@@ -160,11 +198,14 @@ function create(element) {
 function update(dom, element) {
     const instance = dom[internalInstanceKey];
     const element0 = instance._currentElement;
-    //    console.log("instance", element0, "to", element);
+    console.log("instance", element0, "to", element);
     if (element.type !== element0.type) {
-        dom.parentElement.removeChild(dom);
-        dom.appendChild(create(element));
+        dom.parentElement.replaceChild(dom, create(element));
         return;
+    }
+
+    if (!equals(element0.props, element.props)) {
+        console.log(123);
     }
 
     if (element.props.children) {

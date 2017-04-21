@@ -3,11 +3,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 (function (global, factory) {
-    (typeof exports === 'undefined' ? 'undefined' : _typeof(exports)) === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('jquery')) : typeof define === 'function' && define.amd ? define(['jquery'], factory) : global.React = factory(global.jQuery);
-})(this, function (jquery) {
+    (typeof exports === 'undefined' ? 'undefined' : _typeof(exports)) === 'object' && typeof module !== 'undefined' ? module.exports = factory() : typeof define === 'function' && define.amd ? define(factory) : global.React = factory();
+})(this, function () {
     'use strict';
-
-    jquery = 'default' in jquery ? jquery['default'] : jquery;
 
     //import $ from "jquery";
 
@@ -26,7 +24,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             children[_key - 2] = arguments[_key];
         }
 
-        if (children) {
+        if (children.length) {
             instance.props.children = children;
         }
         return instance;

@@ -1,4 +1,3 @@
-import $ from "jquery";
 import createElement from "./createElement";
 
 class Component {
