@@ -1,3 +1,5 @@
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -32,9 +34,39 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
     //window.React = exports;
 
-    var Component = function Component() {
-        _classCallCheck(this, Component);
-    };
+    var Component = function () {
+        function Component(props) {
+            _classCallCheck(this, Component);
+
+            this.props = props;
+        }
+
+        _createClass(Component, [{
+            key: 'setWrapper',
+            value: function setWrapper() {}
+        }, {
+            key: 'setState',
+            value: function setState(updater, cb) {
+                var _this = this;
+
+                var instance = this._reactInternalInstance;
+                if (instance.setStateTimeout) {
+                    clearTimeout(instance.setStateTimeout);
+                }
+                instance.stateQueue.push({
+                    updater: updater,
+                    cb: cb
+                });
+
+                instance.setStateTimeout = setTimeout(function () {
+                    instance.setStateTimeout = 0;
+                    instance.handleStateQueue(_this.state, _this.props);
+                });
+            }
+        }]);
+
+        return Component;
+    }();
 
     var exports$1 = {
         createElement: createElement,

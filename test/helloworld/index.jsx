@@ -1,17 +1,45 @@
-function Clock(props) {
-    return (
-        <div>
-      <h1>Hello, world!</h1>
-      <h2>It is {props.date.toLocaleTimeString()}.</h2>
-    </div>
-    );
+class Toggle extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            isToggleOn: true
+        };
+
+        // This binding is necessary to make `this` work in the callback
+        this.handleClick = this.handleClick.bind(this);
+    }
+
+    handleClick() {
+        this.setState(prevState => ({
+            isToggleOn: !prevState.isToggleOn
+        }));
+    }
+
+    render() {
+        return (
+            <button onClick={this.handleClick}>
+        {this.state.isToggleOn ? 'ON' : 'OFF'}
+      </button>
+        );
+    }
 }
 
-function tick() {
-    ReactDOM.render(
-        <Clock date={new Date()} />,
-        document.getElementById('root')
-    );
-}
+ReactDOM.render(
+    <Toggle />,
+    document.getElementById('root')
+);
 
-setInterval(tick, 1000);
+//function tick() {
+//    const element = (
+//        <div>
+//      <h1>Hello, world!</h1>
+//      <h2>It is {new Date().toLocaleTimeString()}.</h2>
+//    </div>
+//    );
+//    ReactDOM.render(
+//        element,
+//        document.getElementById('root')
+//    );
+//}
+//
+//setInterval(tick, 1000);

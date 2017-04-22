@@ -21,6 +21,32 @@ regiterAttr("className", function (value, dom) {
 });
 regiterAttr("children", function (value, dom) {});
 
+const events = [];
+for (var property in document.documentElement) {
+    var match = property.match(/^on(.+)/);
+    if (match) {
+        const event = match[1];
+        const reactEvent = 'on' + event[0].toUpperCase() + event.slice(1);
+        events.push({
+            event: match[1],
+            reactEvent
+        });
+    }
+}
+
+function onReactEvent(value, dom, instance, attr, eventName) {
+    console.log('onReactEvent', attr, value, eventName);
+
+    //    dom.addEventListener(value.match, )
+}
+console.log(events);
+events.forEach(function ({
+    event,
+    reactEvent
+}) {
+    regiterAttr(reactEvent, onReactEvent);
+});
+regiterAttr();
 
 function insertAfter(newNode, referenceNode) {
     referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
@@ -28,9 +54,17 @@ function insertAfter(newNode, referenceNode) {
 
 function equals(x, y) {
     for (var p in y) {
+        if (typeof y[p] !== typeof x[p]) {
+            return false;
+        }
         switch (typeof (y[p])) {
             case 'object':
-                if (!equals(x[p],y[p])) {
+                if (y[p] instanceof Date) {
+                    if (y[p].getTime() !== x[p].getTime()) {
+                        return false;
+                    }
+                }
+                if (!equals(x[p], y[p])) {
                     return false
                 };
                 break;
@@ -57,7 +91,9 @@ function equals(x, y) {
 
 function getChildren(parent, children, old = {}) {
     if (!children) {
-        return [];
+        return {
+            children: {}
+        };
     }
     const _renderedChildren = {};
 
@@ -82,11 +118,11 @@ function getChildren(parent, children, old = {}) {
     }
 
 
-    children.forEach(function (child, i) {
+    children.forEach(function (child = '', i) {
         function recursion(child, preKey, index) {
             let key = `${preKey}${index}`;
 
-            if (isText(child)) {
+            if (isText(child)) { //text node
                 let value;
 
                 if (!old[key]) {
@@ -94,16 +130,16 @@ function getChildren(parent, children, old = {}) {
                     value = node;
                     append(value, key);
                 } else {
-                    lastNode = old[key];
+                    lastNode = old[key]._hostNode;
                     value = child;
 
-                    if (old[key].textContent !== value) {
-                        old[key].textContent = value;
+                    if (old[key]._hostNode.textContent !== value) {
+                        old[key]._hostNode.textContent = value;
                     }
                 }
-                _renderedChildren[key] = value;
+                _renderedChildren[key] = new ReactDOMTextComponent(child, value);
 
-            } else if (Array.isArray(child)) {
+            } else if (Array.isArray(child)) { //array 
                 child.forEach((ele, j) => {
                     recursion(ele, `${key}:`, j);
                 });
@@ -123,11 +159,11 @@ function getChildren(parent, children, old = {}) {
 
                 } else {
 
-                    lastNode = old[key];
-                    value = old[key];
-                    update(old[key], child);
+                    lastNode = old[key]._hostNode;
+                    value = old[key]._hostNode;
+                    update(old[key]._hostNode, child);
                 }
-                _renderedChildren[key] = value;
+                _renderedChildren[key] = new ReactDOMComponent(child, value);
 
             }
         }
@@ -144,17 +180,97 @@ function getChildren(parent, children, old = {}) {
     };
 }
 
-function create(element) {
+class ReactCompositeComponentWrapper {
+    constructor(element, type) {
+        this._currentElement = element;
+        if (!isComponent(type)) {
+            return;
+        }
+
+        if (type.defaultProps) {
+            for (const i in type.defaultProps) {
+                if (element.props[i] === undefined) {
+                    element.props[i] = type.defaultProps[i];
+                }
+            }
+        }
+        const component = new type(element.props);
+        this._instance = component;
+        component._reactInternalInstance = this;
+        if (!component.state) {
+            component.state = {};
+        }
+        component.componentWillMount && component.componentWillMount();
+        if (component.componentDidMount) {
+            setTimeout(function () {
+                component.componentDidMount();
+            });
+        }
+
+        Object.assign(this, {
+            stateQueue: []
+        });
+    }
+    handleStateQueue(oldState, props) {
+        const cbList = [];
+        const stateList = [];
+        this.stateQueue.forEach(function ({
+            updater,
+            cb
+        }) {
+            if (cb) {
+                cbList.push(cb);
+            }
+            if (typeof updater === 'function') {
+                stateList.push(updater(oldState, props));
+            } else {
+                stateList.push(updater);
+            }
+        });
+        const state = {};
+        Object.assign(state, oldState);
+        stateList.forEach(function (stateThis) {
+            Object.assign(state, stateThis);
+        });
+        this.stateQueue.length = 0;
+        cbList.forEach((cb) => {
+            cb.call(this);
+        });
+        this._instance.state = state;
+        const element = this._instance.render();
+        update(this._hostNode, element);
+    }
+
+}
+class ReactDOMComponent {
+    constructor(element, dom) {
+        this._currentElement = element;
+        this._hostNode = dom;
+    }
+}
+class ReactDOMTextComponent {
+    constructor(element, dom) {
+        this._currentElement = element;
+        this._hostNode = dom;
+    }
+}
+
+function create(element, owner) {
     const {
         type,
-        props
+        props,
     } = element;
+
+    if (owner) {
+        element._owner = owner;
+    }
+
     let dom;
     const instance = {
         _currentElement: element,
     };
 
-    if (typeof type === "string") {
+    if (typeof type === "string") { //normal dom
         dom = document.createElement(type);
         for (const attrName in props) {
             if (attrMap[attrName]) {
@@ -163,20 +279,25 @@ function create(element) {
                 dom.setAttribute(attrName, props[attrName]);
             }
         }
+        dom[internalInstanceKey] = instance;
 
     } else {
-        const component = new type(element.props);
-        if (Object instanceof React.Component) {
-            instance.component = component;
-            dom = create(instance.component.render());
-        } else {
-            dom = create(component);
+        if (type.prototype instanceof React.Component) { //component
+            const owner = new ReactCompositeComponentWrapper(element, type);
+            dom = create(owner._instance.render(), owner);
+            owner._hostNode = dom;
+            return dom;
+        } else { //stateless
+            const ele = type(element.props);
+            const owner = new ReactCompositeComponentWrapper(element, type);
+            const dom = create(ele, owner);
+            owner._hostNode = dom;
+            return dom;
         }
-
-
     }
 
     let children = [];
+
     if (props.children) {
         let result = getChildren(dom, props.children, {});
         instance._renderedChildren = result.children;
@@ -195,17 +316,57 @@ function create(element) {
     return dom;
 }
 
+function isStateLess(type) {
+    return typeof type === "function" && !isComponent(type);
+}
+
+function isComponent(type) {
+    return type.prototype instanceof React.Component;
+}
+
 function update(dom, element) {
+
     const instance = dom[internalInstanceKey];
     const element0 = instance._currentElement;
-    console.log("instance", element0, "to", element);
-    if (element.type !== element0.type) {
-        dom.parentElement.replaceChild(dom, create(element));
+
+
+    let ownerType;
+    const owner = element0._owner;
+
+    let isHost = false;
+    if (owner) {
+        isHost = owner._hostNode === dom;
+        ownerType = owner._currentElement.type;
+    }
+
+    if (isStateLess(element.type) && isHost && ownerType === element.type) {
+        update(dom, element.type(element.props));
         return;
     }
 
-    if (!equals(element0.props, element.props)) {
-        console.log(123);
+
+
+    if (isHost) {
+        if (element.type !== ownerType && element.type !== element0.type) {
+            dom.parentElement.replaceChild(create(element), dom);
+            return;
+        }
+
+    } else {
+        if (element.type !== element0.type) {
+            dom.parentElement.replaceChild(create(element), dom);
+            return;
+        }
+    }
+
+
+
+    if (!equals(element0.props, element.props)) { //props changed        
+        if (isComponent(element.type)) {
+            console.log("com");
+        } else { //normal dom
+        }
+
     }
 
     if (element.props.children) {
@@ -221,47 +382,7 @@ function update(dom, element) {
             delete oldChildren[i];
         }
     }
-    //    console.log(oldChildren, newChildren);
-    //    const keys = dom.childrenNode.map(function (child, i) {
-    //        if (child.props.key) {
-    //            return child.props.key;
-    //        } else {
-    //            return internalInstanceKey + i;
-    //        }
-    //    });
-    //    let keys0 = [];
-    //    [].slice.call(dom.childNodes).forEach(function (node, i) {
-    //        if (node.nodeType === 1) {
-    //            const key = node[internalInstanceKey]._currentElement.props.key;
-    //            console.log(key)
-    //            if (typeof key === "string" || typeof key === "number") {
-    //                return key;
-    //            } else {
-    //                return undefined;
-    //            }
-    //        } else {
-    //            return undefined;
-    //        }
-    //    });
 
-    //    const keys = element.props.children.map(function (child, i) {
-    //        if (typeof child === "string") {
-    //            return undefined;
-    //        } else if (Array.isArray(child)) {
-    //            return undefined;
-    //        } else if (typeof child === "boolean") {
-    //            return undefined;
-    //        } else if (typeof child === "object" && child) {
-    //            if (child.props.key) {
-    //                return child.props.key;
-    //            } else {
-    //                return undefined;
-    //            }
-    //        } else {
-    //            return i;
-    //        }
-    //    });
-    //    console.log("key", keys0, "to", keys);
 
 }
 
