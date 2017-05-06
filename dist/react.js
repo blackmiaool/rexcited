@@ -34,6 +34,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
     //window.React = exports;
 
+    var isAsyncSetState = false;
+
+    function asyncSetState(value) {
+        isAsyncSetState = value;
+    }
+
     var Component = function () {
         function Component(props) {
             _classCallCheck(this, Component);
@@ -57,11 +63,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     updater: updater,
                     cb: cb
                 });
-
-                instance.setStateTimeout = setTimeout(function () {
+                var execQueue = function execQueue() {
                     instance.setStateTimeout = 0;
-                    instance.handleStateQueue(_this.state, _this.props);
-                });
+                    instance.handleStateQueue.call(_this, _this.state, _this.props);
+                };
+                if (isAsyncSetState) {
+                    instance.setStateTimeout = setTimeout(execQueue);
+                } else {
+                    execQueue();
+                }
             }
         }]);
 
@@ -70,7 +80,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
     var exports$1 = {
         createElement: createElement,
-        Component: Component
+        Component: Component,
+        asyncSetState: asyncSetState
     };
 
     //window.React = exports;

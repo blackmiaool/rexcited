@@ -29,6 +29,11 @@ function createElement(type, config, ...children) {
 
 //window.React = exports;
 
+let isAsyncSetState = false;
+
+function asyncSetState(value) {
+    isAsyncSetState = value;
+}
 class Component {
     constructor(props) {
         this.props = props;
@@ -36,8 +41,7 @@ class Component {
     setWrapper() {
 
     }
-    setState(updater, cb) {
-        const instance = this._reactInternalInstance;
+    setState(updater, cb) {const instance = this._reactInternalInstance;
         if (instance.setStateTimeout) {
             clearTimeout(instance.setStateTimeout);
         }
@@ -45,17 +49,24 @@ class Component {
             updater,
             cb
         });
-
-        instance.setStateTimeout = setTimeout(() => {
+        const execQueue = () => {
             instance.setStateTimeout = 0;
-            instance.handleStateQueue(this.state, this.props);
-      
-        });
+            instance.handleStateQueue.call(this, this.state, this.props);
+
+        };
+        if (isAsyncSetState) {
+            instance.setStateTimeout = setTimeout(execQueue);
+            
+        } else {
+            execQueue();
+        }
+
     }
 }
 const exports$1 = {
     createElement,
-    Component
+    Component,
+    asyncSetState
 };
 
 //window.React = exports;

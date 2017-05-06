@@ -1,45 +1,100 @@
-class Toggle extends React.Component {
+class FancyBorder extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            isToggleOn: true
-        };
 
-        // This binding is necessary to make `this` work in the callback
-        this.handleClick = this.handleClick.bind(this);
     }
-
-    handleClick() {
-        this.setState(prevState => ({
-            isToggleOn: !prevState.isToggleOn
-        }));
-    }
-
     render() {
-        return (
-            <button onClick={this.handleClick}>
-        {this.state.isToggleOn ? 'ON' : 'OFF'}
-      </button>
-        );
+        return <div className={'FancyBorder FancyBorder-' + this.props.color}>
+      {this.props.children}
+    </div>
     }
 }
 
+function Dialog(props) {
+    return (
+        <FancyBorder color="blue">
+      <h1 className="Dialog-title">
+        {props.title}
+      </h1>
+      <p className="Dialog-message">
+        {props.message}
+      </p>
+      {props.children}
+    </FancyBorder>
+    );
+}
+
+class SignUpDialog extends React.Component {
+        constructor(props) {
+            super(props);
+            this.handleChange = this.handleChange.bind(this);
+            this.handleSignUp = this.handleSignUp.bind(this);
+            this.state = {
+                login: ''
+            };
+        }
+
+        render() {
+            return (
+                <Dialog title="Mars Exploration Program"
+              message="How should we refer to you?">
+        <input value={this.state.login}
+               onChange={this.handleChange} />
+        <button onClick={this.handleSignUp}>
+          Sign Me Up!
+        </button>
+      </Dialog>
+            );
+        }
+
+        handleChange(e) {
+            this.setState({
+                login: e.target.value
+            });
+        }
+
+        handleSignUp() {
+            alert(`Welcome aboard, ${this.state.login}!`);
+        }
+    }
+    //
+    //var i = 0;
+    //class A extends React.Component {
+    //    constructor(props) {
+    //        super(props);
+    //        this.handleChange = this.handleChange.bind(this);
+    //        this.handleSignUp = this.handleSignUp.bind(this);
+    //        this.state = {
+    //            login: ''
+    //        };
+    //    }
+    //
+    //    render() {
+    //        console.log(this);
+    //        if (i < 3) {
+    //            i++
+    //            return <A/>
+    //        } else {
+    //            return <div/>;
+    //        }
+    //    }
+    //
+    //    handleChange(e) {
+    //        this.setState({
+    //            login: e.target.value
+    //        });
+    //    }
+    //
+    //    handleSignUp() {
+    //        alert(`Welcome aboard, ${this.state.login}!`);
+    //    }
+    //}
+
+//ReactDOM.render(
+//    <A />,
+//    document.getElementById('root')
+//);
 ReactDOM.render(
-    <Toggle />,
+    <SignUpDialog />,
     document.getElementById('root')
 );
-
-//function tick() {
-//    const element = (
-//        <div>
-//      <h1>Hello, world!</h1>
-//      <h2>It is {new Date().toLocaleTimeString()}.</h2>
-//    </div>
-//    );
-//    ReactDOM.render(
-//        element,
-//        document.getElementById('root')
-//    );
-//}
-//
-//setInterval(tick, 1000);
