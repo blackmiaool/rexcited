@@ -6,132 +6,178 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var FancyBorder = function (_React$Component) {
-    _inherits(FancyBorder, _React$Component);
+//class CustomTextInput extends React.Component {
+//    constructor(props) {
+//        super(props);
+//        this.focus = this.focus.bind(this);
+//    }
+//
+//    focus() {
+//        // Explicitly focus the text input using the raw DOM API
+//        this.textInput.focus();
+//    }
+//
+//    render() {
+//        // Use the `ref` callback to store a reference to the text input DOM
+//        // element in an instance field (for example, this.textInput).
+//        return (
+//            <div>
+//        <input
+//          type="text"
+//          ref={(input) => { this.textInput = input; console.log(3)}} />
+//        <input
+//          type="button"
+//          value="Focus the text input"
+//          onClick={this.focus}
+//        />
+//      </div>
+//        );
+//    }
+//}
+//console.log(1)
+//ReactDOM.render(
+//    <CustomTextInput />,
+//    document.getElementById('root')
+//);
+//console.log(2)
+var scaleNames = {
+    c: 'Celsius',
+    f: 'Fahrenheit'
+};
 
-    function FancyBorder(props) {
-        _classCallCheck(this, FancyBorder);
+function toCelsius(fahrenheit) {
+    return (fahrenheit - 32) * 5 / 9;
+}
 
-        return _possibleConstructorReturn(this, (FancyBorder.__proto__ || Object.getPrototypeOf(FancyBorder)).call(this, props));
+function toFahrenheit(celsius) {
+    return celsius * 9 / 5 + 32;
+}
+
+function tryConvert(temperature, convert) {
+    var input = parseFloat(temperature);
+    if (Number.isNaN(input)) {
+        return '';
+    }
+    var output = convert(input);
+    var rounded = Math.round(output * 1000) / 1000;
+    return rounded.toString();
+}
+
+function BoilingVerdict(props) {
+    if (props.celsius >= 100) {
+        return React.createElement(
+            'p',
+            null,
+            'The water would boil.'
+        );
+    }
+    return React.createElement(
+        'p',
+        null,
+        'The water would not boil.'
+    );
+}
+
+var TemperatureInput = function (_React$Component) {
+    _inherits(TemperatureInput, _React$Component);
+
+    function TemperatureInput(props) {
+        _classCallCheck(this, TemperatureInput);
+
+        var _this = _possibleConstructorReturn(this, (TemperatureInput.__proto__ || Object.getPrototypeOf(TemperatureInput)).call(this, props));
+
+        _this.handleChange = _this.handleChange.bind(_this);
+        return _this;
     }
 
-    _createClass(FancyBorder, [{
-        key: "render",
+    _createClass(TemperatureInput, [{
+        key: 'handleChange',
+        value: function handleChange(e) {
+            this.props.onTemperatureChange(e.target.value);
+        }
+    }, {
+        key: 'render',
         value: function render() {
+            var temperature = this.props.temperature;
+            var scale = this.props.scale;
             return React.createElement(
-                "div",
-                { className: 'FancyBorder FancyBorder-' + this.props.color },
-                this.props.children
+                'fieldset',
+                null,
+                React.createElement(
+                    'legend',
+                    null,
+                    'Enter temperature in ',
+                    scaleNames[scale],
+                    ':'
+                ),
+                React.createElement('input', { value: temperature,
+                    onChange: this.handleChange })
             );
         }
     }]);
 
-    return FancyBorder;
+    return TemperatureInput;
 }(React.Component);
 
-function Dialog(props) {
-    return React.createElement(
-        FancyBorder,
-        { color: "blue" },
-        React.createElement(
-            "h1",
-            { className: "Dialog-title" },
-            props.title
-        ),
-        React.createElement(
-            "p",
-            { className: "Dialog-message" },
-            props.message
-        ),
-        props.children
-    );
-}
+var Calculator = function (_React$Component2) {
+    _inherits(Calculator, _React$Component2);
 
-var SignUpDialog = function (_React$Component2) {
-    _inherits(SignUpDialog, _React$Component2);
+    function Calculator(props) {
+        _classCallCheck(this, Calculator);
 
-    function SignUpDialog(props) {
-        _classCallCheck(this, SignUpDialog);
+        var _this2 = _possibleConstructorReturn(this, (Calculator.__proto__ || Object.getPrototypeOf(Calculator)).call(this, props));
 
-        var _this2 = _possibleConstructorReturn(this, (SignUpDialog.__proto__ || Object.getPrototypeOf(SignUpDialog)).call(this, props));
-
-        _this2.handleChange = _this2.handleChange.bind(_this2);
-        _this2.handleSignUp = _this2.handleSignUp.bind(_this2);
+        _this2.handleCelsiusChange = _this2.handleCelsiusChange.bind(_this2);
+        _this2.handleFahrenheitChange = _this2.handleFahrenheitChange.bind(_this2);
         _this2.state = {
-            login: ''
+            temperature: '',
+            scale: 'c'
         };
         return _this2;
     }
 
-    _createClass(SignUpDialog, [{
-        key: "render",
-        value: function render() {
-            return React.createElement(
-                Dialog,
-                { title: "Mars Exploration Program",
-                    message: "How should we refer to you?" },
-                React.createElement("input", { value: this.state.login,
-                    onChange: this.handleChange }),
-                React.createElement(
-                    "button",
-                    { onClick: this.handleSignUp },
-                    "Sign Me Up!"
-                )
-            );
-        }
-    }, {
-        key: "handleChange",
-        value: function handleChange(e) {
+    _createClass(Calculator, [{
+        key: 'handleCelsiusChange',
+        value: function handleCelsiusChange(temperature) {
             this.setState({
-                login: e.target.value
+                scale: 'c',
+                temperature: temperature
             });
         }
     }, {
-        key: "handleSignUp",
-        value: function handleSignUp() {
-            alert("Welcome aboard, " + this.state.login + "!");
+        key: 'handleFahrenheitChange',
+        value: function handleFahrenheitChange(temperature) {
+            this.setState({
+                scale: 'f',
+                temperature: temperature
+            });
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            var scale = this.state.scale;
+            var temperature = this.state.temperature;
+            var celsius = scale === 'f' ? tryConvert(temperature, toCelsius) : temperature;
+            var fahrenheit = scale === 'c' ? tryConvert(temperature, toFahrenheit) : temperature;
+
+            return React.createElement(
+                'div',
+                null,
+                React.createElement(TemperatureInput, {
+                    scale: 'c',
+                    temperature: celsius,
+                    onTemperatureChange: this.handleCelsiusChange }),
+                React.createElement(TemperatureInput, {
+                    scale: 'f',
+                    temperature: fahrenheit,
+                    onTemperatureChange: this.handleFahrenheitChange }),
+                React.createElement(BoilingVerdict, {
+                    celsius: parseFloat(celsius) })
+            );
         }
     }]);
 
-    return SignUpDialog;
+    return Calculator;
 }(React.Component);
-//
-//var i = 0;
-//class A extends React.Component {
-//    constructor(props) {
-//        super(props);
-//        this.handleChange = this.handleChange.bind(this);
-//        this.handleSignUp = this.handleSignUp.bind(this);
-//        this.state = {
-//            login: ''
-//        };
-//    }
-//
-//    render() {
-//        console.log(this);
-//        if (i < 3) {
-//            i++
-//            return <A/>
-//        } else {
-//            return <div/>;
-//        }
-//    }
-//
-//    handleChange(e) {
-//        this.setState({
-//            login: e.target.value
-//        });
-//    }
-//
-//    handleSignUp() {
-//        alert(`Welcome aboard, ${this.state.login}!`);
-//    }
-//}
 
-//ReactDOM.render(
-//    <A />,
-//    document.getElementById('root')
-//);
-
-
-ReactDOM.render(React.createElement(SignUpDialog, null), document.getElementById('root'));
+ReactDOM.render(React.createElement(Calculator, null), document.getElementById('root'));

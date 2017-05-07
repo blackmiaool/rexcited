@@ -25,6 +25,18 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     });
     regiterAttr("children", function (value, dom) {});
 
+    regiterAttr("ref", function (value, dom, instance, attrName) {
+        var ref = void 0;
+        if (instance._currentElement._owner && instance._currentElement._owner._hostNode === dom) {
+            //host
+            ref = instance._currentElement._owner._instance;
+        } else {
+            ref = dom;
+        }
+        if (typeof value === "function") {} else {}
+        console.log("arguments", arguments);
+    });
+
     var events = [];
     for (var property in document.documentElement) {
         var match = property.match(/^on(.+)/);
@@ -109,7 +121,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         var old = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
         var owner = arguments[3];
 
-        console.log('getChildren', children, old);
+        console.log('getChildren', parent, children, old);
         if (!children) {
             return {
                 children: {}
@@ -180,16 +192,21 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     }
                     //                console.log(key, old[[key]]);
                     if (!old[key]) {
-                        var _node = create(child, owner);
+                        var _node = _create(child, owner);
                         append(_node, key);
-                        _renderedChildren[key] = new ReactDOMComponent(child, _node, owner);
+                        //                    _renderedChildren[key] = new ReactDOMComponent(child, node, owner);
+                        _renderedChildren[key] = findOwnerUntil(_node[internalInstanceKey], owner);
+                        console.info('!!!!!!!!!!!!', _renderedChildren[key], owner);
                     } else {
-                        lastNode = update(old[key]._hostNode, child);
-                        if (lastNode !== old[key]._hostNode) {
-                            _renderedChildren[key] = new ReactDOMComponent(child, lastNode, owner);
+                        if (old[key] instanceof ReactCompositeComponentWrapper) {
+                            lastNode = update(old[key]._hostNode, child, {
+                                componentRef: old[key]._instance
+                            });
                         } else {
-                            _renderedChildren[key] = old[key];
+                            lastNode = update(old[key]._hostNode, child);
                         }
+
+                        _renderedChildren[key] = findOwnerUntil(lastNode[internalInstanceKey], owner);
                     }
                 }
             }
@@ -219,13 +236,20 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     };
 
     var ReactCompositeComponentWrapper = function () {
-        function ReactCompositeComponentWrapper(element, type) {
+        function ReactCompositeComponentWrapper(type, element, owner) {
             _classCallCheck(this, ReactCompositeComponentWrapper);
 
             this._currentElement = element;
+            if (owner) {
+                this._currentElement._owner = owner;
+            }
             if (isStateLess(type)) {
+                //            element = type(element.props)
                 this._instance = new StatelessComponent(element.props, type);
+                this.type = "stateless";
                 return;
+            } else {
+                this.type = "component";
             }
 
             if (type.defaultProps) {
@@ -258,19 +282,40 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }
 
         _createClass(ReactCompositeComponentWrapper, [{
+            key: 'create',
+            value: function create() {
+                var dom = void 0;
+                if (this.type === "stateless") {
+                    dom = _create(this.render(this._currentElement.props), this);
+                } else {
+                    dom = _create(this.render(), this);
+                }
+                this._hostNode = dom;
+                return dom;
+            }
+        }, {
             key: 'updateProps',
             value: function updateProps(props) {
                 this._instance.props = props;
                 this._currentElement.props = props;
             }
         }, {
+            key: 'render',
+            value: function render() {
+                var element = void 0;
+                if (this.type === "stateless") {
+                    element = this._instance.render(this._currentElement.props);
+                } else {
+                    element = this._instance.render();
+                }
+                return element;
+            }
+        }, {
             key: 'handleStateQueue',
-            value: function handleStateQueue(oldState, props) {
-                var _this2 = this;
-
+            value: function handleStateQueue(componentRef, oldState, props) {
                 var cbList = [];
                 var stateList = [];
-                var instance = this._reactInternalInstance;
+                var instance = componentRef._reactInternalInstance;
                 instance.stateQueue.forEach(function (_ref2) {
                     var updater = _ref2.updater,
                         cb = _ref2.cb;
@@ -292,13 +337,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                 instance.stateQueue.length = 0;
                 cbList.forEach(function (cb) {
-                    cb.call(_this2);
+                    cb.call(componentRef);
                 });
-                this.state = state;
-                var element = this.render();
+                componentRef.state = state;
+                var element = componentRef.render();
 
                 instance._hostNode = update(instance._hostNode, element, {
-                    componentRef: this
+                    componentRef: componentRef
                 });
             }
         }]);
@@ -306,14 +351,44 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         return ReactCompositeComponentWrapper;
     }();
 
-    var ReactDOMComponent = function ReactDOMComponent(element, dom, owner) {
+    var ReactDOMComponent = function ReactDOMComponent(type, element, owner) {
         _classCallCheck(this, ReactDOMComponent);
 
         this._currentElement = element;
-        this._hostNode = dom;
         if (owner) {
-            this.owner = owner;
+            this._currentElement._owner = owner;
         }
+        var dom = document.createElement(type);
+        this._hostNode = dom;
+        if (type === 'input') {
+            dom.addEventListener("input", function (e) {
+                var target = e.target;
+                var instance = target[internalInstanceKey];
+                var element = instance._currentElement;
+                if (target.value !== instance.previousOnchangeValue) {
+                    instance.previousOnchangeValue = target.value;
+                    if (element.props.onChange) {
+                        element.props.onChange.call(element, e);
+                    }
+                    afterCallback.push(function () {
+                        var propsValue = target[internalInstanceKey]._currentElement.props.value;
+                        if (propsValue !== undefined && propsValue !== target.value) {
+                            target.value = propsValue;
+                            instance.previousOnchangeValue = propsValue;
+                        }
+                    });
+                    execAfterCallback();
+                }
+            });
+        }
+        for (var attrName in element.props) {
+            if (attrMap[attrName]) {
+                attrMap[attrName](element.props[attrName], dom, this, attrName);
+            } else {
+                dom.setAttribute(attrName, element.props[attrName]);
+            }
+        }
+        dom[internalInstanceKey] = this;
     };
 
     var ReactDOMTextComponent = function ReactDOMTextComponent(element, dom, owner) {
@@ -341,75 +416,28 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         afterCallback.length = 0;
     }
 
-    function create(element, owner) {
+    function _create(element, owner) {
         console.log('create', element);
-        var dom = void 0;
-        var instance = {
-            _currentElement: element
-        };
-
-        if (!isValidElement(element)) {
-            dom = document.createComment("react-empty");
-            dom._hostNode = dom;
-            dom[internalInstanceKey] = instance;
-            return dom;
-        }
         var type = element.type,
             props = element.props;
 
-
-        if (owner) {
-            element._owner = owner;
+        if (!isValidElement(element)) {
+            //comment
+            var _dom = document.createComment("react-empty");
+            _dom._hostNode = _dom;
+            _dom[internalInstanceKey] = {
+                _currentElement: element
+            };
+            return _dom;
+        }
+        if (isComponent(type)) {
+            var _instance = new ReactCompositeComponentWrapper(type, element, owner);
+            return _instance.create();
         }
 
-        if (typeof type === "string") {
-            //normal dom
-            dom = document.createElement(type);
-            if (type === 'input') {
-                dom.addEventListener("input", function (e) {
-                    var target = e.target;
-                    var instance = target[internalInstanceKey];
-                    var element = instance._currentElement;
-                    if (target.value !== instance.previousOnchangeValue) {
-                        instance.previousOnchangeValue = target.value;
-                        if (element.props.onChange) {
-                            element.props.onChange.call(element, e);
-                        }
-                        afterCallback.push(function () {
-                            var propsValue = target[internalInstanceKey]._currentElement.props.value;
-                            if (propsValue !== undefined && propsValue !== target.value) {
-                                target.value = propsValue;
-                                instance.previousOnchangeValue = propsValue;
-                            }
-                        });
-                        execAfterCallback();
-                    }
-                });
-            }
-            for (var attrName in props) {
-                if (attrMap[attrName]) {
-                    attrMap[attrName](props[attrName], dom, instance, attrName);
-                } else {
-                    dom.setAttribute(attrName, props[attrName]);
-                }
-            }
-            dom[internalInstanceKey] = instance;
-        } else {
-            if (type.prototype instanceof React.Component) {
-                //component
-                var _owner = new ReactCompositeComponentWrapper(element, type);
-                dom = create(_owner._instance.render(), _owner);
-                _owner._hostNode = dom;
-                return dom;
-            } else {
-                //stateless
-                var ele = type(element.props);
-                var _owner2 = new ReactCompositeComponentWrapper(element, type);
-                var _dom = create(ele, _owner2);
-                _owner2._hostNode = _dom;
-                return _dom;
-            }
-        }
+        //normal dom
+        var instance = new ReactDOMComponent(type, element, owner);
+        var dom = instance._hostNode;
 
         var children = [];
 
@@ -418,15 +446,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             instance._renderedChildren = result.children;
         }
 
-        instance._hostNode = dom;
-
         children.forEach(function (child) {
             dom.appendChild(child);
         });
-        //    console.log(dom, element);
-
-
-        dom[internalInstanceKey] = instance;
         return dom;
     }
 
@@ -440,6 +462,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
     function isReactComponent(type) {
         return type.prototype instanceof React.Component;
+    }
+
+    function findOwnerUntil(owner, top) {
+        if (!owner) {
+            return;
+        }
+        while (owner._currentElement._owner && owner._currentElement._owner !== top) {
+            owner = owner._currentElement._owner;
+        }
+        return owner;
     }
 
     function update(dom, element) {
@@ -481,27 +513,25 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }
 
         function createAndReplace() {
-            console.log("createAndReplace");
-            var newDom = create(element);
-            console.log(dom, dom.parentElement);
+            var newDom = _create(element);
             dom.parentElement.replaceChild(newDom, dom);
             return newDom;
         }
         if (isHost) {
             if (info.componentRef) {
-                var _owner3 = element0._owner;
+                var _owner = element0._owner;
                 var lastInstance = void 0;
                 var lastOwner = void 0;
                 var found = void 0;
                 while (1) {
-                    if (_owner3 && _owner3._instance === info.componentRef) {
+                    if (_owner && _owner._instance === info.componentRef) {
                         found = true;
                         break;
                     }
-                    lastInstance = _owner3._instance;
-                    lastOwner = _owner3;
-                    if (_owner3._currentElement._owner) {
-                        _owner3 = _owner3._currentElement._owner;
+                    lastInstance = _owner._instance;
+                    lastOwner = _owner;
+                    if (_owner._currentElement._owner) {
+                        _owner = _owner._currentElement._owner;
                     } else {
                         break;
                     }
@@ -510,7 +540,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 if (found) {
                     if (lastOwner) {
                         lastOwner.updateProps(element.props);
-                        return update(dom, lastOwner._instance.render(), {
+                        return update(dom, lastOwner.render(), {
                             componentRef: lastInstance
                         });
                     }
@@ -522,21 +552,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 console.log("type changed", element.type, element0.type);
                 return createAndReplace();
             } else {}
-            //        if (isStateLess(element.type) && ownerType === element.type) {
-            //            return update(dom, element.type(element.props));
-            //        } else if (isReactComponent(element.type) && ownerType === element.type) {
-            //            owner._instance.props = element.props;
-            //            owner._currentElement.props = element.props;;
-            //            return update(dom, owner._instance.render());
-            //        } else if (element.type !== element0.type || forceRender) {
-            //            console.log(element, element0);
-            //            const newDom = create(element);
-            //            dom.parentElement.replaceChild(newDom, dom);
-            //            return newDom;
-            //        }
         } else {
             var replace = function replace() {
-                var newDom = create(element);
+                var newDom = _create(element);
                 dom.parentElement.replaceChild(newDom, dom);
                 return newDom;
             };
@@ -558,7 +576,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         if (!equals(element0.props, element.props)) {
             //props changed        
-            if (isReactComponent(element.type)) {} else {
+            if (isComponent(element.type)) {
+                owner.updateProps(element.props);
+                return update(dom, owner.render(), owner._instance);
+            } else {
                 //normal dom            
                 for (var attrName in element.props) {
                     if (element0.props[attrName] !== element.props[attrName] && typeof element.props[attrName] !== 'function') {
@@ -579,7 +600,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         for (var i in oldChildren) {
             if (!newChildren[i]) {
-                console.log('remove', i, oldChildren[i]);
                 oldChildren[i]._hostNode.parentElement.removeChild(oldChildren[i]._hostNode);
             }
         }
@@ -594,7 +614,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         if (target.childNodes[0]) {
             update(target.childNodes[0], element);
         } else {
-            var created = create(element);
+            var created = _create(element);
             created.setAttribute('data-reactroot', "");
             target.appendChild(created);
         }

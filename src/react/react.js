@@ -12,7 +12,8 @@ class Component {
     setWrapper() {
 
     }
-    setState(updater, cb) {const instance = this._reactInternalInstance;
+    setState(updater, cb) {
+        const instance = this._reactInternalInstance;
         if (instance.setStateTimeout) {
             clearTimeout(instance.setStateTimeout);
         }
@@ -22,12 +23,12 @@ class Component {
         });
         const execQueue = () => {
             instance.setStateTimeout = 0;
-            instance.handleStateQueue.call(this, this.state, this.props);
+            instance.handleStateQueue(this, this.state, this.props);
 
         };
         if (isAsyncSetState) {
             instance.setStateTimeout = setTimeout(execQueue);
-            
+
         } else {
             execQueue();
         }

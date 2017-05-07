@@ -21,6 +21,21 @@ regiterAttr("className", function (value, dom) {
 });
 regiterAttr("children", function (value, dom) {});
 
+regiterAttr("ref", function (value, dom, instance, attrName) {
+    let ref;
+    if (instance._currentElement._owner && instance._currentElement._owner._hostNode === dom) { //host
+        ref = instance._currentElement._owner._instance;
+    } else {
+        ref = dom;
+    }
+    if (typeof value === "function") {
+
+    } else {
+
+    }
+    console.log("arguments", arguments);
+});
+
 const events = [];
 for (var property in document.documentElement) {
     var match = property.match(/^on(.+)/);
@@ -102,7 +117,7 @@ function equals(x, y) {
 }
 
 function getChildren(parent, children, old = {}, owner) {
-    console.log('getChildren', children, old);
+    console.log('getChildren', parent, children, old);
     if (!children) {
         return {
             children: {}
@@ -173,15 +188,20 @@ function getChildren(parent, children, old = {}, owner) {
                 if (!old[key]) {
                     const node = create(child, owner);
                     append(node, key);
-                    _renderedChildren[key] = new ReactDOMComponent(child, node, owner);
+                    //                    _renderedChildren[key] = new ReactDOMComponent(child, node, owner);
+                    _renderedChildren[key] = findOwnerUntil(node[internalInstanceKey], owner);
+                    console.info('!!!!!!!!!!!!', _renderedChildren[key], owner);
 
                 } else {
-                    lastNode = update(old[key]._hostNode, child);
-                    if (lastNode !== old[key]._hostNode) {
-                        _renderedChildren[key] = new ReactDOMComponent(child, lastNode, owner);
+                    if (old[key] instanceof ReactCompositeComponentWrapper) {
+                        lastNode = update(old[key]._hostNode, child, {
+                            componentRef: old[key]._instance
+                        });
                     } else {
-                        _renderedChildren[key] = old[key];
+                        lastNode = update(old[key]._hostNode, child);
                     }
+
+                    _renderedChildren[key] = findOwnerUntil(lastNode[internalInstanceKey], owner);
                 }
 
 
@@ -210,11 +230,18 @@ class StatelessComponent {
     }
 }
 class ReactCompositeComponentWrapper {
-    constructor(element, type) {
+    constructor(type, element, owner) {
         this._currentElement = element;
+        if (owner) {
+            this._currentElement._owner = owner;
+        }
         if (isStateLess(type)) {
+            //            element = type(element.props)
             this._instance = new StatelessComponent(element.props, type);
+            this.type = "stateless";
             return;
+        } else {
+            this.type = "component";
         }
 
         if (type.defaultProps) {
@@ -245,15 +272,33 @@ class ReactCompositeComponentWrapper {
             stateQueue: []
         });
     }
+    create() {
+        let dom;
+        if (this.type === "stateless") {
+            dom = create(this.render(this._currentElement.props), this);
+        } else {
+            dom = create(this.render(), this);
+        }
+        this._hostNode = dom;
+        return dom;
+    }
     updateProps(props) {
         this._instance.props = props;
         this._currentElement.props = props;
     }
-
-    handleStateQueue(oldState, props) {
+    render() {
+        let element;
+        if (this.type === "stateless") {
+            element = this._instance.render(this._currentElement.props);
+        } else {
+            element = this._instance.render();
+        }
+        return element;
+    }
+    handleStateQueue(componentRef, oldState, props) {
         const cbList = [];
         const stateList = [];
-        const instance = this._reactInternalInstance;
+        const instance = componentRef._reactInternalInstance;
         instance.stateQueue.forEach(function ({
             updater,
             cb
@@ -275,24 +320,54 @@ class ReactCompositeComponentWrapper {
 
         instance.stateQueue.length = 0;
         cbList.forEach((cb) => {
-            cb.call(this);
+            cb.call(componentRef);
         });
-        this.state = state;
-        const element = this.render();
+        componentRef.state = state;
+        const element = componentRef.render();
 
         instance._hostNode = update(instance._hostNode, element, {
-            componentRef: this
+            componentRef
         });
     }
 
 }
 class ReactDOMComponent {
-    constructor(element, dom, owner) {
+    constructor(type, element, owner) {
         this._currentElement = element;
-        this._hostNode = dom;
         if (owner) {
-            this.owner = owner;
+            this._currentElement._owner = owner;
         }
+        const dom = document.createElement(type);
+        this._hostNode = dom;
+        if (type === 'input') {
+            dom.addEventListener("input", function (e) {
+                const target = e.target;
+                const instance = target[internalInstanceKey];
+                const element = instance._currentElement;
+                if (target.value !== instance.previousOnchangeValue) {
+                    instance.previousOnchangeValue = target.value;
+                    if (element.props.onChange) {
+                        element.props.onChange.call(element, e);
+                    }
+                    afterCallback.push(function () {
+                        const propsValue = target[internalInstanceKey]._currentElement.props.value;
+                        if (propsValue !== undefined && propsValue !== target.value) {
+                            target.value = propsValue;
+                            instance.previousOnchangeValue = propsValue;
+                        }
+                    });
+                    execAfterCallback();
+                }
+            });
+        }
+        for (const attrName in element.props) {
+            if (attrMap[attrName]) {
+                attrMap[attrName](element.props[attrName], dom, this, attrName);
+            } else {
+                dom.setAttribute(attrName, element.props[attrName]);
+            }
+        }
+        dom[internalInstanceKey] = this;
     }
 }
 class ReactDOMTextComponent {
@@ -323,75 +398,28 @@ function execAfterCallback() {
 
 function create(element, owner) {
     console.log('create', element);
-    let dom;
-    const instance = {
-        _currentElement: element,
-    };
-
-    if (!isValidElement(element)) {
-        dom = document.createComment("react-empty");
-        dom._hostNode = dom;
-        dom[internalInstanceKey] = instance;
-        return dom;
-
-    }
     const {
         type,
         props,
     } = element;
-
-    if (owner) {
-        element._owner = owner;
+    if (!isValidElement(element)) { //comment
+        const dom = document.createComment("react-empty");
+        dom._hostNode = dom;
+        dom[internalInstanceKey] = {
+            _currentElement: element,
+        };
+        return dom;
+    }
+    if (isComponent(type)) {
+        const instance = new ReactCompositeComponentWrapper(type, element, owner);
+        return instance.create();
     }
 
 
+    //normal dom
+    const instance = new ReactDOMComponent(type, element, owner);
+    const dom = instance._hostNode;
 
-
-    if (typeof type === "string") { //normal dom
-        dom = document.createElement(type);
-        if (type === 'input') {
-            dom.addEventListener("input", function (e) {
-                const target = e.target;
-                const instance = target[internalInstanceKey];
-                const element = instance._currentElement;
-                if (target.value !== instance.previousOnchangeValue) {
-                    instance.previousOnchangeValue = target.value;
-                    if (element.props.onChange) {
-                        element.props.onChange.call(element, e);
-                    }
-                    afterCallback.push(function () {
-                        const propsValue = target[internalInstanceKey]._currentElement.props.value;
-                        if (propsValue !== undefined && propsValue !== target.value) {
-                            target.value = propsValue;
-                            instance.previousOnchangeValue = propsValue;
-                        }
-                    });
-                    execAfterCallback();
-                }
-            });
-        }
-        for (const attrName in props) {
-            if (attrMap[attrName]) {
-                attrMap[attrName](props[attrName], dom, instance, attrName);
-            } else {
-                dom.setAttribute(attrName, props[attrName]);
-            }
-        }
-        dom[internalInstanceKey] = instance;
-    } else {
-        if (type.prototype instanceof React.Component) { //component
-            const owner = new ReactCompositeComponentWrapper(element, type);
-            dom = create(owner._instance.render(), owner);
-            owner._hostNode = dom;
-            return dom;
-        } else { //stateless
-            const ele = type(element.props);
-            const owner = new ReactCompositeComponentWrapper(element, type);
-            const dom = create(ele, owner);
-            owner._hostNode = dom;
-            return dom;
-        }
-    }
 
     let children = [];
 
@@ -400,16 +428,9 @@ function create(element, owner) {
         instance._renderedChildren = result.children;
     }
 
-    instance._hostNode = dom;
-
-
     children.forEach(function (child) {
         dom.appendChild(child);
     });
-    //    console.log(dom, element);
-
-
-    dom[internalInstanceKey] = instance;
     return dom;
 }
 
@@ -423,6 +444,16 @@ function isStateLess(type) {
 
 function isReactComponent(type) {
     return type.prototype instanceof React.Component;
+}
+
+function findOwnerUntil(owner, top) {
+    if (!owner) {
+        return;
+    }
+    while (owner._currentElement._owner && owner._currentElement._owner !== top) {
+        owner = owner._currentElement._owner;
+    }
+    return owner;
 }
 
 function update(dom, element, info = {}) {
@@ -465,10 +496,10 @@ function update(dom, element, info = {}) {
 
 
 
+
+
     function createAndReplace() {
-        console.log("createAndReplace");
         const newDom = create(element);
-        console.log(dom, dom.parentElement);
         dom.parentElement.replaceChild(newDom, dom);
         return newDom;
     }
@@ -478,7 +509,7 @@ function update(dom, element, info = {}) {
             let lastInstance;
             let lastOwner;
             let found;
-            while (1) {                
+            while (1) {
                 if (owner && owner._instance === info.componentRef) {
                     found = true;
                     break;
@@ -495,7 +526,7 @@ function update(dom, element, info = {}) {
             if (found) {
                 if (lastOwner) {
                     lastOwner.updateProps(element.props);
-                    return update(dom, lastOwner._instance.render(), {
+                    return update(dom, lastOwner.render(), {
                         componentRef: lastInstance
                     });
                 }
@@ -510,18 +541,6 @@ function update(dom, element, info = {}) {
         } else {
 
         }
-        //        if (isStateLess(element.type) && ownerType === element.type) {
-        //            return update(dom, element.type(element.props));
-        //        } else if (isReactComponent(element.type) && ownerType === element.type) {
-        //            owner._instance.props = element.props;
-        //            owner._currentElement.props = element.props;;
-        //            return update(dom, owner._instance.render());
-        //        } else if (element.type !== element0.type || forceRender) {
-        //            console.log(element, element0);
-        //            const newDom = create(element);
-        //            dom.parentElement.replaceChild(newDom, dom);
-        //            return newDom;
-        //        }
 
     } else {
         function replace() {
@@ -550,8 +569,9 @@ function update(dom, element, info = {}) {
 
 
     if (!equals(element0.props, element.props)) { //props changed        
-        if (isReactComponent(element.type)) {
-
+        if (isComponent(element.type)) {
+            owner.updateProps(element.props);
+            return update(dom, owner.render(), owner._instance);
         } else { //normal dom            
             for (const attrName in element.props) {
                 if (element0.props[attrName] !== element.props[attrName] && typeof element.props[attrName] !== 'function') {
@@ -575,8 +595,7 @@ function update(dom, element, info = {}) {
 
 
     for (const i in oldChildren) {
-        if (!newChildren[i]) {
-            console.log('remove', i, oldChildren[i]);
+        if (!newChildren[i]) {            
             oldChildren[i]._hostNode.parentElement.removeChild(oldChildren[i]._hostNode);
         }
     }

@@ -65,7 +65,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 });
                 var execQueue = function execQueue() {
                     instance.setStateTimeout = 0;
-                    instance.handleStateQueue.call(_this, _this.state, _this.props);
+                    instance.handleStateQueue(_this, _this.state, _this.props);
                 };
                 if (isAsyncSetState) {
                     instance.setStateTimeout = setTimeout(execQueue);
