@@ -17,16 +17,23 @@ regiterAttr("children", function (value, dom) {});
 
 regiterAttr("ref", function (value, dom, instance, attrName) {
     let ref;
-    if (instance._currentElement._owner && instance._currentElement._owner._hostNode === dom) { //host
-        ref = instance._currentElement._owner._instance;
-    } else {
-        ref = dom;
+    //    if (instance._currentElement._owner && instance._currentElement._owner._hostNode === dom) { //host
+    //        ref = instance._currentElement._owner._instance;
+    //    } else {
+    //        ref = dom;
+    //    }
+    const owner = renderingComponentStack[renderingComponentStack.length - 1];
+    if (owner) {
+        if (typeof value === "function") {
+            owner.afterRenderQueue.push(value.bind(undefined, dom));
+        } else {
+            owner.afterRenderQueue.push(() => {
+                owner._instance.refs[value] = dom;
+            });
+        }
     }
-    if (typeof value === "function") {
 
-    } else {
 
-    }
     console.log("arguments", arguments)
 });
 
@@ -221,11 +228,13 @@ class StatelessComponent {
     constructor(props, type) {
         this.props = props;
         this.type = type;
+        this.refs = {};
         this.render = () => {
             return type(this.props);
         };
     }
 }
+const renderingComponentStack = [];
 class ReactCompositeComponentWrapper {
     constructor(type, element, owner) {
         this._currentElement = element;
@@ -236,6 +245,9 @@ class ReactCompositeComponentWrapper {
             //            element = type(element.props)
             this._instance = new StatelessComponent(element.props, type);
             this.type = "stateless";
+            Object.assign(this, {
+                afterRenderQueue: []
+            })
             return;
         } else {
             this.type = "component";
@@ -254,6 +266,14 @@ class ReactCompositeComponentWrapper {
         if (!component.state) {
             component.state = {};
         }
+
+        for (const attrName in element.props) { //not on stateless
+            if (attrMap[attrName]) {
+                attrMap[attrName](element.props[attrName], component, this, attrName);
+            }
+        }
+
+
         React.asyncSetState(true);
         component.componentWillMount && component.componentWillMount();
         React.asyncSetState(false);
@@ -266,30 +286,69 @@ class ReactCompositeComponentWrapper {
         }
 
         Object.assign(this, {
-            stateQueue: []
+            stateQueue: [],
+            afterRenderQueue: []
         })
     }
     create() {
+        renderingComponentStack.push(this);
         let dom;
+        let element;
         if (this.type === "stateless") {
-            dom = create(this.render(this._currentElement.props), this);
+            element = this.render(this._currentElement.props);
         } else {
-            dom = create(this.render(), this);
+            element = this.render()
         }
+
+        const that = this;
+
+        function transformRef(element) {
+            const refKey = element.props.ref;
+            if (typeof refKey === "string") {
+                element.props.ref = function (ref) {
+                    console.log("this", that);
+                    that._instance.refs[refKey] = ref;
+                }
+            }
+            if (element.props.children) {
+                element.props.children.forEach(function (child) {
+                    if (typeof child === "object" && child && child.props) {
+                        transformRef(child);
+                    }
+                });
+            }
+        }
+
+        transformRef(element); //they will remove it
+        dom = create(element, this);
         this._hostNode = dom;
+        renderingComponentStack.pop();
+        this.handleAfterRenderQueue();
         return dom;
     }
     updateProps(props) {
         this._instance.props = props;
         this._currentElement.props = props;
     }
+    handleAfterRenderQueue() {
+        this.afterRenderQueue.forEach((cb) => {
+            console.log('cb', cb);
+            cb(this._instance);
+        });
+        this.afterRenderQueue.length = 0;
+    }
     render() {
+        console.log("render");
+
+        console.log('renderingComponentStack', renderingComponentStack);
         let element;
         if (this.type === "stateless") {
             element = this._instance.render(this._currentElement.props);
         } else {
             element = this._instance.render();
         }
+
+        console.log("render end");
         return element;
     }
     handleStateQueue(componentRef, oldState, props) {
@@ -597,17 +656,20 @@ function update(dom, element, info = {}) {
 
     }
 
-    const oldChildren = instance._renderedChildren;
-    const newChildren = getChildren(dom, element.props.children, oldChildren, owner).children;
+    if (!isComponent(element)) {
+        const oldChildren = instance._renderedChildren;
+        const newChildren = getChildren(dom, element.props.children, oldChildren, owner).children;
 
 
-    for (const i in oldChildren) {
-        if (!newChildren[i]) {
-            oldChildren[i]._hostNode.parentElement.removeChild(oldChildren[i]._hostNode);
+        for (const i in oldChildren) {
+            if (!newChildren[i]) {
+                oldChildren[i]._hostNode.parentElement.removeChild(oldChildren[i]._hostNode);
+            }
         }
-    }
 
-    instance._renderedChildren = newChildren;
+        instance._renderedChildren = newChildren;
+
+    }
 
 
 

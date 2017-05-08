@@ -45,6 +45,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             _classCallCheck(this, Component);
 
             this.props = props;
+            this.refs = {};
         }
 
         _createClass(Component, [{

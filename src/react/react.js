@@ -8,6 +8,7 @@ function asyncSetState(value) {
 class Component {
     constructor(props) {
         this.props = props;
+        this.refs = {};
     }
     setWrapper() {
 
