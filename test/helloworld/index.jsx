@@ -1,19 +1,30 @@
-function MyFunctionalComponent() {
-    return <input />;
+function CustomTextInput(props) {
+    return (
+        <div>
+      <input ref={props.inputRef} />
+    </div>
+    );
 }
 
-class Parent extends React.Component {
+function Parent(props) {
+    return (
+        <div>
+      My input: <CustomTextInput inputRef={props.inputRef} />
+    </div>
+    );
+}
+
+
+class Grandparent extends React.Component {
     render() {
-        // This will *not* work!
-        setTimeout(() => {
-            console.log(this.refs)
-        })
         return (
-            <MyFunctionalComponent ref={(input) => { this.textInput = input; }} />);
+            <Parent
+        inputRef={el => this.inputElement = el}
+      />
+        );
     }
 }
-
 ReactDOM.render(
-    <Parent />,
+    <Grandparent />,
     document.getElementById('root')
 );

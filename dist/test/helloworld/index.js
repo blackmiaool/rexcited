@@ -6,35 +6,46 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-function MyFunctionalComponent() {
-    return React.createElement('input', null);
+function CustomTextInput(props) {
+    return React.createElement(
+        'div',
+        null,
+        React.createElement('input', { ref: props.inputRef })
+    );
 }
 
-var Parent = function (_React$Component) {
-    _inherits(Parent, _React$Component);
+function Parent(props) {
+    return React.createElement(
+        'div',
+        null,
+        'My input: ',
+        React.createElement(CustomTextInput, { inputRef: props.inputRef })
+    );
+}
 
-    function Parent() {
-        _classCallCheck(this, Parent);
+var Grandparent = function (_React$Component) {
+    _inherits(Grandparent, _React$Component);
 
-        return _possibleConstructorReturn(this, (Parent.__proto__ || Object.getPrototypeOf(Parent)).apply(this, arguments));
+    function Grandparent() {
+        _classCallCheck(this, Grandparent);
+
+        return _possibleConstructorReturn(this, (Grandparent.__proto__ || Object.getPrototypeOf(Grandparent)).apply(this, arguments));
     }
 
-    _createClass(Parent, [{
+    _createClass(Grandparent, [{
         key: 'render',
         value: function render() {
             var _this2 = this;
 
-            // This will *not* work!
-            setTimeout(function () {
-                console.log(_this2.refs);
+            return React.createElement(Parent, {
+                inputRef: function inputRef(el) {
+                    return _this2.inputElement = el;
+                }
             });
-            return React.createElement(MyFunctionalComponent, { ref: function ref(input) {
-                    _this2.textInput = input;
-                } });
         }
     }]);
 
-    return Parent;
+    return Grandparent;
 }(React.Component);
 
-ReactDOM.render(React.createElement(Parent, null), document.getElementById('root'));
+ReactDOM.render(React.createElement(Grandparent, null), document.getElementById('root'));

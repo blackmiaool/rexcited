@@ -11,28 +11,34 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
     var internalInstanceKey = '__reactInternalInstance$' + Math.random().toString(36).slice(2);
 
-    function regiterAttr(name, cb) {
-        attrMap[name] = cb;
+    function regiterAttr(name, type, cb) {
+        if (type === "dom") {
+            attrMap.dom[name] = cb;
+        } else if (type === "component") {
+            attrMap.component[name] = cb;
+        } else {
+            attrMap.dom[name] = cb;
+            attrMap.component[name] = cb;
+        }
     }
-    var attrMap = {};
+    var attrMap = {
+        dom: {},
+        component: {}
+    };
 
     function isText(key) {
         return typeof key === "string" || typeof key === "number";
     }
 
-    regiterAttr("className", function (value, dom) {
+    regiterAttr("className", "dom", function (value, dom) {
         dom.setAttribute("class", value);
     });
-    regiterAttr("children", function (value, dom) {});
+    regiterAttr("children", "", function (value, dom) {});
 
-    regiterAttr("ref", function (value, dom, instance, attrName) {
+    regiterAttr("ref", "", function (value, dom, instance, attrName) {
         var ref = void 0;
-        //    if (instance._currentElement._owner && instance._currentElement._owner._hostNode === dom) { //host
-        //        ref = instance._currentElement._owner._instance;
-        //    } else {
-        //        ref = dom;
-        //    }
         var owner = renderingComponentStack[renderingComponentStack.length - 1];
+        console.log('owner', owner);
         if (owner) {
             if (typeof value === "function") {
                 owner.afterRenderQueue.push(value.bind(undefined, dom));
@@ -74,7 +80,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         var event = _ref.event,
             reactEvent = _ref.reactEvent;
 
-        regiterAttr(reactEvent, onReactEvent);
+        regiterAttr(reactEvent, 'dom', onReactEvent);
     });
 
     function insertAfter(newNode, referenceNode) {
@@ -106,7 +112,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     };
                     break;
                 case 'function':
-                    if (typeof x[p] == 'undefined' || p != 'equals' && y[p].toString() != x[p].toString()) {
+                    if (typeof x[p] == 'undefined' || p != 'equals') {
                         return false;
                     };
                     break;
@@ -283,8 +289,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
             for (var attrName in element.props) {
                 //not on stateless
-                if (attrMap[attrName]) {
-                    attrMap[attrName](element.props[attrName], component, this, attrName);
+                if (attrMap.component[attrName]) {
+                    attrMap.component[attrName](element.props[attrName], component, this, attrName);
                 }
             }
 
@@ -345,9 +351,25 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             }
         }, {
             key: 'updateProps',
-            value: function updateProps(props) {
+            value: function updateProps(props, dom) {
+                console.log('updateProps');
+                renderingComponentStack.push(this);
+                console.log('props', props);
+                for (var attrName in props) {
+                    //not on stateless
+                    if (props[attrName] !== this._instance.props[attrName] && attrMap.component[attrName]) {
+                        attrMap.component[attrName](props[attrName], component, this._instance, attrName);
+                    }
+                }
                 this._instance.props = props;
                 this._currentElement.props = props;
+
+                var result = update(dom, this.render(), {
+                    componentRef: this._instance
+                });
+                renderingComponentStack.pop();
+                this.handleAfterRenderQueue();
+                return result;
             }
         }, {
             key: 'handleAfterRenderQueue',
@@ -381,6 +403,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             value: function handleStateQueue(componentRef, oldState, props) {
                 var cbList = [];
                 var stateList = [];
+                renderingComponentStack.push(this);
                 var instance = componentRef._reactInternalInstance;
                 instance.stateQueue.forEach(function (_ref2) {
                     var updater = _ref2.updater,
@@ -411,6 +434,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 instance._hostNode = update(instance._hostNode, element, {
                     componentRef: componentRef
                 });
+                renderingComponentStack.pop();
+                this.handleAfterRenderQueue();
             }
         }]);
 
@@ -448,8 +473,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             });
         }
         for (var attrName in element.props) {
-            if (attrMap[attrName]) {
-                attrMap[attrName](element.props[attrName], dom, this, attrName);
+            if (attrMap.dom[attrName]) {
+                attrMap.dom[attrName](element.props[attrName], dom, this, attrName);
             } else {
                 dom.setAttribute(attrName, element.props[attrName]);
             }
@@ -586,7 +611,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         if (isHost) {
             if (info.componentRef) {
                 var _owner = element0._owner;
-                var lastInstance = void 0;
                 var lastOwner = void 0;
                 var found = void 0;
                 while (1) {
@@ -594,7 +618,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                         found = true;
                         break;
                     }
-                    lastInstance = _owner._instance;
                     lastOwner = _owner;
                     if (_owner._currentElement._owner) {
                         _owner = _owner._currentElement._owner;
@@ -605,10 +628,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                 if (found) {
                     if (lastOwner) {
-                        lastOwner.updateProps(element.props);
-                        return update(dom, lastOwner.render(), {
-                            componentRef: lastInstance
-                        });
+                        return lastOwner.updateProps(element.props, dom);
                     }
                 } else {
                     console.log("else");
@@ -643,14 +663,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         if (!equals(element0.props, element.props)) {
             //props changed        
             if (isComponent(element.type)) {
-                owner.updateProps(element.props);
-                return update(dom, owner.render(), owner._instance);
+                return owner.updateProps(element.props);
             } else {
                 //normal dom            
                 for (var attrName in element.props) {
-                    if (element0.props[attrName] !== element.props[attrName] && typeof element.props[attrName] !== 'function') {
-                        if (attrMap[attrName]) {
-                            attrMap[attrName](element.props[attrName], dom, instance, attrName);
+                    if (element0.props[attrName] !== element.props[attrName]) {
+                        console.log("not");
+                        if (attrMap.dom[attrName]) {
+                            attrMap.dom[attrName](element.props[attrName], dom, instance, attrName);
                         } else {
 
                             dom.setAttribute(attrName, element.props[attrName]);

@@ -7,28 +7,39 @@
 const internalInstanceKey = '__reactInternalInstance$' + Math.random().toString(36).slice(2);
 
 
-function regiterAttr(name, cb) {
-    attrMap[name] = cb;
+function regiterAttr(name, type, cb) {
+    if (type === "dom") {
+        attrMap.dom[name] = cb;
+    } else if (type === "component") {
+        attrMap.component[name] = cb;
+    } else {
+        attrMap.dom[name] = cb;
+        attrMap.component[name] = cb;
+    }
+
 }
-const attrMap = {};
+const attrMap = {
+    dom: {
+
+    },
+    component: {
+
+    }
+};
 
 function isText(key) {
     return typeof key === "string" || typeof key === "number";
 }
 
-regiterAttr("className", function (value, dom) {
+regiterAttr("className", "dom", function (value, dom) {
     dom.setAttribute("class", value);
 });
-regiterAttr("children", function (value, dom) {});
+regiterAttr("children", "", function (value, dom) {});
 
-regiterAttr("ref", function (value, dom, instance, attrName) {
+regiterAttr("ref", "", function (value, dom, instance, attrName) {
     let ref;
-    //    if (instance._currentElement._owner && instance._currentElement._owner._hostNode === dom) { //host
-    //        ref = instance._currentElement._owner._instance;
-    //    } else {
-    //        ref = dom;
-    //    }
     const owner = renderingComponentStack[renderingComponentStack.length - 1];
+    console.log('owner', owner);
     if (owner) {
         if (typeof value === "function") {
             owner.afterRenderQueue.push(value.bind(undefined, dom));
@@ -71,7 +82,7 @@ events.forEach(function ({
     event,
     reactEvent
 }) {
-    regiterAttr(reactEvent, onReactEvent);
+    regiterAttr(reactEvent,'dom', onReactEvent);
 });
 
 function insertAfter(newNode, referenceNode) {
@@ -103,7 +114,7 @@ function equals(x, y) {
                 };
                 break;
             case 'function':
-                if (typeof (x[p]) == 'undefined' || (p != 'equals' && y[p].toString() != x[p].toString())) {
+                if (typeof (x[p]) == 'undefined' || (p != 'equals')) {
                     return false;
                 };
                 break;
@@ -271,8 +282,8 @@ class ReactCompositeComponentWrapper {
         }
 
         for (const attrName in element.props) { //not on stateless
-            if (attrMap[attrName]) {
-                attrMap[attrName](element.props[attrName], component, this, attrName);
+            if (attrMap.component[attrName]) {
+                attrMap.component[attrName](element.props[attrName], component, this, attrName);
             }
         }
 
@@ -322,16 +333,32 @@ class ReactCompositeComponentWrapper {
             }
         }
 
-        transformRef(element);//they will remove it
+        transformRef(element); //they will remove it
         dom = create(element, this);
         this._hostNode = dom;
         renderingComponentStack.pop();
         this.handleAfterRenderQueue();
         return dom;
     }
-    updateProps(props) {
+    updateProps(props, dom) {
+        console.log('updateProps');
+        renderingComponentStack.push(this);
+        console.log('props', props);
+        for (const attrName in props) { //not on stateless
+            if (props[attrName] !== this._instance.props[attrName] && attrMap.component[attrName]) {
+                attrMap.component[attrName](props[attrName], component, this._instance, attrName);
+            }
+        }
         this._instance.props = props;
         this._currentElement.props = props;
+
+        const result = update(dom, this.render(), {
+            componentRef: this._instance
+        });
+        renderingComponentStack.pop();
+        this.handleAfterRenderQueue();
+        return result;
+
     }
     handleAfterRenderQueue() {
         this.afterRenderQueue.forEach((cb) => {
@@ -357,6 +384,7 @@ class ReactCompositeComponentWrapper {
     handleStateQueue(componentRef, oldState, props) {
         const cbList = [];
         const stateList = [];
+        renderingComponentStack.push(this);
         const instance = componentRef._reactInternalInstance;
         instance.stateQueue.forEach(function ({
             updater,
@@ -387,6 +415,8 @@ class ReactCompositeComponentWrapper {
         instance._hostNode = update(instance._hostNode, element, {
             componentRef
         });
+        renderingComponentStack.pop();
+        this.handleAfterRenderQueue();
     }
 
 }
@@ -420,8 +450,8 @@ class ReactDOMComponent {
             });
         }
         for (const attrName in element.props) {
-            if (attrMap[attrName]) {
-                attrMap[attrName](element.props[attrName], dom, this, attrName);
+            if (attrMap.dom[attrName]) {
+                attrMap.dom[attrName](element.props[attrName], dom, this, attrName);
             } else {
                 dom.setAttribute(attrName, element.props[attrName]);
             }
@@ -565,7 +595,6 @@ function update(dom, element, info = {}) {
     if (isHost) {
         if (info.componentRef) {
             let owner = element0._owner;
-            let lastInstance;
             let lastOwner;
             let found;
             while (1) {
@@ -573,7 +602,6 @@ function update(dom, element, info = {}) {
                     found = true;
                     break;
                 }
-                lastInstance = owner._instance;
                 lastOwner = owner;
                 if (owner._currentElement._owner) {
                     owner = owner._currentElement._owner;
@@ -584,10 +612,7 @@ function update(dom, element, info = {}) {
 
             if (found) {
                 if (lastOwner) {
-                    lastOwner.updateProps(element.props);
-                    return update(dom, lastOwner.render(), {
-                        componentRef: lastInstance
-                    });
+                    return lastOwner.updateProps(element.props, dom);
                 }
             } else {
                 console.log("else");
@@ -629,20 +654,18 @@ function update(dom, element, info = {}) {
 
     if (!equals(element0.props, element.props)) { //props changed        
         if (isComponent(element.type)) {
-            owner.updateProps(element.props);
-            return update(dom, owner.render(), owner._instance);
+            return owner.updateProps(element.props);
         } else { //normal dom            
             for (const attrName in element.props) {
-                if (element0.props[attrName] !== element.props[attrName] && typeof element.props[attrName] !== 'function') {
-                    if (attrMap[attrName]) {
-                        attrMap[attrName](element.props[attrName], dom, instance, attrName);
+                if (element0.props[attrName] !== element.props[attrName]) {
+                    console.log("not");
+                    if (attrMap.dom[attrName]) {
+                        attrMap.dom[attrName](element.props[attrName], dom, instance, attrName);
                     } else {
 
                         dom.setAttribute(attrName, element.props[attrName]);
-
                     }
                 }
-
             }
             element0.props = element.props;
         }
