@@ -34,6 +34,18 @@ function isText(key) {
 regiterAttr("className", "dom", function (value, dom) {
     dom.setAttribute("class", value);
 });
+regiterAttr("defaultValue", "dom", function (value, dom) {
+    if (dom.tagName !== 'INPUT') {
+        return;
+    }
+    if (!dom[internalInstanceKey].usedDefaultValue) {
+        dom.value = value;
+    }
+    dom[internalInstanceKey].usedDefaultValue = true;
+    //    dom.setAttribute("class", value);
+});
+
+
 regiterAttr("children", "", function (value, dom) {});
 
 regiterAttr("ref", "", function (value, dom, instance, attrName) {
@@ -82,7 +94,7 @@ events.forEach(function ({
     event,
     reactEvent
 }) {
-    regiterAttr(reactEvent,'dom', onReactEvent);
+    regiterAttr(reactEvent, 'dom', onReactEvent);
 });
 
 function insertAfter(newNode, referenceNode) {
@@ -208,7 +220,7 @@ function getChildren(parent, children, old = {}, owner) {
                     append(node, key);
                     //                    _renderedChildren[key] = new ReactDOMComponent(child, node, owner);
                     _renderedChildren[key] = findOwnerUntil(node[internalInstanceKey], owner);
-                    console.info('!!!!!!!!!!!!', _renderedChildren[key], owner);
+                    //                    console.info('!!!!!!!!!!!!', _renderedChildren[key], owner)
 
                 } else {
                     if (old[key] instanceof ReactCompositeComponentWrapper) {
@@ -304,6 +316,23 @@ class ReactCompositeComponentWrapper {
             afterRenderQueue: []
         });
     }
+
+    transformRef(element) {
+        const refKey = element.props.ref;
+        if (typeof refKey === "string") {
+            element.props.ref = function (ref) {
+                console.log("this", that);
+                that._instance.refs[refKey] = ref;
+            };
+        }
+        if (element.props.children) {
+            element.props.children.forEach((child) => {
+                if (typeof child === "object" && child && child.props) {
+                    this.transformRef(child);
+                }
+            });
+        }
+    }
     create() {
         renderingComponentStack.push(this);
         let dom;
@@ -316,24 +345,9 @@ class ReactCompositeComponentWrapper {
 
         const that = this;
 
-        function transformRef(element) {
-            const refKey = element.props.ref;
-            if (typeof refKey === "string") {
-                element.props.ref = function (ref) {
-                    console.log("this", that);
-                    that._instance.refs[refKey] = ref;
-                };
-            }
-            if (element.props.children) {
-                element.props.children.forEach(function (child) {
-                    if (typeof child === "object" && child && child.props) {
-                        transformRef(child);
-                    }
-                });
-            }
-        }
 
-        transformRef(element); //they will remove it
+
+        this.transformRef(element); //they will remove it
         dom = create(element, this);
         this._hostNode = dom;
         renderingComponentStack.pop();
@@ -341,8 +355,11 @@ class ReactCompositeComponentWrapper {
         return dom;
     }
     updateProps(props, dom) {
+        const instance = this._instance;
         console.log('updateProps');
-        renderingComponentStack.push(this);
+        const shouldRender = !instance.shouldComponentUpdate || !instance.shouldComponentUpdate(props, this._instance.state);
+
+
         console.log('props', props);
         for (const attrName in props) { //not on stateless
             if (props[attrName] !== this._instance.props[attrName] && attrMap.component[attrName]) {
@@ -352,11 +369,17 @@ class ReactCompositeComponentWrapper {
         this._instance.props = props;
         this._currentElement.props = props;
 
-        const result = update(dom, this.render(), {
-            componentRef: this._instance
-        });
-        renderingComponentStack.pop();
-        this.handleAfterRenderQueue();
+        if (shouldRender) {
+            renderingComponentStack.push(this);
+            const element = this.render();
+            this.transformRef(element); //they will remove it
+            const result = update(dom, element, {
+                componentRef: this._instance
+            });
+            renderingComponentStack.pop();
+            this.handleAfterRenderQueue();
+        }
+
         return result;
 
     }
@@ -381,12 +404,13 @@ class ReactCompositeComponentWrapper {
         console.log("render end");
         return element;
     }
-    handleStateQueue(componentRef, oldState, props) {
+    handleStateQueue(oldState, props) {
         const cbList = [];
         const stateList = [];
-        renderingComponentStack.push(this);
-        const instance = componentRef._reactInternalInstance;
-        instance.stateQueue.forEach(function ({
+
+        const instance = this._instance;
+
+        this.stateQueue.forEach(function ({
             updater,
             cb
         }) {
@@ -405,18 +429,27 @@ class ReactCompositeComponentWrapper {
             Object.assign(state, stateThis);
         });
 
-        instance.stateQueue.length = 0;
+        this.stateQueue.length = 0;
         cbList.forEach((cb) => {
-            cb.call(componentRef);
+            cb.call(instance);
         });
-        componentRef.state = state;
-        const element = componentRef.render();
 
-        instance._hostNode = update(instance._hostNode, element, {
-            componentRef
-        });
-        renderingComponentStack.pop();
-        this.handleAfterRenderQueue();
+
+        const shouldRender = !instance.shouldComponentUpdate || instance.shouldComponentUpdate(props, this._instance.state);
+
+        instance.state = state;
+
+        if (shouldRender) {
+            renderingComponentStack.push(this);
+            const element = instance.render();
+
+            this._hostNode = update(this._hostNode, element, {
+                componentRef: instance
+            });
+            renderingComponentStack.pop();
+            this.handleAfterRenderQueue();
+        }
+
     }
 
 }
@@ -439,8 +472,11 @@ class ReactDOMComponent {
                         element.props.onChange.call(element, e);
                     }
                     afterCallback.push(function () {
+
                         const propsValue = target[internalInstanceKey]._currentElement.props.value;
+
                         if (propsValue !== undefined && propsValue !== target.value) {
+                            console.log("do");
                             target.value = propsValue;
                             instance.previousOnchangeValue = propsValue;
                         }
@@ -449,6 +485,8 @@ class ReactDOMComponent {
                 }
             });
         }
+
+        dom[internalInstanceKey] = this;
         for (const attrName in element.props) {
             if (attrMap.dom[attrName]) {
                 attrMap.dom[attrName](element.props[attrName], dom, this, attrName);
@@ -456,7 +494,7 @@ class ReactDOMComponent {
                 dom.setAttribute(attrName, element.props[attrName]);
             }
         }
-        dom[internalInstanceKey] = this;
+
     }
 }
 class ReactDOMTextComponent {
@@ -658,7 +696,7 @@ function update(dom, element, info = {}) {
         } else { //normal dom            
             for (const attrName in element.props) {
                 if (element0.props[attrName] !== element.props[attrName]) {
-                    console.log("not");
+                    //                    console.log("not");
                     if (attrMap.dom[attrName]) {
                         attrMap.dom[attrName](element.props[attrName], dom, instance, attrName);
                     } else {

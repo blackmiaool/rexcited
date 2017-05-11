@@ -6,46 +6,69 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-function CustomTextInput(props) {
-    return React.createElement(
-        'div',
-        null,
-        React.createElement('input', { ref: props.inputRef })
-    );
-}
+var NameForm = function (_React$Component) {
+    _inherits(NameForm, _React$Component);
 
-function Parent(props) {
-    return React.createElement(
-        'div',
-        null,
-        'My input: ',
-        React.createElement(CustomTextInput, { inputRef: props.inputRef })
-    );
-}
+    function NameForm(props) {
+        _classCallCheck(this, NameForm);
 
-var Grandparent = function (_React$Component) {
-    _inherits(Grandparent, _React$Component);
+        var _this = _possibleConstructorReturn(this, (NameForm.__proto__ || Object.getPrototypeOf(NameForm)).call(this, props));
 
-    function Grandparent() {
-        _classCallCheck(this, Grandparent);
-
-        return _possibleConstructorReturn(this, (Grandparent.__proto__ || Object.getPrototypeOf(Grandparent)).apply(this, arguments));
+        _this.handleSubmit = _this.handleSubmit.bind(_this);
+        _this.state = {
+            value: 3
+        };
+        _this.onchange = _this.onchange.bind(_this);
+        return _this;
     }
 
-    _createClass(Grandparent, [{
-        key: 'render',
+    _createClass(NameForm, [{
+        key: "onchange",
+        value: function onchange(e) {
+            console.log(e.target.value);
+            this.setState({
+                value: e.target.value
+            });
+        }
+    }, {
+        key: "shouldComponentUpdate",
+        value: function shouldComponentUpdate(nextProps, nextState) {
+            if (nextState.value.length % 3 === 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "handleSubmit",
+        value: function handleSubmit(event) {
+            alert('A name was submitted: ' + this.input.value);
+            event.preventDefault();
+        }
+    }, {
+        key: "render",
         value: function render() {
             var _this2 = this;
 
-            return React.createElement(Parent, {
-                inputRef: function inputRef(el) {
-                    return _this2.inputElement = el;
-                }
-            });
+            return React.createElement(
+                "form",
+                { onSubmit: this.handleSubmit },
+                React.createElement(
+                    "label",
+                    null,
+                    "Name:",
+                    React.createElement("input", {
+                        value: this.state.value,
+                        type: "text", ref: function ref(input) {
+                            return _this2.input = input;
+                        }, onChange: this.onchange })
+                ),
+                React.createElement("input", { type: "submit", value: "Submit" })
+            );
         }
     }]);
 
-    return Grandparent;
+    return NameForm;
 }(React.Component);
 
-ReactDOM.render(React.createElement(Grandparent, null), document.getElementById('root'));
+ReactDOM.render(React.createElement(NameForm, null), document.getElementById('root'));

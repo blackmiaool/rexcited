@@ -33,6 +33,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     regiterAttr("className", "dom", function (value, dom) {
         dom.setAttribute("class", value);
     });
+    regiterAttr("defaultValue", "dom", function (value, dom) {
+        if (dom.tagName !== 'INPUT') {
+            return;
+        }
+        if (!dom[internalInstanceKey].usedDefaultValue) {
+            dom.value = value;
+        }
+        dom[internalInstanceKey].usedDefaultValue = true;
+        //    dom.setAttribute("class", value);
+    });
+
     regiterAttr("children", "", function (value, dom) {});
 
     regiterAttr("ref", "", function (value, dom, instance, attrName) {
@@ -211,7 +222,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                         append(_node, key);
                         //                    _renderedChildren[key] = new ReactDOMComponent(child, node, owner);
                         _renderedChildren[key] = findOwnerUntil(_node[internalInstanceKey], owner);
-                        console.info('!!!!!!!!!!!!', _renderedChildren[key], owner);
+                        //                    console.info('!!!!!!!!!!!!', _renderedChildren[key], owner)
                     } else {
                         if (old[key] instanceof ReactCompositeComponentWrapper) {
                             lastNode = update(old[key]._hostNode, child, {
@@ -312,6 +323,26 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }
 
         _createClass(ReactCompositeComponentWrapper, [{
+            key: 'transformRef',
+            value: function transformRef(element) {
+                var _this2 = this;
+
+                var refKey = element.props.ref;
+                if (typeof refKey === "string") {
+                    element.props.ref = function (ref) {
+                        console.log("this", that);
+                        that._instance.refs[refKey] = ref;
+                    };
+                }
+                if (element.props.children) {
+                    element.props.children.forEach(function (child) {
+                        if ((typeof child === 'undefined' ? 'undefined' : _typeof(child)) === "object" && child && child.props) {
+                            _this2.transformRef(child);
+                        }
+                    });
+                }
+            }
+        }, {
             key: 'create',
             value: function create() {
                 renderingComponentStack.push(this);
@@ -325,24 +356,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                 var that = this;
 
-                function transformRef(element) {
-                    var refKey = element.props.ref;
-                    if (typeof refKey === "string") {
-                        element.props.ref = function (ref) {
-                            console.log("this", that);
-                            that._instance.refs[refKey] = ref;
-                        };
-                    }
-                    if (element.props.children) {
-                        element.props.children.forEach(function (child) {
-                            if ((typeof child === 'undefined' ? 'undefined' : _typeof(child)) === "object" && child && child.props) {
-                                transformRef(child);
-                            }
-                        });
-                    }
-                }
-
-                transformRef(element); //they will remove it
+                this.transformRef(element); //they will remove it
                 dom = _create(element, this);
                 this._hostNode = dom;
                 renderingComponentStack.pop();
@@ -352,8 +366,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: 'updateProps',
             value: function updateProps(props, dom) {
+                var instance = this._instance;
                 console.log('updateProps');
-                renderingComponentStack.push(this);
+                var shouldRender = !instance.shouldComponentUpdate || !instance.shouldComponentUpdate(props, this._instance.state);
+
                 console.log('props', props);
                 for (var attrName in props) {
                     //not on stateless
@@ -364,21 +380,27 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 this._instance.props = props;
                 this._currentElement.props = props;
 
-                var result = update(dom, this.render(), {
-                    componentRef: this._instance
-                });
-                renderingComponentStack.pop();
-                this.handleAfterRenderQueue();
+                if (shouldRender) {
+                    renderingComponentStack.push(this);
+                    var element = this.render();
+                    this.transformRef(element); //they will remove it
+                    var _result = update(dom, element, {
+                        componentRef: this._instance
+                    });
+                    renderingComponentStack.pop();
+                    this.handleAfterRenderQueue();
+                }
+
                 return result;
             }
         }, {
             key: 'handleAfterRenderQueue',
             value: function handleAfterRenderQueue() {
-                var _this2 = this;
+                var _this3 = this;
 
                 this.afterRenderQueue.forEach(function (cb) {
                     console.log('cb', cb);
-                    cb(_this2._instance);
+                    cb(_this3._instance);
                 });
                 this.afterRenderQueue.length = 0;
             }
@@ -400,12 +422,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             }
         }, {
             key: 'handleStateQueue',
-            value: function handleStateQueue(componentRef, oldState, props) {
+            value: function handleStateQueue(oldState, props) {
                 var cbList = [];
                 var stateList = [];
-                renderingComponentStack.push(this);
-                var instance = componentRef._reactInternalInstance;
-                instance.stateQueue.forEach(function (_ref2) {
+
+                var instance = this._instance;
+
+                this.stateQueue.forEach(function (_ref2) {
                     var updater = _ref2.updater,
                         cb = _ref2.cb;
 
@@ -424,18 +447,25 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     Object.assign(state, stateThis);
                 });
 
-                instance.stateQueue.length = 0;
+                this.stateQueue.length = 0;
                 cbList.forEach(function (cb) {
-                    cb.call(componentRef);
+                    cb.call(instance);
                 });
-                componentRef.state = state;
-                var element = componentRef.render();
 
-                instance._hostNode = update(instance._hostNode, element, {
-                    componentRef: componentRef
-                });
-                renderingComponentStack.pop();
-                this.handleAfterRenderQueue();
+                var shouldRender = !instance.shouldComponentUpdate || instance.shouldComponentUpdate(props, this._instance.state);
+
+                instance.state = state;
+
+                if (shouldRender) {
+                    renderingComponentStack.push(this);
+                    var element = instance.render();
+
+                    this._hostNode = update(this._hostNode, element, {
+                        componentRef: instance
+                    });
+                    renderingComponentStack.pop();
+                    this.handleAfterRenderQueue();
+                }
             }
         }]);
 
@@ -462,8 +492,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                         element.props.onChange.call(element, e);
                     }
                     afterCallback.push(function () {
+
                         var propsValue = target[internalInstanceKey]._currentElement.props.value;
+
                         if (propsValue !== undefined && propsValue !== target.value) {
+                            console.log("do");
                             target.value = propsValue;
                             instance.previousOnchangeValue = propsValue;
                         }
@@ -472,6 +505,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 }
             });
         }
+
+        dom[internalInstanceKey] = this;
         for (var attrName in element.props) {
             if (attrMap.dom[attrName]) {
                 attrMap.dom[attrName](element.props[attrName], dom, this, attrName);
@@ -479,7 +514,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 dom.setAttribute(attrName, element.props[attrName]);
             }
         }
-        dom[internalInstanceKey] = this;
     };
 
     var ReactDOMTextComponent = function ReactDOMTextComponent(element, dom, owner) {
@@ -533,8 +567,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         var children = [];
 
         if (props.children) {
-            var result = getChildren(dom, props.children, {}, owner);
-            instance._renderedChildren = result.children;
+            var _result2 = getChildren(dom, props.children, {}, owner);
+            instance._renderedChildren = _result2.children;
         }
 
         children.forEach(function (child) {
@@ -668,7 +702,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 //normal dom            
                 for (var attrName in element.props) {
                     if (element0.props[attrName] !== element.props[attrName]) {
-                        console.log("not");
+                        //                    console.log("not");
                         if (attrMap.dom[attrName]) {
                             attrMap.dom[attrName](element.props[attrName], dom, instance, attrName);
                         } else {

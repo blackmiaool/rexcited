@@ -1,30 +1,47 @@
-function CustomTextInput(props) {
-    return (
-        <div>
-      <input ref={props.inputRef} />
-    </div>
-    );
-}
+class NameForm extends React.Component {
+    constructor(props) {
+        super(props);
+        this.handleSubmit = this.handleSubmit.bind(this);
+        this.state = {
+            value: 3
+        }
+        this.onchange = this.onchange.bind(this);
+    }
+    onchange(e) {
+        console.log(e.target.value);
+        this.setState({
+            value: e.target.value
+        });
+    }
+    shouldComponentUpdate(nextProps, nextState) {
+        if (nextState.value.length % 3 === 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-function Parent(props) {
-    return (
-        <div>
-      My input: <CustomTextInput inputRef={props.inputRef} />
-    </div>
-    );
-}
+    handleSubmit(event) {
+        alert('A name was submitted: ' + this.input.value);
+        event.preventDefault();
+    }
 
-
-class Grandparent extends React.Component {
     render() {
-        return (
-            <Parent
-        inputRef={el => this.inputElement = el}
-      />
-        );
+        return (<form onSubmit={this.handleSubmit}>
+      <label>
+        Name:
+        <input
+          value={this.state.value}
+          type="text"ref = {
+    (input) => this.input = input
+} onChange={this.onchange}/>
+      </label>
+      <input type="submit" value="Submit" />
+    </form>);
     }
 }
+
 ReactDOM.render(
-    <Grandparent />,
+    <NameForm />,
     document.getElementById('root')
 );

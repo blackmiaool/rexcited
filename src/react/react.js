@@ -24,7 +24,7 @@ class Component {
         });
         const execQueue = () => {
             instance.setStateTimeout = 0;
-            instance.handleStateQueue(this, this.state, this.props);
+            instance.handleStateQueue(this.state, this.props);
 
         };
         if (isAsyncSetState) {
