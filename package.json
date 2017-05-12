@@ -24,15 +24,13 @@
     "gulp-babel": "^6.1.2",
     "gulp-cached": "^1.1.1",
     "gulp-rename": "^1.2.2",
-    "gulp-rollup": "^2.11.0",
     "gulp-uglify": "^2.1.2",
     "gulp-util": "^3.0.8",
-    "rollup": "^0.41.6",
-    "rollup-plugin-commonjs": "^8.0.2",
-    "rollup-plugin-node-resolve": "^3.0.0"
+    "webpack": "^2.5.1"
   },
   "dependencies": {
     "gulp-livereload": "^3.8.1",
-    "jquery": "^3.2.1"
+    "jquery": "^3.2.1",
+    "prop-types": "^15.5.10"
   }
 }

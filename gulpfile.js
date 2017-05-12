@@ -11,7 +11,7 @@ const babel = require('gulp-babel');
 const uglify = require('gulp-uglify');
 const rename = require("gulp-rename");
 const commonjs = require('rollup-plugin-commonjs');
-
+const nodeResolve = require('rollup-plugin-node-resolve');
 let distFolder = 'dist';
 
 
@@ -99,7 +99,8 @@ gulp.task('react', ['react-pre'], () => {
         .pipe(gulp.dest(distFolder))
         .pipe(livereload());
 });
-gulp.task('test', () => {
+
+gulp.task('test-pre', function () {
     const babel_pipe = babel(get_babel_params());
     babel_pipe.on('error', (ee) => {
         gutil.log(ee);
@@ -111,6 +112,40 @@ gulp.task('test', () => {
         .pipe(babel_pipe)
         .pipe(gulp.dest(distFolder))
         .pipe(livereload());
+
+
+
+});
+
+
+gulp.task('test', ['test-pre'], () => {
+    return rollup({
+        entry: 'dist/test/helloworld/index.js',
+        plugins: [
+            nodeResolve({
+                jsnext: true,
+                main: true
+            }),
+                commonjs({
+                // non-CommonJS modules will be ignored, but you can also
+                // specifically include/exclude files
+                include: 'node_modules/**', // Default: undefined
+
+                ignoreGlobal: false, // Default: false
+                // if false then skip sourceMap generation for CommonJS modules
+                sourceMap: false, // Default: true
+
+            })
+        ]
+    }).then(function (bundle) {
+        return bundle.write({
+            format: "umd",
+            moduleName: "index",
+            context: "window",
+            //            treeshake: false,
+            dest: './dist/test/helloworld/index2.js'
+        });
+    });
 });
 gulp.task('reload', () => {
     return gulp.src('')
