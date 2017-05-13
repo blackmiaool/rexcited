@@ -30,11 +30,20 @@ const attrMap = {
 function isText(key) {
     return typeof key === "string" || typeof key === "number";
 }
+regiterAttr("style", "dom", function (value, previousValue, dom) {
+    console.log('value', value, previousValue);
+    if (typeof value === "string") {
+        dom.setAttribute("style", value);
+    } else {
+        dom.setAttribute("style", "");
+        Object.assign(dom.style, value);
+    }
 
-regiterAttr("className", "dom", function (value, dom) {
+});
+regiterAttr("className", "dom", function (value, previousValue, dom) {
     dom.setAttribute("class", value);
 });
-regiterAttr("defaultValue", "dom", function (value, dom) {
+regiterAttr("defaultValue", "dom", function (value, previousValue, dom) {
     if (dom.tagName !== 'INPUT') {
         return;
     }
@@ -46,9 +55,9 @@ regiterAttr("defaultValue", "dom", function (value, dom) {
 });
 
 
-regiterAttr("children", "", function (value, dom) {});
+regiterAttr("children", "", function (value, previousValue, dom) {});
 
-regiterAttr("ref", "", function (value, dom, instance, attrName) {
+regiterAttr("ref", "", function (value, previousValue, dom, wrapper, attrName) {
     let ref;
     const owner = renderingComponentStack[renderingComponentStack.length - 1];
     console.log('owner', owner);
@@ -79,12 +88,19 @@ for (var property in document.documentElement) {
     }
 }
 
-function onReactEvent(value, dom, instance, attr) {
+function onReactEvent(value, previousValue, dom, wrapper, attr) {
     const eventName = attr.match(/on(\w+)/i)[1].toLowerCase();
-    dom.addEventListener(eventName, function (e) {
+    console.log(111111111111111111, previousValue);
+    if (wrapper.eventMap[eventName]) {
+        dom.removeEventListener(eventName, wrapper.eventMap[eventName]);
+        delete wrapper.eventMap[eventName];
+    }
+    const listener = function (e) {
         e.nativeEvent = e;
         value(e);
-    });
+    };
+    dom.addEventListener(eventName, listener);
+    wrapper.eventMap[eventName] = listener;
     //    console.log('onReactEvent', attr, value, eventName);
 
     //    dom.addEventListener(value.match, )
@@ -115,25 +131,25 @@ function equals(x, y) {
             return false;
         }
         switch (typeof (y[p])) {
-            case 'object':
-                if (y[p] instanceof Date) {
-                    if (y[p].getTime() !== x[p].getTime()) {
-                        return false;
-                    }
-                }
-                if (!equals(x[p], y[p])) {
-                    return false
-                };
-                break;
-            case 'function':
-                if (typeof (x[p]) == 'undefined' || (p != 'equals')) {
-                    return false;
-                };
-                break;
-            default:
-                if (y[p] != x[p]) {
+        case 'object':
+            if (y[p] instanceof Date) {
+                if (y[p].getTime() !== x[p].getTime()) {
                     return false;
                 }
+            }
+            if (!equals(x[p], y[p])) {
+                return false
+            };
+            break;
+        case 'function':
+            if (typeof (x[p]) == 'undefined' || (p != 'equals')) {
+                return false;
+            };
+            break;
+        default:
+            if (y[p] != x[p]) {
+                return false;
+            }
         }
     }
 
@@ -146,7 +162,7 @@ function equals(x, y) {
     return true;
 }
 
-function getChildren(parent, children, old = {}, owner) {
+function getChildren(parent, children, old = {}, owner, context) {
     console.log('getChildren', parent, children, old);
     if (!children) {
         return {
@@ -216,19 +232,31 @@ function getChildren(parent, children, old = {}, owner) {
                 }
                 //                console.log(key, old[[key]]);
                 if (!old[key]) {
-                    const node = create(child, owner);
-                    append(node, key);
+                    const dom = create(child, {
+                        owner,
+                        context
+                    });
+                    append(dom, key);
                     //                    _renderedChildren[key] = new ReactDOMComponent(child, node, owner);
-                    _renderedChildren[key] = findOwnerUntil(node[internalInstanceKey], owner);
+                    //                    if (isValidElement(dom[internalInstanceKey]._currentElement)) {
+                    _renderedChildren[key] = findOwnerUntil(dom[internalInstanceKey], owner);
+                    //                    } else {
+                    //                        console.log("else")
+                    //                        _renderedChildren[key] = null;
+                    //                    }
+
                     //                    console.info('!!!!!!!!!!!!', _renderedChildren[key], owner)
 
                 } else {
                     if (old[key] instanceof ReactCompositeComponentWrapper) {
                         lastNode = update(old[key]._hostNode, child, {
-                            componentRef: old[key]._instance
+                            componentRef: old[key]._instance,
+                            context
                         });
                     } else {
-                        lastNode = update(old[key]._hostNode, child);
+                        lastNode = update(old[key]._hostNode, child, {
+                            context
+                        });
                     }
 
                     _renderedChildren[key] = findOwnerUntil(lastNode[internalInstanceKey], owner);
@@ -251,12 +279,11 @@ function getChildren(parent, children, old = {}, owner) {
 }
 
 class StatelessComponent {
-    constructor(props, type) {
-        this.props = props;
+    constructor(type) {
         this.type = type;
         this.refs = {};
-        this.render = () => {
-            return type(this.props);
+        this.render = (props) => {
+            return type(props);
         };
     }
 }
@@ -267,17 +294,6 @@ class ReactCompositeComponentWrapper {
         if (owner) {
             this._currentElement._owner = owner;
         }
-        if (isStateLess(type)) {
-            //            element = type(element.props)
-            this._instance = new StatelessComponent(element.props, type);
-            this.type = "stateless";
-            Object.assign(this, {
-                afterRenderQueue: []
-            });
-            return;
-        } else {
-            this.type = "component";
-        }
 
         if (type.defaultProps) {
             for (const i in type.defaultProps) {
@@ -286,29 +302,43 @@ class ReactCompositeComponentWrapper {
                 }
             }
         }
-        const component = new type(element.props);
-        this._instance = component;
-        component._reactInternalInstance = this;
-        if (!component.state) {
-            component.state = {};
+
+
+        if (isStateLess(type)) {
+            this._instance = new StatelessComponent(type);
+            this.type = "stateless";
+        } else {
+            this.type = "component";
         }
 
-        for (const attrName in element.props) { //not on stateless
-            if (attrMap.component[attrName]) {
-                attrMap.component[attrName](element.props[attrName], component, this, attrName);
+
+        if (isReactComponent(type)) {
+            const component = new type(element.props);
+
+            component.context = {};
+            this._instance = component;
+            component._reactInternalInstance = this;
+            if (!component.state) {
+                component.state = {};
             }
-        }
+
+            for (const attrName in element.props) {
+                if (attrMap.component[attrName]) {
+                    attrMap.component[attrName](element.props[attrName], undefined, component, this, attrName);
+                }
+            }
 
 
-        React.asyncSetState(true);
-        component.componentWillMount && component.componentWillMount();
-        React.asyncSetState(false);
-        if (component.componentDidMount) {
-            setTimeout(function () {
-                React.asyncSetState(true);
-                component.componentDidMount();
-                React.asyncSetState(false);
-            });
+            React.asyncSetState(true);
+            component.componentWillMount && component.componentWillMount();
+            React.asyncSetState(false);
+            if (component.componentDidMount) {
+                setTimeout(function () {
+                    React.asyncSetState(true);
+                    component.componentDidMount();
+                    React.asyncSetState(false);
+                });
+            }
         }
 
         Object.assign(this, {
@@ -333,29 +363,63 @@ class ReactCompositeComponentWrapper {
             });
         }
     }
-    create() {
+    getContext() {
+        if (this._instance.getChildContext) {
+            const context = this._instance.getChildContext();
+            return Object.assign({}, this._context, context);
+        } else {
+            return this._context;
+        }
+    }
+    updateSelfContext() {
+        let contextThis = {};
+        console.log(this);
+        if (this._currentElement.type.contextTypes) {
+            for (const i in this._currentElement.type.contextTypes) {
+                contextThis[i] = this._context[i];
+            }
+        }
+        this._instance.context = contextThis;
+    }
+    create(props, context = {}) {
         renderingComponentStack.push(this);
         let dom;
         let element;
+
+        this._context = context;
+
+        this.updateSelfContext();
+
+
         if (this.type === "stateless") {
-            element = this.render(this._currentElement.props);
+            element = this.render(props, this._instance.context);
         } else {
             element = this.render();
         }
 
+        let childContext = this.getContext();
+
+
         const that = this;
 
+        if (element) {
+            this.transformRef(element); //they will remove this    
+        }
 
-
-        this.transformRef(element); //they will remove it
-        dom = create(element, this);
+        dom = create(element, {
+            owner: this,
+            context: childContext
+        });
         this._hostNode = dom;
         renderingComponentStack.pop();
         this.handleAfterRenderQueue();
         return dom;
     }
-    updateProps(props, dom) {
+    updateProps(props, dom, context) {
+        console.log('updateProps', context);
+        this._context = context;
         const instance = this._instance;
+        this.updateSelfContext();
         console.log('updateProps');
         const shouldRender = !instance.shouldComponentUpdate || !instance.shouldComponentUpdate(props, this._instance.state);
 
@@ -363,24 +427,26 @@ class ReactCompositeComponentWrapper {
         console.log('props', props);
         for (const attrName in props) { //not on stateless
             if (props[attrName] !== this._instance.props[attrName] && attrMap.component[attrName]) {
-                attrMap.component[attrName](props[attrName], component, this._instance, attrName);
+                attrMap.component[attrName](props[attrName], this._instance.props[attrName], dom, this, attrName);
             }
         }
         this._instance.props = props;
         this._currentElement.props = props;
 
+        let result;
         if (shouldRender) {
             renderingComponentStack.push(this);
             const element = this.render();
-            this.transformRef(element); //they will remove it
-            const result = update(dom, element, {
-                componentRef: this._instance
+            this.transformRef(element); //they will remove this
+            result = update(dom, element, {
+                componentRef: this._instance,
+                context: this.getContext()
             });
             renderingComponentStack.pop();
             this.handleAfterRenderQueue();
         }
 
-        return result;
+        return dom;
 
     }
     handleAfterRenderQueue() {
@@ -396,7 +462,7 @@ class ReactCompositeComponentWrapper {
         console.log('renderingComponentStack', renderingComponentStack);
         let element;
         if (this.type === "stateless") {
-            element = this._instance.render(this._currentElement.props);
+            element = this._instance.render.call(undefined, this._currentElement.props);
         } else {
             element = this._instance.render();
         }
@@ -442,9 +508,11 @@ class ReactCompositeComponentWrapper {
         if (shouldRender) {
             renderingComponentStack.push(this);
             const element = instance.render();
+            let context = this.getContext();
 
             this._hostNode = update(this._hostNode, element, {
-                componentRef: instance
+                componentRef: instance,
+                context
             });
             renderingComponentStack.pop();
             this.handleAfterRenderQueue();
@@ -485,11 +553,11 @@ class ReactDOMComponent {
                 }
             });
         }
-
+        this.eventMap = {};
         dom[internalInstanceKey] = this;
         for (const attrName in element.props) {
             if (attrMap.dom[attrName]) {
-                attrMap.dom[attrName](element.props[attrName], dom, this, attrName);
+                attrMap.dom[attrName](element.props[attrName], undefined, dom, this, attrName);
             } else {
                 dom.setAttribute(attrName, element.props[attrName]);
             }
@@ -523,23 +591,28 @@ function execAfterCallback() {
 }
 
 
-function create(element, owner) {
-    console.log('create', element);
+function create(element, {
+    owner,
+    context
+} = {}) {
+    console.log('create', element, arguments[1]);
+
+    if (!isValidElement(element)) { //comment
+        const dom = document.createComment("react-empty");
+        dom[internalInstanceKey] = {
+            _currentElement: element,
+            _hostNode: dom
+        };
+        return dom;
+    }
+
     const {
         type,
         props,
     } = element;
-    if (!isValidElement(element)) { //comment
-        const dom = document.createComment("react-empty");
-        dom._hostNode = dom;
-        dom[internalInstanceKey] = {
-            _currentElement: element,
-        };
-        return dom;
-    }
     if (isComponent(type)) {
         const instance = new ReactCompositeComponentWrapper(type, element, owner);
-        return instance.create();
+        return instance.create(props, context);
     }
 
 
@@ -551,7 +624,7 @@ function create(element, owner) {
     let children = [];
 
     if (props.children) {
-        let result = getChildren(dom, props.children, {}, owner);
+        let result = getChildren(dom, props.children, {}, owner, context);
         instance._renderedChildren = result.children;
     }
 
@@ -577,15 +650,21 @@ function findOwnerUntil(owner, top) {
     if (!owner) {
         return;
     }
+    if (!owner._currentElement) {
+        return owner;
+    }
     while (owner._currentElement._owner && owner._currentElement._owner !== top) {
         owner = owner._currentElement._owner;
     }
     return owner;
 }
 
-function update(dom, element, info = {}) {
+function update(dom, element, {
+    componentRef,
+    context
+} = {}) {
     //    console.trace("1")
-    console.log('update', dom, element, info);
+    console.log('update', dom, element, context);
     let forceRender = false;
     if (!element && dom) { //dom to comment
         const comment = document.createComment("react-empty: ?");
@@ -626,17 +705,19 @@ function update(dom, element, info = {}) {
 
 
     function createAndReplace() {
-        const newDom = create(element);
+        const newDom = create(element, {
+            context
+        });
         dom.parentElement.replaceChild(newDom, dom);
         return newDom;
     }
     if (isHost) {
-        if (info.componentRef) {
+        if (componentRef) {
             let owner = element0._owner;
             let lastOwner;
             let found;
             while (1) {
-                if (owner && owner._instance === info.componentRef) {
+                if (owner && owner._instance === componentRef) {
                     found = true;
                     break;
                 }
@@ -650,7 +731,7 @@ function update(dom, element, info = {}) {
 
             if (found) {
                 if (lastOwner) {
-                    return lastOwner.updateProps(element.props, dom);
+                    return lastOwner.updateProps(element.props, dom, context);
                 }
             } else {
                 console.log("else");
@@ -666,7 +747,9 @@ function update(dom, element, info = {}) {
 
     } else {
         function replace() {
-            const newDom = create(element);
+            const newDom = create(element, {
+                context
+            });
             dom.parentElement.replaceChild(newDom, dom);
             return newDom;
         }
@@ -692,13 +775,13 @@ function update(dom, element, info = {}) {
 
     if (!equals(element0.props, element.props)) { //props changed        
         if (isComponent(element.type)) {
-            return owner.updateProps(element.props);
+            return owner.updateProps(element.props, dom, context);
         } else { //normal dom            
             for (const attrName in element.props) {
                 if (element0.props[attrName] !== element.props[attrName]) {
                     //                    console.log("not");
                     if (attrMap.dom[attrName]) {
-                        attrMap.dom[attrName](element.props[attrName], dom, instance, attrName);
+                        attrMap.dom[attrName](element.props[attrName], element0.props[attrName], dom, instance, attrName);
                     } else {
 
                         dom.setAttribute(attrName, element.props[attrName]);
@@ -710,13 +793,14 @@ function update(dom, element, info = {}) {
 
     }
 
-    if (!isComponent(element)) {
+    if (!isComponent(element.type)) {
         const oldChildren = instance._renderedChildren;
-        const newChildren = getChildren(dom, element.props.children, oldChildren, owner).children;
+        const newChildren = getChildren(dom, element.props.children, oldChildren, owner, context).children;
 
 
+        console.log('oldChildren', oldChildren);
         for (const i in oldChildren) {
-            if (!newChildren[i]) {
+            if (!newChildren[i] && oldChildren[i]) {
                 oldChildren[i]._hostNode.parentElement.removeChild(oldChildren[i]._hostNode);
             }
         }

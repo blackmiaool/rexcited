@@ -1,58 +1,75 @@
-//import React from "./src/react/react.js";
-//import ReactDOM from "./src/react-dom/react-dom.js"
-const React = window.React;
-const ReactDOM = window.ReactDOM;
-const PropTypes = require('prop-types');
+import React from 'react'
+import {
+    render
+} from 'react-dom'
+//const {
+//    render
+//} = ReactDOM;
+import {
+    Provider,
+    connect
+} from 'react-redux'
+import {
+    createStore
+} from 'redux'
 
-class Button extends React.Component {
-    render() {
-        return (
-            <button style={{background: this.context.color}}>
-        {this.props.children}
-      </button>
-        );
+
+const mapStateToProps = (state, ownProps) => {
+    return {
+        cnt: state.cnt
     }
 }
 
-Button.contextTypes = {
-    color: PropTypes.string
-};
-
-class Message extends React.Component {
-    render() {
-        return (
-            <div>
-        {this.props.text} <Button>Delete</Button>
-      </div>
-        );
+const mapDispatchToProps = (dispatch, ownProps) => {
+    return {
+        add: () => {
+            dispatch({
+                type: "add",
+                cnt: 1
+            })
+        }
     }
 }
 
-class MessageList extends React.Component {
-    getChildContext() {
+
+
+let store = createStore((state = {
+    cnt: 0
+}, action) => {
+    switch (action.type) {
+    case 'add':
         return {
-            color: "purple"
-        };
+            cnt: state.cnt + 1
+        }
+    default:
+        return state
     }
-
+});
+class B extends React.Component {
+    constructor(props) {
+        super(props);
+    }
     render() {
-        const children = this.props.messages.map((message, i) =>
-            <Message key={i} text={message.text} />
-        );
-        return <div>{children}</div>;
+
+        return <div><p>{this.props.cnt}</p><button onClick={this.props.add}>+1s</button></div>;
     }
 }
 
-MessageList.childContextTypes = {
-    color: PropTypes.string
-};
+B = connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(B)
 
-const message = [{
-    text: "12"
-}, {
-    text: "abc"
-}];
-ReactDOM.render(
-    <MessageList messages={message} />,
+function App() {
+    return <div>
+        <B/>
+        
+    </div>;
+}
+console.log(Provider)
+render(
+    <Provider store={store}>
+    <App />
+  </Provider>,
     document.getElementById('root')
-);
+)

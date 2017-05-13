@@ -105,7 +105,7 @@ gulp.task('test', () => {
         .pipe(webpackStream({
             module: {
                 loaders: [{
-                    test: /\.jsx$/,
+                    test: /\.jsx?$/,
                     loader: 'babel-loader',
                     query: {
                         presets: [
@@ -117,9 +117,16 @@ gulp.task('test', () => {
                     loader: "json-loader"
                 }]
             },
+            resolve: {
+                alias: {
+                    react: "/home/blackmiaool/github/blackmiaoolreact/src/react/react.js",
+                    'react-dom': "/home/blackmiaool/github/blackmiaoolreact/src/react-dom/react-dom.js",
+                },
+                //                root: "."
+            },
             output: {
                 path: path.resolve(__dirname, 'dist'),
-                filename: 'index.bundle.js'
+                filename: 'index0.bundle.js'
             },
             plugins: [
                     new webpack.DefinePlugin({
