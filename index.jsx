@@ -1,5 +1,7 @@
 //import React from "./src/react/react.js";
 //import ReactDOM from "./src/react-dom/react-dom.js"
+const React = window.React;
+const ReactDOM = window.ReactDOM;
 const PropTypes = require('prop-types');
 
 class Button extends React.Component {
