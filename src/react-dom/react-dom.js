@@ -1,3 +1,4 @@
+import React from 'react';
 const internalInstanceKey = '__reactInternalInstance$' + Math.random().toString(36).slice(2);
 
 
@@ -169,6 +170,7 @@ function getChildren(parent, children, old = {}, owner, context) {
     let lastNode;
 
     function append(node, key) {
+        console.log("node", node, key)
         if (prependParent) {
             if (parent.firstChild) {
                 parent.insertBefore(node, parent.firstChild);
@@ -286,7 +288,7 @@ class StatelessComponent {
 }
 const renderingComponentStack = [];
 class ReactCompositeComponentWrapper {
-    constructor(type, element, owner) {
+    constructor(type, element, owner, context = {}) {
         this._currentElement = element;
         if (owner) {
             this._currentElement._owner = owner;
@@ -302,7 +304,7 @@ class ReactCompositeComponentWrapper {
 
 
         if (isStateLess(type)) {
-            this._instance = new StatelessComponent(type);
+            this._instance = new StatelessComponent(type, context);
             this.type = "stateless";
         } else {
             this.type = "component";
@@ -310,9 +312,9 @@ class ReactCompositeComponentWrapper {
 
 
         if (isReactComponent(type)) {
-            const component = new type(element.props);
+            const component = new type(element.props, context);
 
-            component.context = {};
+            component.context = context;
             this._instance = component;
             component._reactInternalInstance = this;
             if (!component.state) {
@@ -341,7 +343,8 @@ class ReactCompositeComponentWrapper {
         Object.assign(this, {
             stateQueue: [],
             afterRenderQueue: []
-        })
+        });
+        return this.create(element.props, context);
     }
 
     transformRef(element) {
@@ -378,7 +381,7 @@ class ReactCompositeComponentWrapper {
         }
         this._instance.context = contextThis;
     }
-    create(props, context = {}) {
+    create(props, context) {
         renderingComponentStack.push(this);
         let dom;
         let element;
@@ -608,8 +611,7 @@ function create(element, {
         props,
     } = element;
     if (isComponent(type)) {
-        const instance = new ReactCompositeComponentWrapper(type, element, owner);
-        return instance.create(props, context);
+        return new ReactCompositeComponentWrapper(type, element, owner, context);
     }
 
 
@@ -837,6 +839,8 @@ function render(element, target) {
 const exports = {
     render
 }
-
+export {
+    render
+};
 export default exports;
 //window.ReactDOM = exports;

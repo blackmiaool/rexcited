@@ -2,44 +2,40 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
-//    entry: {
-//        'app': './index'
-//    },
-    output: {
-        path: path.resolve(__dirname, 'dist'),
-        filename: 'index.bundle.js'
+    entry: {
+        'app': './index.jsx'
     },
+
     module: {
-        rules: [{
-            test: /\.jsx$/,
+        loaders: [{
+            test: /\.jsx?$/,
             loader: 'babel-loader',
             query: {
-                presets: [
-          'es2015',
-          'react'
-        ],
+                presets: ['es2015', 'react'],
                 plugins: []
             },
-            //            include: [
-            //        path.resolve(__dirname, 'test')
-            //      ]
-    }, {
+                }, {
             test: /\.json$/,
             loader: "json-loader"
-    }]
+                }]
+    },
+    resolve: {
+        alias: {
+            react: path.resolve(path.join(__dirname, 'src', 'react', 'react')),
+            'react-dom': path.resolve(path.join(__dirname, 'src', 'react-dom', 'react-dom')),
+        },
+        //                root: "."
+    },
+    output: {
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'index0.bundle.js'
     },
     plugins: [
-    new webpack.DefinePlugin({
+                    new webpack.DefinePlugin({
             'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production')
         }),
-  ],
-    resolve: {
-        modules: [
-      path.join(process.cwd(), 'app'),
-      'node_modules'
-    ],
-        extensions: ['.js', '.json']
-    },
+            ],
+
     devtool: false,
     watch: true
 };

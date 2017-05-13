@@ -5,9 +5,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 (function (global, factory) {
-    (typeof exports === 'undefined' ? 'undefined' : _typeof(exports)) === 'object' && typeof module !== 'undefined' ? module.exports = factory() : typeof define === 'function' && define.amd ? define(factory) : global.ReactDOM = factory();
-})(this, function () {
+    (typeof exports === 'undefined' ? 'undefined' : _typeof(exports)) === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('react')) : typeof define === 'function' && define.amd ? define(['react'], factory) : global.ReactDOM = factory(global.React);
+})(this, function (React) {
     'use strict';
+
+    React = 'default' in React ? React['default'] : React;
 
     var internalInstanceKey = '__reactInternalInstance$' + Math.random().toString(36).slice(2);
 

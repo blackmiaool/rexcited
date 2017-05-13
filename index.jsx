@@ -8,7 +8,7 @@ import {
 import {
     Provider,
     connect
-} from 'react-redux'
+} from './react-redux/src/index.js'
 import {
     createStore
 } from 'redux'
@@ -66,7 +66,7 @@ function App() {
         
     </div>;
 }
-console.log(Provider)
+
 render(
     <Provider store={store}>
     <App />

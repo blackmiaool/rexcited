@@ -1,4 +1,5 @@
 import createElement from "./createElement.js";
+import Children from "./children.js";
 
 let isAsyncSetState = false;
 
@@ -6,9 +7,10 @@ function asyncSetState(value) {
     isAsyncSetState = value;
 }
 class Component {
-    constructor(props) {
+    constructor(props, context) {
         this.props = props;
         this.refs = {};
+        this.context = context
     }
     setWrapper() {
 
@@ -39,7 +41,14 @@ class Component {
 const exports = {
     createElement,
     Component,
-    asyncSetState
+    asyncSetState,
+    Children
 }
+export {
+    createElement,
+    Component,
+    asyncSetState,
+    Children
+};
 export default exports;
 //window.React = exports;

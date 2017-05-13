@@ -1,8 +1,10 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-	typeof define === 'function' && define.amd ? define(factory) :
-	(global.ReactDOM = factory());
-}(this, (function () { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('react')) :
+	typeof define === 'function' && define.amd ? define(['react'], factory) :
+	(global.ReactDOM = factory(global.React));
+}(this, (function (React) { 'use strict';
+
+React = 'default' in React ? React['default'] : React;
 
 const internalInstanceKey = '__reactInternalInstance$' + Math.random().toString(36).slice(2);
 

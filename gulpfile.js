@@ -25,8 +25,8 @@ function get_babel_params() {
     };
 }
 
-
-gulp.task('default', () => gulp.start(['react-dom', 'react', 'test']));
+//'react-dom', 'react',
+gulp.task('default', () => gulp.start(['test']));
 
 
 gulp.task('reload', () => {
@@ -108,8 +108,7 @@ gulp.task('test', () => {
                     test: /\.jsx?$/,
                     loader: 'babel-loader',
                     query: {
-                        presets: [
-                          'es2015', 'react'],
+                        presets: ['es2015', 'react'],
                         plugins: []
                     },
                 }, {
@@ -119,8 +118,8 @@ gulp.task('test', () => {
             },
             resolve: {
                 alias: {
-                    react: "/home/blackmiaool/github/blackmiaoolreact/src/react/react.js",
-                    'react-dom': "/home/blackmiaool/github/blackmiaoolreact/src/react-dom/react-dom.js",
+                    react: path.resolve(path.join(__dirname, 'src', 'react', 'react')),
+                    'react-dom': path.resolve(path.join(__dirname, 'src', 'react-dom', 'react-dom')),
                 },
                 //                root: "."
             },
@@ -143,8 +142,8 @@ gulp.task('reload', () => {
 
 livereload.listen();
 
-
-gulp.watch('src/react/*', ['react']);
-gulp.watch('src/react-dom/*', ['react-dom']);
-gulp.watch('index.jsx', ['test'])
+//
+//gulp.watch('src/react/*', ['react']);
+//gulp.watch('src/react-dom/*', ['react-dom']);
+gulp.watch(['index.jsx', 'src/**/*.js', 'react-redux/**/*.*'], ['test'])
 gulp.watch('src/*.html', ['reload']);
