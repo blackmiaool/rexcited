@@ -1,6 +1,9 @@
 import React from 'react';
 const internalInstanceKey = '__reactInternalInstance$' + Math.random().toString(36).slice(2);
 
+function log() {
+    //    console.log.apply(console, arguments);
+}
 
 function regiterAttr(name, type, cb) {
     if (type === "dom") {
@@ -27,7 +30,6 @@ function isText(key) {
 }
 
 regiterAttr("dangerouslySetInnerHTML", "dom", function (value, previousValue, dom) {
-    console.log('dangerouslySetInnerHTML', value)
     dom.innerHTML = value.__html;
 });
 regiterAttr("style", "dom", function (value, previousValue, dom) {
@@ -63,7 +65,7 @@ regiterAttr("children", "", function (value, previousValue, dom) {});
 regiterAttr("ref", "", function (value, previousValue, dom, wrapper, attrName) {
     let ref;
     const owner = renderingComponentStack[renderingComponentStack.length - 1];
-    console.log('owner', owner);
+    log('owner', owner);
     if (owner) {
         if (typeof value === "function") {
             owner.afterRenderQueue.push(value.bind(undefined, dom));
@@ -75,7 +77,7 @@ regiterAttr("ref", "", function (value, previousValue, dom, wrapper, attrName) {
     }
 
 
-    console.log("arguments", arguments)
+    log("arguments", arguments)
 });
 
 const events = [];
@@ -104,7 +106,7 @@ function onReactEvent(value, previousValue, dom, wrapper, attr) {
     };
     dom.addEventListener(eventName, listener);
     wrapper.eventMap[eventName] = listener;
-    //    console.log('onReactEvent', attr, value, eventName);
+    //    log('onReactEvent', attr, value, eventName);
 
     //    dom.addEventListener(value.match, )
 }
@@ -171,7 +173,7 @@ function equals(x, y) {
 }
 
 function getChildren(parent, children, old = {}, owner, context) {
-    console.log('getChildren', parent, children, old)
+    log('getChildren', parent, children, old)
     if (!children) {
         return {
             children: {}
@@ -183,7 +185,7 @@ function getChildren(parent, children, old = {}, owner, context) {
     let lastNode;
 
     function append(node, key) {
-        console.log("node", node, key)
+        log("node", node, key)
         if (prependParent && !lastNode) {
             if (parent.firstChild) {
                 parent.insertBefore(node, parent.firstChild);
@@ -238,11 +240,11 @@ function getChildren(parent, children, old = {}, owner, context) {
                     //                    if (isValidElement(dom[internalInstanceKey]._currentElement)) {
                     _renderedChildren[key] = findOwnerUntil(dom[internalInstanceKey], owner);
                     //                    } else {
-                    //                        console.log("else")
+                    //                        log("else")
                     //                        _renderedChildren[key] = null;
                     //                    }
 
-                    //                    console.info('!!!!!!!!!!!!', _renderedChildren[key], owner)
+                    //                    info('!!!!!!!!!!!!', _renderedChildren[key], owner)
 
                 } else {
                     if (old[key] instanceof ReactCompositeComponentWrapper) {
@@ -258,7 +260,7 @@ function getChildren(parent, children, old = {}, owner, context) {
                             });
                         }
                     } else {
-                        console.log(3)
+                        log(3)
                         lastNode = update(old[key]._hostNode, child, {
                             context
                         });
@@ -356,7 +358,7 @@ class ReactCompositeComponentWrapper {
         const refKey = element.props.ref;
         if (typeof refKey === "string") {
             element.props.ref = function (ref) {
-                console.log("this", that);
+                log("this", that);
                 that._instance.refs[refKey] = ref;
             }
         }
@@ -378,7 +380,7 @@ class ReactCompositeComponentWrapper {
     }
     updateSelfContext() {
         let contextThis = {}
-        console.log(this);
+        log(this);
         if (this._currentElement.type.contextTypes) {
             for (const i in this._currentElement.type.contextTypes) {
                 contextThis[i] = this._context[i];
@@ -413,7 +415,7 @@ class ReactCompositeComponentWrapper {
             context: childContext
         });
         if (!dom) {
-            console.error('wrong hostNode', element, this, dom);
+            log('wrong hostNode', element, this, dom);
         }
 
         this._hostNode = dom;
@@ -422,7 +424,7 @@ class ReactCompositeComponentWrapper {
         return dom;
     }
     updateProps(props, context) {
-        console.log('updateProps', context)
+        log('updateProps', context)
         this._instance.componentWillReceiveProps && this._instance.componentWillReceiveProps(props);
         this._context = context;
         const instance = this._instance;
@@ -432,24 +434,24 @@ class ReactCompositeComponentWrapper {
 
     handleAfterRenderQueue() {
         this.afterRenderQueue.forEach((cb) => {
-            console.log('cb', cb);
+            log('cb', cb);
             cb(this._instance);
         });
         this.afterRenderQueue.length = 0;
     }
     render() {
-        console.log("render");
+        log("render");
 
-        console.log('renderingComponentStack', renderingComponentStack);
+        log('renderingComponentStack', renderingComponentStack);
         let element;
         if (this.type === "stateless") {
-            console.log('render stateless', this._currentElement.props);
+            log('render stateless', this._currentElement.props);
             element = this._instance.render.call(undefined, this._currentElement.props, this.getContext());
         } else {
             element = this._instance.render();
         }
 
-        console.log("render end", element);
+        log("render end", element);
         return element;
     }
     remove() {
@@ -556,7 +558,7 @@ class ReactDOMComponent {
                         const propsValue = target[internalInstanceKey]._currentElement.props.value;
 
                         if (propsValue !== undefined && propsValue !== target.value) {
-                            console.log("do")
+                            log("do")
                             target.value = propsValue;
                             instance.previousOnchangeValue = propsValue;
                         }
@@ -602,7 +604,7 @@ function create(element, {
     owner,
     context
 } = {}) {
-    console.log('create', element, arguments[1])
+    log('create', element, arguments[1])
 
     if (!React.isValidElement(element)) { //comment
         const dom = document.createComment("react-empty");
@@ -679,7 +681,7 @@ function update(dom, element, {
     componentRef,
     context
 } = {}) {
-    console.log('update', dom, element, context, componentRef)
+    log('update', dom, element, context, componentRef)
     let forceRender = false;
     if (!element && dom) { //dom to comment
         const comment = document.createComment("react-empty: ?");
@@ -751,12 +753,12 @@ function update(dom, element, {
 
                 }
             } else {
-                console.log("else");
+                log("else");
                 return createAndReplace();
 
             }
         } else if (element.type !== element0.type || forceRender) {
-            console.log("type changed", element.type, element0.type)
+            log("type changed", element.type, element0.type)
             return createAndReplace();
         } else {
 
@@ -796,7 +798,7 @@ function update(dom, element, {
         } else { //normal dom            
             for (const attrName in element.props) {
                 if (element0.props[attrName] !== element.props[attrName]) {
-                    //                    console.log("not");
+                    //                    log("not");
                     if (attrMap.dom[attrName]) {
                         attrMap.dom[attrName](element.props[attrName], element0.props[attrName], dom, instance, attrName);
                     } else {
@@ -815,7 +817,7 @@ function update(dom, element, {
         const newChildren = getChildren(dom, element.props.children, oldChildren, owner, context).children;
 
 
-        console.log('oldChildren', oldChildren);
+        log('oldChildren', oldChildren);
         for (const i in oldChildren) {
             if (!newChildren[i] && oldChildren[i]) {
                 oldChildren[i].remove();
@@ -843,7 +845,7 @@ function render(element, target) {
     }
 
     //    const targetInstance = target.childNodes[0][internalInstanceKey];
-    //    console.log(targetInstance)
+    //    log(targetInstance)
 }
 const exports = {
     render

@@ -7,7 +7,7 @@ function map(children, cb, thisArg) {
     if (children && children.length === 1 && children[0] === null) {
         return [];
     }
-    console.log('childrenmap', arguments);
+
     if (Array.isArray(children)) {
         return children.map(cb, thisArg);
     } else if (typeof children === "object" && children) {
