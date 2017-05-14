@@ -26,7 +26,10 @@ function isText(key) {
     return typeof key === "string" || typeof key === "number";
 }
 regiterAttr("style", "dom", function (value, previousValue, dom) {
-    console.log('value', value, previousValue);
+    if (value && previousValue && equals(value, previousValue)) {
+        return;
+    }
+
     if (typeof value === "string") {
         dom.setAttribute("style", value);
     } else {
@@ -85,7 +88,7 @@ for (var property in document.documentElement) {
 
 function onReactEvent(value, previousValue, dom, wrapper, attr) {
     const eventName = attr.match(/on(\w+)/i)[1].toLowerCase();
-    console.log(111111111111111111, previousValue);
+
     if (wrapper.eventMap[eventName]) {
         dom.removeEventListener(eventName, wrapper.eventMap[eventName]);
         delete wrapper.eventMap[eventName];
@@ -245,10 +248,14 @@ function getChildren(parent, children, old = {}, owner, context) {
 
                 } else {
                     if (old[key] instanceof ReactCompositeComponentWrapper) {
-                        lastNode = update(old[key]._hostNode, child, {
-                            componentRef: old[key]._instance,
-                            context
-                        });
+                        if (old[key]._currentElement.type === child.type) {
+                            lastNode = old[key].updateProps(child.props, old[key]._hostNode, context);
+                        } else {
+                            lastNode = update(old[key]._hostNode, child, {
+                                componentRef: old[key]._instance,
+                                context
+                            });
+                        }
                     } else {
                         lastNode = update(old[key]._hostNode, child, {
                             context
@@ -391,11 +398,8 @@ class ReactCompositeComponentWrapper {
         this.updateSelfContext();
 
 
-        if (this.type === "stateless") {
-            element = this.render(props, this._instance.context);
-        } else {
-            element = this.render()
-        }
+        element = this.render()
+
 
         let childContext = this.getContext();
 
@@ -424,12 +428,15 @@ class ReactCompositeComponentWrapper {
         const shouldRender = !instance.shouldComponentUpdate || !instance.shouldComponentUpdate(props, this._instance.state);
 
 
-        console.log('props', props);
-        for (const attrName in props) { //not on stateless
-            if (props[attrName] !== this._instance.props[attrName] && attrMap.component[attrName]) {
-                attrMap.component[attrName](props[attrName], this._instance.props[attrName], dom, this, attrName);
+        console.log('props', props, this);
+        if (this.type === "component") {
+            for (const attrName in props) { //not on stateless
+                if (props[attrName] !== this._instance.props[attrName] && attrMap.component[attrName]) {
+                    attrMap.component[attrName](props[attrName], this._instance.props[attrName], dom, this, attrName);
+                }
             }
         }
+
         this._instance.props = props;
         this._currentElement.props = props;
 
@@ -446,7 +453,7 @@ class ReactCompositeComponentWrapper {
             this.handleAfterRenderQueue();
         }
 
-        return dom;
+        return result;
 
     }
     handleAfterRenderQueue() {
@@ -462,12 +469,13 @@ class ReactCompositeComponentWrapper {
         console.log('renderingComponentStack', renderingComponentStack);
         let element;
         if (this.type === "stateless") {
-            element = this._instance.render.call(undefined, this._currentElement.props);
+            console.log('render stateless', this._currentElement.props);
+            element = this._instance.render.call(undefined, this._currentElement.props, this.getContext());
         } else {
             element = this._instance.render();
         }
 
-        console.log("render end");
+        console.log("render end", element);
         return element;
     }
     handleStateQueue(oldState, props) {
@@ -672,8 +680,7 @@ function update(dom, element, {
     componentRef,
     context
 } = {}) {
-    //    console.trace("1")
-    console.log('update', dom, element, context)
+    console.log('update', dom, element, context, componentRef)
     let forceRender = false;
     if (!element && dom) { //dom to comment
         const comment = document.createComment("react-empty: ?");
@@ -741,6 +748,8 @@ function update(dom, element, {
             if (found) {
                 if (lastOwner) {
                     return lastOwner.updateProps(element.props, dom, context);
+                } else {
+
                 }
             } else {
                 console.log("else");
@@ -754,32 +763,29 @@ function update(dom, element, {
 
         }
 
-    } else {
-        function replace() {
-            const newDom = create(element, {
-                context
-            });
-            dom.parentElement.replaceChild(newDom, dom);
-            return newDom;
-        }
-        if (forceRender || typeof element0 !== typeof element) {
-            return replace();
-        }
-
-        if (isValidElement(element0) && isValidElement(element)) {
-            if (element.type !== element0.type) {
-                return replace();
-            }
-        } else {
-            if (element !== element0) {
-                return replace();
-            }
-        }
-
-
-
     }
 
+    function replace() {
+        const newDom = create(element, {
+            componentRef,
+            context
+        });
+        dom.parentElement.replaceChild(newDom, dom);
+        return newDom;
+    }
+    if (forceRender || typeof element0 !== typeof element) {
+        return replace();
+    }
+
+    if (isValidElement(element0) && isValidElement(element)) {
+        if (element.type !== element0.type) {
+            return replace();
+        }
+    } else {
+        if (element !== element0) {
+            return replace();
+        }
+    }
 
 
     if (!equals(element0.props, element.props)) { //props changed        

@@ -1,34 +1,23 @@
 const path = require('path');
 const webpack = require('webpack');
 
-module.exports = {
-    entry: {
-        'app': './index.jsx'
-    },
 
+var config = {
+    entry: {
+        'app': './test/index.js'
+    },
     module: {
         loaders: [{
             test: /\.jsx?$/,
             loader: 'babel-loader',
             query: {
-                presets: ['es2015', 'react'],
+                presets: ['stage-0', 'latest', 'react'],
                 plugins: []
             },
                 }, {
             test: /\.json$/,
             loader: "json-loader"
                 }]
-    },
-    resolve: {
-        alias: {
-            react: path.resolve(path.join(__dirname, 'src', 'react', 'react')),
-            'react-dom': path.resolve(path.join(__dirname, 'src', 'react-dom', 'react-dom')),
-        },
-        //                root: "."
-    },
-    output: {
-        path: path.resolve(__dirname, 'dist'),
-        filename: 'index0.bundle.js'
     },
     plugins: [
                     new webpack.DefinePlugin({
@@ -39,3 +28,71 @@ module.exports = {
     devtool: false,
     watch: true
 };
+
+var test0Config = Object.assign({}, config, {
+    name: "a",
+    output: {
+        path: path.resolve(path.join(__dirname, 'dist')),
+        filename: "index0.bundle.js"
+    },
+    resolve: {
+        alias: {
+            react: path.resolve(path.join(__dirname, 'src', 'react', 'react')),
+            'react-dom': path.resolve(path.join(__dirname, 'src', 'react-dom', 'react-dom')),
+        },
+        //                root: "."
+    },
+});
+var testConfig = Object.assign({}, config, {
+    name: "b",
+    output: {
+        path: path.resolve(path.join(__dirname, 'dist')),
+        filename: "index.bundle.js"
+    },
+});
+
+// Return Array of Configurations
+module.exports = [
+    test0Config, testConfig,
+]
+
+
+
+//module.exports = {
+//    entry: {
+//        'app': './index.jsx'
+//    },
+//
+//    module: {
+//        loaders: [{
+//            test: /\.jsx?$/,
+//            loader: 'babel-loader',
+//            query: {
+//                presets: ['es2015', 'react'],
+//                plugins: []
+//            },
+//                }, {
+//            test: /\.json$/,
+//            loader: "json-loader"
+//                }]
+//    },
+//    resolve: {
+//        alias: {
+//            react: path.resolve(path.join(__dirname, 'src', 'react', 'react')),
+//            'react-dom': path.resolve(path.join(__dirname, 'src', 'react-dom', 'react-dom')),
+//        },
+//        //                root: "."
+//    },
+//    output: {
+//        path: path.resolve(__dirname, 'dist'),
+//        filename: 'index0.bundle.js'
+//    },
+//    plugins: [
+//                    new webpack.DefinePlugin({
+//            'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production')
+//        }),
+//            ],
+//
+//    devtool: false,
+//    watch: true
+//};

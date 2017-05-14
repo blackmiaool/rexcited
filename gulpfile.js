@@ -26,7 +26,7 @@ function get_babel_params() {
 }
 
 //'react-dom', 'react',
-gulp.task('default', () => gulp.start(['test']));
+gulp.task('default', () => gulp.start(['test0', 'test']));
 
 
 gulp.task('reload', () => {
@@ -100,7 +100,7 @@ gulp.task('react', ['react-pre'], () => {
 
 
 
-gulp.task('test', () => {
+gulp.task('test0', () => {
     return gulp.src("./index.jsx")
         .pipe(webpackStream({
             module: {
@@ -121,7 +121,6 @@ gulp.task('test', () => {
                     react: path.resolve(path.join(__dirname, 'src', 'react', 'react')),
                     'react-dom': path.resolve(path.join(__dirname, 'src', 'react-dom', 'react-dom')),
                 },
-                //                root: "."
             },
             output: {
                 path: path.resolve(__dirname, 'dist'),
@@ -135,6 +134,37 @@ gulp.task('test', () => {
         }), webpack)
         .pipe(gulp.dest("./dist"))
 });
+
+gulp.task('test', () => {
+    return gulp.src("./index.jsx")
+        .pipe(webpackStream({
+            module: {
+                loaders: [{
+                    test: /\.jsx?$/,
+                    loader: 'babel-loader',
+                    query: {
+                        presets: ['es2015', 'react'],
+                        plugins: []
+                    },
+                }, {
+                    test: /\.json$/,
+                    loader: "json-loader"
+                }]
+            },
+            resolve: {},
+            output: {
+                path: path.resolve(__dirname, 'dist'),
+                filename: 'index.bundle.js'
+            },
+            plugins: [
+                    new webpack.DefinePlugin({
+                    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production')
+                }),
+            ],
+        }), webpack)
+        .pipe(gulp.dest("./dist"))
+});
+
 gulp.task('reload', () => {
     return gulp.src('')
         .pipe(livereload());
@@ -145,5 +175,5 @@ livereload.listen();
 //
 //gulp.watch('src/react/*', ['react']);
 //gulp.watch('src/react-dom/*', ['react-dom']);
-gulp.watch(['index.jsx', 'src/**/*.js', 'react-redux/**/*.*'], ['test'])
+gulp.watch(['index.jsx', 'src/**/*.js', 'react-redux/**/*.*'], ['test0', 'test'])
 gulp.watch('src/*.html', ['reload']);
