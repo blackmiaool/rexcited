@@ -249,7 +249,7 @@ function getChildren(parent, children, old = {}, owner, context) {
                 } else {
                     if (old[key] instanceof ReactCompositeComponentWrapper) {
                         if (old[key]._currentElement.type === child.type) {
-                            lastNode = old[key].updateProps(child.props, old[key]._hostNode, context);
+                            lastNode = old[key].updateProps(child.props, context);
                         } else {
                             lastNode = update(old[key]._hostNode, child, {
                                 componentRef: old[key]._instance,
@@ -336,7 +336,7 @@ class ReactCompositeComponentWrapper {
 
 
             React.asyncSetState(true);
-            component.componentWillMount && component.componentWillMount();
+
             React.asyncSetState(false);
             if (component.componentDidMount) {
                 setTimeout(function () {
@@ -397,7 +397,7 @@ class ReactCompositeComponentWrapper {
 
         this.updateSelfContext();
 
-
+        this._instance.componentWillMount && this._instance.componentWillMount();
         element = this.render()
 
 
@@ -419,43 +419,15 @@ class ReactCompositeComponentWrapper {
         this.handleAfterRenderQueue();
         return dom;
     }
-    updateProps(props, dom, context) {
+    updateProps(props, context) {
         console.log('updateProps', context)
+        this._instance.componentWillReceiveProps && this._instance.componentWillReceiveProps(props);
         this._context = context;
         const instance = this._instance;
         this.updateSelfContext();
-        console.log('updateProps');
-        const shouldRender = !instance.shouldComponentUpdate || !instance.shouldComponentUpdate(props, this._instance.state);
-
-
-        console.log('props', props, this);
-        if (this.type === "component") {
-            for (const attrName in props) { //not on stateless
-                if (props[attrName] !== this._instance.props[attrName] && attrMap.component[attrName]) {
-                    attrMap.component[attrName](props[attrName], this._instance.props[attrName], dom, this, attrName);
-                }
-            }
-        }
-
-        this._instance.props = props;
-        this._currentElement.props = props;
-
-        let result;
-        if (shouldRender) {
-            renderingComponentStack.push(this);
-            const element = this.render();
-            this.transformRef(element); //they will remove this
-            result = update(dom, element, {
-                componentRef: this._instance,
-                context: this.getContext()
-            });
-            renderingComponentStack.pop();
-            this.handleAfterRenderQueue();
-        }
-
-        return result;
-
+        return this.doUpdate(this._instance.state, props);
     }
+
     handleAfterRenderQueue() {
         this.afterRenderQueue.forEach((cb) => {
             console.log('cb', cb);
@@ -508,24 +480,51 @@ class ReactCompositeComponentWrapper {
             cb.call(instance);
         });
 
-
-        const shouldRender = !instance.shouldComponentUpdate || instance.shouldComponentUpdate(props, this._instance.state);
-
-        instance.state = state;
+        this.doUpdate(state, this._instance.props);
+    }
+    doUpdate(nextState, nextProps) {
+        const instance = this._instance;
+        let result;
+        const shouldRender = !instance.shouldComponentUpdate || instance.shouldComponentUpdate(nextProps, nextState);
 
         if (shouldRender) {
-            renderingComponentStack.push(this);
-            const element = instance.render();
-            let context = this.getContext();
+            const dom = this._hostNode;
+            instance.componentWillUpdate && instance.componentWillUpdate(nextProps, nextState)
+            const prevState = instance.state;
+            const prevProps = instance.props;
 
-            this._hostNode = update(this._hostNode, element, {
+            instance.state = nextState;
+
+            if (nextProps !== prevProps) {
+                if (this.type === "component") {
+                    for (const attrName in nextProps) { //not on stateless
+                        if (nextProps[attrName] !== this._instance.props[attrName] && attrMap.component[attrName]) {
+                            attrMap.component[attrName](nextProps[attrName], this._instance.props[attrName], dom, this, attrName);
+                        }
+                    }
+                }
+                instance.props = nextProps;
+                this._currentElement.props = nextProps;
+            }
+
+
+            renderingComponentStack.push(this);
+            const element = this.render();
+            this.transformRef(element); //they will remove this
+            result = update(dom, element, {
                 componentRef: instance,
-                context
+                context: this.getContext()
             });
+            this._hostNode = result;
             renderingComponentStack.pop();
             this.handleAfterRenderQueue();
+            instance.componentDidUpdate && instance.componentDidUpdate(prevProps, prevState)
+        } else {
+            instance.state = nextState;
+            instance.props = nextProps;
+            result = this._hostNode;
         }
-
+        return result;
     }
 
 }
@@ -747,7 +746,7 @@ function update(dom, element, {
 
             if (found) {
                 if (lastOwner) {
-                    return lastOwner.updateProps(element.props, dom, context);
+                    return lastOwner.updateProps(element.props, context);
                 } else {
 
                 }
@@ -790,7 +789,7 @@ function update(dom, element, {
 
     if (!equals(element0.props, element.props)) { //props changed        
         if (isComponent(element.type)) {
-            return owner.updateProps(element.props, dom, context);
+            return owner.updateProps(element.props, context);
         } else { //normal dom            
             for (const attrName in element.props) {
                 if (element0.props[attrName] !== element.props[attrName]) {
