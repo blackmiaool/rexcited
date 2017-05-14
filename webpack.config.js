@@ -4,7 +4,8 @@ const webpack = require('webpack');
 
 var config = {
     entry: {
-        'app': './test/index.js'
+        //        'app': './test/index.js'
+        'app': './index.jsx'
     },
     module: {
         loaders: [{

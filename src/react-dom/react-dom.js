@@ -117,6 +117,11 @@ function insertAfter(newNode, referenceNode) {
 let cnt = 0;
 
 function equals(x, y) {
+    if (!(typeof x === 'object' && x && typeof y === 'object' && y)) {
+        if (x !== y) {
+            return;
+        }
+    }
     cnt++;
     if (cnt > 100) {
         return;
@@ -225,7 +230,7 @@ function getChildren(parent, children, old = {}, owner, context) {
                     recursion(ele, `${key}:`, j);
                 });
             } else {
-                if (isText(child.props.key)) {
+                if (child && child.props && isText(child.props.key)) {
                     key = `${preKey}\$${child.props.key}`;
 
                 }
@@ -248,15 +253,37 @@ function getChildren(parent, children, old = {}, owner, context) {
 
                 } else {
                     if (old[key] instanceof ReactCompositeComponentWrapper) {
-                        if (old[key]._currentElement.type === child.type) {
+                        if (child && old[key]._currentElement.type === child.type) {
                             lastNode = old[key].updateProps(child.props, context);
                         } else {
+                            if (!child) {
+                                old[key].remove();
+                            }
                             lastNode = update(old[key]._hostNode, child, {
                                 componentRef: old[key]._instance,
                                 context
                             });
                         }
+
+
+
+
+
+//                        if (!child) {
+     //                            console.log(33)
+     //                        } else if (old[key]._currentElement.type === child.type) {
+     //                            console.log("2322")
+     //
+     //                        } else {
+     //                            console.log('555', old[key])
+     //                            old[key].remove();
+     //                            lastNode = update(old[key]._hostNode, child, {
+     //                                componentRef: old[key]._instance,
+     //                                context
+     //                            });
+     //                        }
                     } else {
+                        console.log(3)
                         lastNode = update(old[key]._hostNode, child, {
                             context
                         });
@@ -270,12 +297,7 @@ function getChildren(parent, children, old = {}, owner, context) {
         }
         recursion(child, ".", i);
     });
-    //    for (const i in old) {
-    //        if (!_renderedChildren[i]) {
-    //            console.log(old[i], old[i].parentElement);
-    //            old[i].parentElement.removeChild(old[i]);
-    //        }
-    //    }
+
     return {
         children: _renderedChildren,
     };
@@ -449,6 +471,9 @@ class ReactCompositeComponentWrapper {
 
         console.log("render end", element);
         return element;
+    }
+    remove() {
+        this._instance.componentWillUnmount && this._instance.componentWillUnmount();
     }
     handleStateQueue(oldState, props) {
         const cbList = [];
@@ -769,6 +794,7 @@ function update(dom, element, {
             componentRef,
             context
         });
+
         dom.parentElement.replaceChild(newDom, dom);
         return newDom;
     }
@@ -815,6 +841,7 @@ function update(dom, element, {
         console.log('oldChildren', oldChildren);
         for (const i in oldChildren) {
             if (!newChildren[i] && oldChildren[i]) {
+                oldChildren[i].remove();
                 oldChildren[i]._hostNode.parentElement.removeChild(oldChildren[i]._hostNode);
             }
         }

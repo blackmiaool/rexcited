@@ -2,74 +2,42 @@ import React from 'react'
 import {
     render
 } from 'react-dom'
-//const {
-//    render
-//} = ReactDOM;
-import {
-    Provider,
-    connect
-} from './react-redux/src/index.js'
-import {
-    createStore
-} from 'redux'
 
-
-const mapStateToProps = (state, ownProps) => {
-    return {
-        cnt: state.cnt
-    }
-}
-
-const mapDispatchToProps = (dispatch, ownProps) => {
-    return {
-        add: () => {
-            dispatch({
-                type: "add",
-                cnt: 1
-            })
-        }
-    }
-}
-
-
-
-let store = createStore((state = {
-    cnt: 0
-}, action) => {
-    switch (action.type) {
-    case 'add':
-        return {
-            cnt: state.cnt + 1
-        }
-    default:
-        return state
-    }
-});
 class B extends React.Component {
+    componentWillUnmount() {
+        console.log("unmount");
+    }
+    render() {
+        return <a>test</a>
+    }
+}
+class App extends React.Component {
     constructor(props) {
         super(props);
+        this.state = {
+            a: 1
+        }
+    }
+    componentDidMount() {
+        setTimeout(() => {
+            this.setState({
+                a: 0
+            })
+        }, 1000)
+    }
+    componentWillUnmount() {
+        console.log("unmount");
     }
     render() {
 
-        return <div><p>{this.props.cnt}</p><button onClick={this.props.add}>+1s</button></div>;
+        return <div>{this.state.a && <B/> || null}</div>;
+
+
     }
 }
 
-B = connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(B)
-
-function App() {
-    return <div>
-        <B/>
-        
-    </div>;
-}
 
 render(
-    <Provider store={store}>
-    <App />
-  </Provider>,
+    <App />,
     document.getElementById('root')
 )
