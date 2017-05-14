@@ -1,7 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 
-
+console.log("my webpack");
 var config = {
     entry: {
         //        'app': './test/index.js'

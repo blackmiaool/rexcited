@@ -25,6 +25,11 @@ const attrMap = {
 function isText(key) {
     return typeof key === "string" || typeof key === "number";
 }
+
+regiterAttr("dangerouslySetInnerHTML", "dom", function (value, previousValue, dom) {
+    console.log('dangerouslySetInnerHTML', value)
+    dom.innerHTML = value.__html;
+});
 regiterAttr("style", "dom", function (value, previousValue, dom) {
     if (value && previousValue && equals(value, previousValue)) {
         return;
@@ -179,7 +184,7 @@ function getChildren(parent, children, old = {}, owner, context) {
 
     function append(node, key) {
         console.log("node", node, key)
-        if (prependParent) {
+        if (prependParent && !lastNode) {
             if (parent.firstChild) {
                 parent.insertBefore(node, parent.firstChild);
             } else {
@@ -214,17 +219,6 @@ function getChildren(parent, children, old = {}, owner, context) {
                     }
                 }
                 _renderedChildren[key] = new ReactDOMTextComponent(child, node, owner);
-
-                //                if (!old[key]) {
-                //                    const node = create(child, parent[internalInstanceKey]._currentElement._owner);
-                //                    append(node, key);
-                //                    _renderedChildren[key] = new ReactDOMComponent(child, node);
-                //                } else {
-                //                    lastNode = update(old[key]._hostNode, child);
-                //                    if (lastNode !== old[key]._hostNode) {
-                //                        _renderedChildren[key] = new ReactDOMTextComponent(child, lastNode);
-                //                    }
-                //                }
             } else if (Array.isArray(child)) { //array 
                 child.forEach((ele, j) => {
                     recursion(ele, `${key}:`, j);
@@ -234,7 +228,6 @@ function getChildren(parent, children, old = {}, owner, context) {
                     key = `${preKey}\$${child.props.key}`;
 
                 }
-                //                console.log(key, old[[key]]);
                 if (!old[key]) {
                     const dom = create(child, {
                         owner,
@@ -264,24 +257,6 @@ function getChildren(parent, children, old = {}, owner, context) {
                                 context
                             });
                         }
-
-
-
-
-
-//                        if (!child) {
-     //                            console.log(33)
-     //                        } else if (old[key]._currentElement.type === child.type) {
-     //                            console.log("2322")
-     //
-     //                        } else {
-     //                            console.log('555', old[key])
-     //                            old[key].remove();
-     //                            lastNode = update(old[key]._hostNode, child, {
-     //                                componentRef: old[key]._instance,
-     //                                context
-     //                            });
-     //                        }
                     } else {
                         console.log(3)
                         lastNode = update(old[key]._hostNode, child, {
@@ -377,6 +352,7 @@ class ReactCompositeComponentWrapper {
     }
 
     transformRef(element) {
+        const that = this;
         const refKey = element.props.ref;
         if (typeof refKey === "string") {
             element.props.ref = function (ref) {
@@ -436,6 +412,10 @@ class ReactCompositeComponentWrapper {
             owner: this,
             context: childContext
         });
+        if (!dom) {
+            console.error('wrong hostNode', element, this, dom);
+        }
+
         this._hostNode = dom;
         renderingComponentStack.pop();
         this.handleAfterRenderQueue();
@@ -607,12 +587,7 @@ class ReactDOMTextComponent {
     }
 }
 
-function isValidElement(element) {
-    if (typeof element !== "object" || !element) {
-        return false;
-    }
-    return true;
-}
+
 const afterCallback = [];
 
 function execAfterCallback() {
@@ -629,7 +604,7 @@ function create(element, {
 } = {}) {
     console.log('create', element, arguments[1])
 
-    if (!isValidElement(element)) { //comment
+    if (!React.isValidElement(element)) { //comment
         const dom = document.createComment("react-empty");
         dom[internalInstanceKey] = {
             _currentElement: element,
@@ -708,7 +683,7 @@ function update(dom, element, {
     let forceRender = false;
     if (!element && dom) { //dom to comment
         const comment = document.createComment("react-empty: ?");
-        dom.parentElement.replaceChild(comment, dom)
+        dom.parentElement && dom.parentElement.replaceChild(comment, dom)
         comment[internalInstanceKey] = dom[internalInstanceKey];
         return comment;
     }
@@ -727,7 +702,7 @@ function update(dom, element, {
     let ownerType;
     let owner;
 
-    if (isValidElement(element0)) {
+    if (React.isValidElement(element0)) {
         owner = element0._owner;
     } else {
 
@@ -794,15 +769,17 @@ function update(dom, element, {
             componentRef,
             context
         });
+        if (dom.parentElement) {
+            dom.parentElement.replaceChild(newDom, dom);
+        }
 
-        dom.parentElement.replaceChild(newDom, dom);
         return newDom;
     }
     if (forceRender || typeof element0 !== typeof element) {
         return replace();
     }
 
-    if (isValidElement(element0) && isValidElement(element)) {
+    if (React.isValidElement(element0) && React.isValidElement(element)) {
         if (element.type !== element0.type) {
             return replace();
         }

@@ -5,14 +5,14 @@
 
 
 
-function createElement(type, config, ...children) {
-    if (!config) {
-        config = {};
+function createElement(type, props, ...children) {
+    if (!props) {
+        props = {};
     }
 
     const instance = {
         type,
-        props: config
+        props
     };
     if (children.length) {
         instance.props.children = children;
