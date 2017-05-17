@@ -355,7 +355,7 @@ class ReactCompositeComponentWrapper {
                 setTimeout(() => {
                     this.isAsyncSetState = true;
                     component.componentDidMount();
-                    this.handleStateQueue(this._instance.props);
+                    this.handleStateQueue(this._instance.props, true);
                 });
             }
         }
@@ -422,7 +422,9 @@ class ReactCompositeComponentWrapper {
             this.isAsyncSetState = true;
             this._instance.componentWillMount();
         }
-
+        if (this._instance.componentWillMount) {
+            this.handleStateQueue(props);
+        }
 
         element = this.render()
 
@@ -449,9 +451,7 @@ class ReactCompositeComponentWrapper {
         renderingComponentStack.pop();
 
         this.handleAfterRenderQueue();
-        if (this._instance.componentWillMount) {
-            this.handleStateQueue(props);
-        }
+
 
         return dom;
     }
@@ -503,7 +503,7 @@ class ReactCompositeComponentWrapper {
         }
 
     }
-    handleStateQueue(props) {
+    handleStateQueue(props, render) {
         this.isAsyncSetState = false;
         const instance = this._instance;
         const oldState = instance.state;
@@ -537,8 +537,11 @@ class ReactCompositeComponentWrapper {
         cbList.forEach((cb) => {
             cb.call(instance);
         });
-
-        this.doUpdate(state, this._instance.props);
+        instance.state = state;
+        if (render) {
+            this.doUpdate(state, this._instance.props);
+        }
+        //        this.doUpdate(state, this._instance.props);
     }
     doUpdate(nextState, nextProps) {
         const instance = this._instance;
@@ -585,7 +588,7 @@ class ReactCompositeComponentWrapper {
             if (instance.componentDidUpdate) {
                 this.isAsyncSetState = true;
                 instance.componentDidUpdate(prevProps, prevState)
-                this.handleStateQueue(prevProps);
+                this.handleStateQueue(prevProps, true);
             }
         } else {
             instance.state = nextState;

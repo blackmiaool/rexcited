@@ -153,14 +153,16 @@ var Component = function () {
     }, {
         key: "setState",
         value: function setState(updater, cb) {
+
             var wrapper = this._reactInternalInstance;
+            console.log('set', wrapper.isAsyncSetState);
             wrapper.stateQueue.push({
                 updater: updater,
                 cb: cb
             });
 
             if (!wrapper.isAsyncSetState) {
-                wrapper.handleStateQueue(this.props);
+                wrapper.handleStateQueue(this.props, true);
             }
         }
     }]);
@@ -656,7 +658,7 @@ var ReactCompositeComponentWrapper = function () {
                 setTimeout(function () {
                     _this.isAsyncSetState = true;
                     component.componentDidMount();
-                    _this.handleStateQueue(_this._instance.props);
+                    _this.handleStateQueue(_this._instance.props, true);
                 });
             }
         }
@@ -736,6 +738,9 @@ var ReactCompositeComponentWrapper = function () {
                 this.isAsyncSetState = true;
                 this._instance.componentWillMount();
             }
+            if (this._instance.componentWillMount) {
+                this.handleStateQueue(props);
+            }
 
             element = this.render();
 
@@ -761,9 +766,6 @@ var ReactCompositeComponentWrapper = function () {
             renderingComponentStack.pop();
 
             this.handleAfterRenderQueue();
-            if (this._instance.componentWillMount) {
-                this.handleStateQueue(props);
-            }
 
             return dom;
         }
@@ -825,7 +827,7 @@ var ReactCompositeComponentWrapper = function () {
         }
     }, {
         key: 'handleStateQueue',
-        value: function handleStateQueue(props) {
+        value: function handleStateQueue(props, render) {
             this.isAsyncSetState = false;
             var instance = this._instance;
             var oldState = instance.state;
@@ -858,8 +860,11 @@ var ReactCompositeComponentWrapper = function () {
             cbList.forEach(function (cb) {
                 cb.call(instance);
             });
-
-            this.doUpdate(state, this._instance.props);
+            instance.state = state;
+            if (render) {
+                this.doUpdate(state, this._instance.props);
+            }
+            //        this.doUpdate(state, this._instance.props);
         }
     }, {
         key: 'doUpdate',
@@ -908,7 +913,7 @@ var ReactCompositeComponentWrapper = function () {
                 if (instance.componentDidUpdate) {
                     this.isAsyncSetState = true;
                     instance.componentDidUpdate(prevProps, prevState);
-                    this.handleStateQueue(prevProps);
+                    this.handleStateQueue(prevProps, true);
                 }
             } else {
                 instance.state = nextState;

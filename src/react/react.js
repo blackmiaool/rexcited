@@ -34,14 +34,16 @@ class Component {
         wrapper.doUpdate(this.state, this.props);
     }
     setState(updater, cb) {
+
         const wrapper = this._reactInternalInstance;
+        console.log('set', wrapper.isAsyncSetState);
         wrapper.stateQueue.push({
             updater,
             cb
         });
 
         if (!wrapper.isAsyncSetState) {
-            wrapper.handleStateQueue(this.props);
+            wrapper.handleStateQueue(this.props, true);
         }
 
     }
