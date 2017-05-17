@@ -2,12 +2,6 @@ import createElement from "./createElement.js";
 import Children from "./children.js";
 import propTypes from 'prop-types'
 
-let isAsyncSetState = false;
-
-function asyncSetState(value) {
-    isAsyncSetState = value;
-}
-
 const createClassStaticKeys = ['getDefaultProps', 'getInitialState', 'propTypes', 'statics']
 
 function createClass(obj) {
@@ -33,32 +27,21 @@ class Component {
         this.context = context
     }
     setWrapper() {
-
+        console.log(1)
     }
     forceUpdate() {
-        const instance = this._reactInternalInstance;
-        instance.handleStateQueue(this.state, this.props);
+        const wrapper = this._reactInternalInstance;
+        wrapper.doUpdate(this.state, this.props);
     }
     setState(updater, cb) {
-        console.log('setState')
-        const instance = this._reactInternalInstance;
-        if (instance.setStateTimeout) {
-            clearTimeout(instance.setStateTimeout);
-        }
-        instance.stateQueue.push({
+        const wrapper = this._reactInternalInstance;
+        wrapper.stateQueue.push({
             updater,
             cb
         });
-        const execQueue = () => {
-            instance.setStateTimeout = 0;
-            instance.handleStateQueue(this.state, this.props);
 
-        };
-        if (isAsyncSetState) {
-            instance.setStateTimeout = setTimeout(execQueue);
-
-        } else {
-            execQueue();
+        if (!wrapper.isAsyncSetState) {
+            wrapper.handleStateQueue(this.props);
         }
 
     }
@@ -76,16 +59,10 @@ function isValidElement(element) {
 }
 const PropTypes = propTypes.PropTypes
 
-
-
 function cloneElement(element, config, ...children) {
-    console.log('cloneElement', element, config, children);
+    console.log('cloneElement', arguments);
     if (!isValidElement(element)) {
         return element;
-    }
-    if (Array.isArray(element)) {
-        console.log('array', element);
-        return element.map(a => a);
     }
     const element0 = element;
 
@@ -102,6 +79,22 @@ function cloneElement(element, config, ...children) {
         delete element.props.children;
     }
 
+    console.log('element', element);
+    //    const props = Object.assign({}, element.props);
+    //
+    //    const owner = element._owner;
+    //
+    //    console.log(1)
+    //    if (children.length && !props.children.length) {
+    //        props.children = children;
+    //    }
+    //
+    //    console.log(props.children)
+    //    const elementNew = createElement(element.type, props, ...props.children);
+    //    console.log(3)
+    //
+    //    elementNew._owner = owner;
+
     return element;
 }
 
@@ -109,7 +102,6 @@ function cloneElement(element, config, ...children) {
 let exports = {
     createElement,
     Component,
-    asyncSetState,
     Children,
     PropTypes,
     createClass,
@@ -121,7 +113,6 @@ let exports = {
 export {
     createElement,
     Component,
-    asyncSetState,
     Children,
     PropTypes,
     createClass,

@@ -355,7 +355,7 @@ class ReactCompositeComponentWrapper {
                 setTimeout(() => {
                     this.isAsyncSetState = true;
                     component.componentDidMount();
-                    this.handleStateQueue(this._instance.state, this._instance.props);
+                    this.handleStateQueue(this._instance.props);
                 });
             }
         }
@@ -450,7 +450,7 @@ class ReactCompositeComponentWrapper {
 
         this.handleAfterRenderQueue();
         if (this._instance.componentWillMount) {
-            this.handleStateQueue(this._instance.state, props);
+            this.handleStateQueue(props);
         }
 
         return dom;
@@ -461,7 +461,7 @@ class ReactCompositeComponentWrapper {
             this.isAsyncSetState = true;
             this.assignDefaultProps(nextProps);
             this._instance.componentWillReceiveProps(nextProps);
-            this.handleStateQueue(this._instance.state, nextProps);
+            this.handleStateQueue(nextProps);
         }
 
         this._context = nextContext;
@@ -496,19 +496,23 @@ class ReactCompositeComponentWrapper {
         return element;
     }
     remove() {
-        React.asyncSetState(true);
-        this._instance.componentWillUnmount && this._instance.componentWillUnmount();
-        React.asyncSetState(false);
+        if (this._instance.componentWillUnmount) {
+            this.isAsyncSetState = true;
+            this._instance.componentWillUnmount();
+            this.handleStateQueue(this._instance.props);
+        }
+
     }
-    handleStateQueue(oldState, props) {
+    handleStateQueue(props) {
         this.isAsyncSetState = false;
+        const instance = this._instance;
+        const oldState = instance.state;
         if (!this.stateQueue.length) {
             return;
         }
         const cbList = [];
         const stateList = [];
 
-        const instance = this._instance;
 
         this.stateQueue.forEach(function ({
             updater,
@@ -543,9 +547,13 @@ class ReactCompositeComponentWrapper {
 
         if (shouldRender) {
             const dom = this._hostNode;
-            React.asyncSetState(true);
-            instance.componentWillUpdate && instance.componentWillUpdate(nextProps, nextState)
-            React.asyncSetState(false);
+
+            if (instance.componentWillUpdate) {
+                this.isAsyncSetState = true;
+                instance.componentWillUpdate(nextProps, nextState)
+                this.handleStateQueue(nextProps);
+            }
+
             const prevState = instance.state;
             const prevProps = instance.props;
 
@@ -574,9 +582,11 @@ class ReactCompositeComponentWrapper {
             this._hostNode = result;
             renderingComponentStack.pop();
             this.handleAfterRenderQueue();
-            React.asyncSetState(true);
-            instance.componentDidUpdate && instance.componentDidUpdate(prevProps, prevState)
-            React.asyncSetState(false);
+            if (instance.componentDidUpdate) {
+                this.isAsyncSetState = true;
+                instance.componentDidUpdate(prevProps, prevState)
+                this.handleStateQueue(prevProps);
+            }
         } else {
             instance.state = nextState;
             instance.props = nextProps;

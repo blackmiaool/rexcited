@@ -76,7 +76,7 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.cloneElement = exports.isValidElement = exports.createClass = exports.PropTypes = exports.Children = exports.asyncSetState = exports.Component = exports.createElement = undefined;
+exports.cloneElement = exports.isValidElement = exports.createClass = exports.PropTypes = exports.Children = exports.Component = exports.createElement = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
@@ -101,12 +101,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var isAsyncSetState = false;
-
-function asyncSetState(value) {
-    isAsyncSetState = value;
-}
 
 var createClassStaticKeys = ['getDefaultProps', 'getInitialState', 'propTypes', 'statics'];
 
@@ -147,35 +141,26 @@ var Component = function () {
 
     _createClass(Component, [{
         key: "setWrapper",
-        value: function setWrapper() {}
+        value: function setWrapper() {
+            console.log(1);
+        }
     }, {
         key: "forceUpdate",
         value: function forceUpdate() {
-            var instance = this._reactInternalInstance;
-            instance.handleStateQueue(this.state, this.props);
+            var wrapper = this._reactInternalInstance;
+            wrapper.doUpdate(this.state, this.props);
         }
     }, {
         key: "setState",
         value: function setState(updater, cb) {
-            var _this2 = this;
-
-            console.log('setState');
-            var instance = this._reactInternalInstance;
-            if (instance.setStateTimeout) {
-                clearTimeout(instance.setStateTimeout);
-            }
-            instance.stateQueue.push({
+            var wrapper = this._reactInternalInstance;
+            wrapper.stateQueue.push({
                 updater: updater,
                 cb: cb
             });
-            var execQueue = function execQueue() {
-                instance.setStateTimeout = 0;
-                instance.handleStateQueue(_this2.state, _this2.props);
-            };
-            if (isAsyncSetState) {
-                instance.setStateTimeout = setTimeout(execQueue);
-            } else {
-                execQueue();
+
+            if (!wrapper.isAsyncSetState) {
+                wrapper.handleStateQueue(this.props);
             }
         }
     }]);
@@ -200,15 +185,9 @@ function cloneElement(element, config) {
         children[_key - 2] = arguments[_key];
     }
 
-    console.log('cloneElement', element, config, children);
+    console.log('cloneElement', arguments);
     if (!isValidElement(element)) {
         return element;
-    }
-    if (Array.isArray(element)) {
-        console.log('array', element);
-        return element.map(function (a) {
-            return a;
-        });
     }
     var element0 = element;
 
@@ -224,13 +203,28 @@ function cloneElement(element, config) {
         delete element.props.children;
     }
 
+    console.log('element', element);
+    //    const props = Object.assign({}, element.props);
+    //
+    //    const owner = element._owner;
+    //
+    //    console.log(1)
+    //    if (children.length && !props.children.length) {
+    //        props.children = children;
+    //    }
+    //
+    //    console.log(props.children)
+    //    const elementNew = createElement(element.type, props, ...props.children);
+    //    console.log(3)
+    //
+    //    elementNew._owner = owner;
+
     return element;
 }
 
 var _exports = {
     createElement: _createElement2.default,
     Component: Component,
-    asyncSetState: asyncSetState,
     Children: _children2.default,
     PropTypes: PropTypes,
     createClass: createClass,
@@ -240,7 +234,6 @@ var _exports = {
 
 exports.createElement = _createElement2.default;
 exports.Component = Component;
-exports.asyncSetState = asyncSetState;
 exports.Children = _children2.default;
 exports.PropTypes = PropTypes;
 exports.createClass = createClass;
@@ -663,7 +656,7 @@ var ReactCompositeComponentWrapper = function () {
                 setTimeout(function () {
                     _this.isAsyncSetState = true;
                     component.componentDidMount();
-                    _this.handleStateQueue(_this._instance.state, _this._instance.props);
+                    _this.handleStateQueue(_this._instance.props);
                 });
             }
         }
@@ -769,7 +762,7 @@ var ReactCompositeComponentWrapper = function () {
 
             this.handleAfterRenderQueue();
             if (this._instance.componentWillMount) {
-                this.handleStateQueue(this._instance.state, props);
+                this.handleStateQueue(props);
             }
 
             return dom;
@@ -782,7 +775,7 @@ var ReactCompositeComponentWrapper = function () {
                 this.isAsyncSetState = true;
                 this.assignDefaultProps(nextProps);
                 this._instance.componentWillReceiveProps(nextProps);
-                this.handleStateQueue(this._instance.state, nextProps);
+                this.handleStateQueue(nextProps);
             }
 
             this._context = nextContext;
@@ -824,21 +817,23 @@ var ReactCompositeComponentWrapper = function () {
     }, {
         key: 'remove',
         value: function remove() {
-            _react2.default.asyncSetState(true);
-            this._instance.componentWillUnmount && this._instance.componentWillUnmount();
-            _react2.default.asyncSetState(false);
+            if (this._instance.componentWillUnmount) {
+                this.isAsyncSetState = true;
+                this._instance.componentWillUnmount();
+                this.handleStateQueue(this._instance.props);
+            }
         }
     }, {
         key: 'handleStateQueue',
-        value: function handleStateQueue(oldState, props) {
+        value: function handleStateQueue(props) {
             this.isAsyncSetState = false;
+            var instance = this._instance;
+            var oldState = instance.state;
             if (!this.stateQueue.length) {
                 return;
             }
             var cbList = [];
             var stateList = [];
-
-            var instance = this._instance;
 
             this.stateQueue.forEach(function (_ref2) {
                 var updater = _ref2.updater,
@@ -875,9 +870,13 @@ var ReactCompositeComponentWrapper = function () {
 
             if (shouldRender) {
                 var dom = this._hostNode;
-                _react2.default.asyncSetState(true);
-                instance.componentWillUpdate && instance.componentWillUpdate(nextProps, nextState);
-                _react2.default.asyncSetState(false);
+
+                if (instance.componentWillUpdate) {
+                    this.isAsyncSetState = true;
+                    instance.componentWillUpdate(nextProps, nextState);
+                    this.handleStateQueue(nextProps);
+                }
+
                 var prevState = instance.state;
                 var prevProps = instance.props;
 
@@ -906,9 +905,11 @@ var ReactCompositeComponentWrapper = function () {
                 this._hostNode = result;
                 renderingComponentStack.pop();
                 this.handleAfterRenderQueue();
-                _react2.default.asyncSetState(true);
-                instance.componentDidUpdate && instance.componentDidUpdate(prevProps, prevState);
-                _react2.default.asyncSetState(false);
+                if (instance.componentDidUpdate) {
+                    this.isAsyncSetState = true;
+                    instance.componentDidUpdate(prevProps, prevState);
+                    this.handleStateQueue(prevProps);
+                }
             } else {
                 instance.state = nextState;
                 instance.props = nextProps;
