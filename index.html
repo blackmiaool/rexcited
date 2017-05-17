@@ -10,12 +10,32 @@
 
 <body>
     <div id="root"></div>
-<!--
+    <!--
 <script src="dist/react.js"></script>
 <script src="dist/react-dom.js"></script>
 <script src="./react-redux.js"></script>
 -->
     <script src="dist/index0.bundle.js"></script>
+    <style>
+        .example-enter {
+            opacity: 0.01;
+        }
+        
+        .example-enter.example-enter-active {
+            opacity: 1;
+            transition: opacity 500ms ease-in;
+        }
+        
+        .example-leave {
+            opacity: 1;
+        }
+        
+        .example-leave.example-leave-active {
+            opacity: 0.01;
+            transition: opacity 300ms ease-in;
+        }
+
+    </style>
 </body>
 
 </html>

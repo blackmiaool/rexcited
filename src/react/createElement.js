@@ -14,6 +14,10 @@ function createElement(type, props, ...children) {
         type,
         props
     };
+    if (props.key) {
+        instance.key = props.key;
+        delete props.key
+    }
     if (children.length) {
         instance.props.children = children;
     }

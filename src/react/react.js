@@ -8,20 +8,22 @@ function asyncSetState(value) {
     isAsyncSetState = value;
 }
 
+const createClassStaticKeys = ['getDefaultProps', 'getInitialState', 'propTypes', 'statics']
+
 function createClass(obj) {
     console.log('createClass', obj);
     class a extends Component {
 
     }
     for (const i in obj) {
-
-        if (typeof i === 'function' && i !== 'getDefaultProps') {
-            a.prototype[i] = obj[i];
-        } else {
+        if (createClassStaticKeys.indexOf(i) > -1) {
             a[i] = obj[i];
+        } else {
+            a.prototype[i] = obj[i];
         }
 
     }
+    a.originalCreateClassObj = obj;
     return a;
 }
 class Component {
@@ -38,6 +40,7 @@ class Component {
         instance.handleStateQueue(this.state, this.props);
     }
     setState(updater, cb) {
+        console.log('setState')
         const instance = this._reactInternalInstance;
         if (instance.setStateTimeout) {
             clearTimeout(instance.setStateTimeout);
@@ -61,6 +64,10 @@ class Component {
     }
 }
 
+function isText(key) {
+    return typeof key === "string" || typeof key === "number";
+}
+
 function isValidElement(element) {
     if (typeof element !== "object" || !element) {
         return false;
@@ -69,28 +76,33 @@ function isValidElement(element) {
 }
 const PropTypes = propTypes.PropTypes
 
-function cloneElement(element, config, children) {
-    const props = Object.assign({}, element.props);
 
-    const owner = element._owner;
 
-    for (const i in config) {
-        props[i] = config[i];
+function cloneElement(element, config, ...children) {
+    console.log('cloneElement', element, config, children);
+    if (!isValidElement(element)) {
+        return element;
+    }
+    if (Array.isArray(element)) {
+        console.log('array', element);
+        return element.map(a => a);
+    }
+    const element0 = element;
+
+
+    element = Object.assign({}, element);
+    element.props = Object.assign({}, element.props, config);
+
+    element.props.children = element.props.children || [];
+
+    element.props.children = element.props.children.concat(children).map(function (child) {
+        return cloneElement(child);
+    });
+    if (!element.props.children.length) {
+        delete element.props.children;
     }
 
-    const childrenLength = arguments.length - 2;
-    if (childrenLength === 1) {
-        props.children = children;
-    } else if (childrenLength > 1) {
-        const childArray = Array(childrenLength);
-        for (let i = 0; i < childrenLength; i++) {
-            childArray[i] = arguments[i + 2];
-        }
-        props.children = childArray;
-    }
-    const elementNew = createElement(element.type, props, ...props.children);
-    elementNew._owner = owner;
-    return elementNew;
+    return element;
 }
 
 
