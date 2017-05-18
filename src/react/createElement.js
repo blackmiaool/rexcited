@@ -18,6 +18,10 @@ function createElement(type, props, ...children) {
         instance.key = props.key;
         delete props.key
     }
+    if (props.ref) {
+        instance.ref = props.ref;
+        delete props.ref
+    }
     if (children.length) {
         instance.props.children = children;
     }

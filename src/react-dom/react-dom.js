@@ -2,7 +2,7 @@ import React from 'react';
 const internalInstanceKey = '__reactInternalInstance$' + Math.random().toString(36).slice(2);
 
 function log() {
-    console.log.apply(console, arguments);
+    //    console.log.apply(console, arguments);
 }
 
 function regiterAttr(name, type, cb) {
@@ -64,13 +64,14 @@ regiterAttr("children", "", function (value, previousValue, dom) {});
 
 regiterAttr("ref", "", function (value, previousValue, dom, wrapper, attrName) {
     let ref;
+    console.log(arguments)
     const owner = renderingComponentStack[renderingComponentStack.length - 1];
     if (owner) {
         if (typeof value === "function") {
-            owner.afterRenderQueue.push(value.bind(undefined, dom));
+            owner.afterRenderQueue.push(value.bind(undefined, wrapper._instance));
         } else {
             owner.afterRenderQueue.push(() => {
-                owner._instance.refs[value] = dom;
+                owner._instance.refs[value] = wrapper._instance;
             });
         }
     }
@@ -289,7 +290,7 @@ function getChildren(parent, children, old = {}, owner, context) {
         }
         recursion(child, ".", i);
     });
-    console.log('_renderedChildren', _renderedChildren);
+    log('_renderedChildren', _renderedChildren);
     return {
         children: _renderedChildren,
     };
@@ -391,7 +392,7 @@ class ReactCompositeComponentWrapper {
         const that = this;
         const refKey = element.props.ref;
         if (typeof refKey === "string") {
-            element.props.ref = function (ref) {
+            element.ref = function (ref) {
                 log("this", that);
                 that._instance.refs[refKey] = ref;
             }
@@ -594,6 +595,9 @@ class ReactCompositeComponentWrapper {
                         if (nextProps[attrName] !== this._instance.props[attrName] && attrMap.component[attrName]) {
                             attrMap.component[attrName](nextProps[attrName], this._instance.props[attrName], dom, this, attrName);
                         }
+                    }
+                    if (instance.ref) {
+                        attrMap.component.ref(instance.ref, this._instance.props[attrName], dom, this, attrName);
                     }
                 }
                 instance.props = nextProps;

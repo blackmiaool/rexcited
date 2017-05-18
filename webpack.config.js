@@ -40,7 +40,7 @@ var test0Config = Object.assign({}, config, {
         alias: {
             react: path.resolve(path.join(__dirname, 'src', 'react', 'react')),
             'react-dom': path.resolve(path.join(__dirname, 'src', 'react-dom', 'react-dom')),
-            //            "react-transition-group": path.resolve(path.join(__dirname, 'react-transition-group', 'src')),
+            "react-transition-group": path.resolve(path.join(__dirname, 'react-transition-group', 'src')),
         },
         //                root: "."
     },
@@ -50,6 +50,12 @@ var testConfig = Object.assign({}, config, {
     output: {
         path: path.resolve(path.join(__dirname, 'dist')),
         filename: "index.bundle.js"
+    },
+    resolve: {
+        alias: {
+            "react-transition-group": path.resolve(path.join(__dirname, 'react-transition-group', 'src')),
+        },
+        //                root: "."
     },
 });
 

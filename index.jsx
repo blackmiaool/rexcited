@@ -36,7 +36,7 @@ class TodoList extends React.Component {
       </div>
         ));
         console.log(items, React.Children.map([items], (child) => child));
-
+        console.log(<div ref="1" key="2"></div>)
         return (
             <div>
         <button onClick={this.handleAdd}>Add Item</button>
