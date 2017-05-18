@@ -62,10 +62,7 @@ function isValidElement(element) {
 const PropTypes = propTypes.PropTypes
 
 function cloneElement(element, config, ...children) {
-    console.log('cloneElement', arguments);
-    if (element.key === '.0:$hello') {
-        console.trace("1")
-    }
+
     if (!isValidElement(element)) {
         return element;
     }
@@ -74,13 +71,13 @@ function cloneElement(element, config, ...children) {
 
     element = Object.assign({}, element);
     element.props = Object.assign({}, element.props, config);
-//    if (element.props.key) {
-//        element.key = element.props.key;
-//        delete element.props.key;
-//    }
-    element.key=element.props.key||element.key;
-    element.ref=element.props.ref||element.ref;
-    
+    //    if (element.props.key) {
+    //        element.key = element.props.key;
+    //        delete element.props.key;
+    //    }
+    element.key = element.props.key || element.key;
+    element.ref = element.props.ref || element.ref;
+
     element.props.children = element.props.children || [];
 
     element.props.children = element.props.children.concat(children).map(function (child) {
@@ -90,22 +87,6 @@ function cloneElement(element, config, ...children) {
         delete element.props.children;
     }
 
-    //    console.log('element', element);
-    //    const props = Object.assign({}, element.props);
-    //
-    //    const owner = element._owner;
-    //
-    //    console.log(1)
-    //    if (children.length && !props.children.length) {
-    //        props.children = children;
-    //    }
-    //
-    //    console.log(props.children)
-    //    const elementNew = createElement(element.type, props, ...props.children);
-    //    console.log(3)
-    //
-    //    elementNew._owner = owner;
-    console.log('clone result', element);
     return element;
 }
 

@@ -227,10 +227,10 @@ function getChildren(parent, children, old = {}, owner, context) {
                     recursion(ele, `${key}:`, j);
                 });
             } else {
-                if (child.props.key) {
-                    child.key = child.props.key.match(/\w+$/)[0];
-                    delete child.props.key;
-                }
+                //                if (child.props.key) {
+                //                    child.key = child.props.key.match(/\w+$/)[0];
+                //                    delete child.props.key;
+                //                }
 
 
 
@@ -414,6 +414,7 @@ class ReactCompositeComponentWrapper {
         }
     }
     getSelfContext() {
+        this._context = this._context || {}
         let contextThis = {}
         if (this._currentElement.type.contextTypes) {
             for (const i in this._currentElement.type.contextTypes) {
@@ -473,8 +474,9 @@ class ReactCompositeComponentWrapper {
     }
     updateProps(nextProps, nextRawContext) {
         log('updateProps', nextProps, this)
-        this._context = nextContext;
+        this._context = nextRawContext;
         this.assignDefaultProps(nextProps);
+        const nextContext = this.getSelfContext();
         if (this._instance.componentWillReceiveProps) {
             this.isAsyncSetState = true;
 
@@ -484,7 +486,7 @@ class ReactCompositeComponentWrapper {
 
 
         const instance = this._instance;
-        const nextContext = this.getSelfContext();
+        
         return this.doUpdate(this._instance.state, nextProps, nextContext);
     }
 
