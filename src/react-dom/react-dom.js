@@ -139,25 +139,25 @@ function equals(x, y) {
             return false;
         }
         switch (typeof (y[p])) {
-            case 'object':
-                if (y[p] instanceof Date) {
-                    if (y[p].getTime() !== x[p].getTime()) {
-                        return false;
-                    }
-                }
-                if (!equals(x[p], y[p])) {
-                    return false
-                };
-                break;
-            case 'function':
-                if (typeof (x[p]) == 'undefined' || (p != 'equals')) {
-                    return false;
-                };
-                break;
-            default:
-                if (y[p] != x[p]) {
+        case 'object':
+            if (y[p] instanceof Date) {
+                if (y[p].getTime() !== x[p].getTime()) {
                     return false;
                 }
+            }
+            if (!equals(x[p], y[p])) {
+                return false
+            };
+            break;
+        case 'function':
+            if (typeof (x[p]) == 'undefined' || (p != 'equals')) {
+                return false;
+            };
+            break;
+        default:
+            if (y[p] != x[p]) {
+                return false;
+            }
         }
     }
 
@@ -171,12 +171,13 @@ function equals(x, y) {
 }
 
 function getChildren(parent, children, old = {}, owner, context) {
-    console.log('getChildren', parent, children, old, owner, context)
+    log('getChildren', parent, children, old, owner, context)
     if (!children) {
         return {
             children: {}
         };
     }
+
     const _renderedChildren = {};
 
     let prependParent = true;
@@ -202,6 +203,8 @@ function getChildren(parent, children, old = {}, owner, context) {
 
 
     children.forEach(function (child = '', i) {
+
+
         function recursion(child, preKey, index) {
             let key = `${preKey}${index}`;
             if (isText(child)) { //text node
@@ -223,6 +226,13 @@ function getChildren(parent, children, old = {}, owner, context) {
                     recursion(ele, `${key}:`, j);
                 });
             } else {
+                if (child.props.key) {
+                    child.key = child.props.key.match(/\w+$/)[0];
+                    delete child.props.key;
+                }
+
+
+
                 if (child && isText(child.key)) {
                     key = `${preKey}\$${child.key}`;
 
@@ -249,15 +259,17 @@ function getChildren(parent, children, old = {}, owner, context) {
                         if (child && old[key]._currentElement.type === child.type) {
                             lastNode = old[key].updateProps(child.props, context);
                         } else {
-                            console.log('replace child')
-                            if (!child) {
-                                old[key].remove();
-                            }
+                            lastNode = old[key]._hostNode;
+                            log('replace child')
+                                //                            if (!child) {
+                            old[key].remove();
+                            //                            }
                             const dom = create(child, {
                                 owner,
                                 context
                             });
                             lastNode.parentElement.replaceChild(dom, lastNode);
+                            lastNode = dom;
                             //                            lastNode = update(old[key]._hostNode, child, {
                             //                                componentRef: old[key]._instance,
                             //                                context
@@ -277,7 +289,7 @@ function getChildren(parent, children, old = {}, owner, context) {
         }
         recursion(child, ".", i);
     });
-
+    console.log('_renderedChildren', _renderedChildren);
     return {
         children: _renderedChildren,
     };
@@ -400,14 +412,17 @@ class ReactCompositeComponentWrapper {
             return this._context;
         }
     }
-    updateSelfContext() {
+    getSelfContext() {
         let contextThis = {}
         if (this._currentElement.type.contextTypes) {
             for (const i in this._currentElement.type.contextTypes) {
                 contextThis[i] = this._context[i];
             }
         }
-        this._instance.context = contextThis;
+        return contextThis;
+    }
+    updateSelfContext() {
+        this._instance.context = this.getSelfContext();
     }
     create(props, context) {
         renderingComponentStack.push(this);
@@ -455,20 +470,21 @@ class ReactCompositeComponentWrapper {
 
         return dom;
     }
-    updateProps(nextProps, nextContext) {
+    updateProps(nextProps, nextRawContext) {
         log('updateProps', nextProps, this)
+        this._context = nextContext;
         this.assignDefaultProps(nextProps);
         if (this._instance.componentWillReceiveProps) {
             this.isAsyncSetState = true;
 
-            this._instance.componentWillReceiveProps(nextProps);
+            this._instance.componentWillReceiveProps(nextProps, nextContext);
             this.handleStateQueue(nextProps);
         }
 
-        this._context = nextContext;
+
         const instance = this._instance;
-        this.updateSelfContext();
-        return this.doUpdate(this._instance.state, nextProps);
+        const nextContext = this.getSelfContext();
+        return this.doUpdate(this._instance.state, nextProps, nextContext);
     }
 
     handleAfterRenderQueue() {
@@ -540,29 +556,38 @@ class ReactCompositeComponentWrapper {
         });
         instance.state = state;
         if (render) {
-            this.doUpdate(state, this._instance.props);
+            this.doUpdate(state, this._instance.props, this._instance.context);
         }
         //        this.doUpdate(state, this._instance.props);
     }
-    doUpdate(nextState, nextProps) {
+    doUpdate(nextState, nextProps, nextContext) {
         const instance = this._instance;
         let result;
-        const shouldRender = !instance.shouldComponentUpdate || instance.shouldComponentUpdate(nextProps, nextState);
+        this.getSelfContext();
+
+        let shouldRender;
+        if (instance.shouldComponentUpdate) {
+            //            this.isAsyncSetState = true;
+            shouldRender = instance.shouldComponentUpdate(nextProps, nextState, nextContext);
+            //            this.handleStateQueue(nextProps,!shouldRender);
+        } else {
+            shouldRender = true;
+        }
 
         if (shouldRender) {
             const dom = this._hostNode;
 
             if (instance.componentWillUpdate) {
                 this.isAsyncSetState = true;
-                instance.componentWillUpdate(nextProps, nextState)
+                instance.componentWillUpdate(nextProps, nextState, nextContext)
                 this.handleStateQueue(nextProps);
             }
 
             const prevState = instance.state;
             const prevProps = instance.props;
+            const prevContext = instance.context;
 
             instance.state = nextState;
-
             if (nextProps !== prevProps) {
                 if (this.type === "component") {
                     for (const attrName in nextProps) { //not on stateless
@@ -574,6 +599,7 @@ class ReactCompositeComponentWrapper {
                 instance.props = nextProps;
                 this._currentElement.props = nextProps;
             }
+            instance.context = nextContext;
 
 
             renderingComponentStack.push(this);
@@ -588,8 +614,8 @@ class ReactCompositeComponentWrapper {
             this.handleAfterRenderQueue();
             if (instance.componentDidUpdate) {
                 this.isAsyncSetState = true;
-                instance.componentDidUpdate(prevProps, prevState)
-                this.handleStateQueue(prevProps, true);
+                instance.componentDidUpdate(prevProps, prevState, prevContext)
+                this.handleStateQueue(instance.props, true);
             }
         } else {
             instance.state = nextState;
@@ -717,8 +743,7 @@ function isStateLess(type) {
 }
 
 function isReactComponent(type) {
-    //    console.log('checktype');
-    //    console.dir(type);
+
     return type.prototype instanceof React.Component || type.prototype.render;
 }
 
@@ -757,8 +782,9 @@ function update(dom, element, {
     log('update', dom, element, context, componentRef)
     let forceRender = false;
     if (!element && dom) { //dom to comment
-        console.log('dom to comment')
+        log('dom to comment')
         const comment = document.createComment("react-empty: ?");
+        //        dom[internalInstanceKey].remove&&dom[internalInstanceKey].remove();
         dom.parentElement && dom.parentElement.replaceChild(comment, dom)
         comment[internalInstanceKey] = dom[internalInstanceKey];
         return comment;
@@ -796,7 +822,8 @@ function update(dom, element, {
 
 
     function createAndReplace() {
-        console.log('createAndReplace')
+
+        dom[internalInstanceKey].remove && dom[internalInstanceKey].remove();
         const newDom = create(element, {
             context,
             owner: (componentRef || {})._reactInternalInstance
@@ -930,11 +957,9 @@ function render(element, target) {
 }
 
 function findDOMNode(component) {
-    console.log(22222, component)
     if (!component) {
         return;
     }
-    console.log("11111", component._reactInternalInstance._hostNode)
     return component._reactInternalInstance._hostNode;
 }
 const exports = {

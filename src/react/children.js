@@ -8,7 +8,7 @@ function isText(key) {
 //React.Children.map(children, function[(thisArg)])
 //Invokes a function on every immediate child contained within children with this set to thisArg. If children is a keyed fragment or array it will be traversed: the function will never be passed the container objects. If children is null or undefined, returns null or undefined rather than an array.
 function map(children, cb, thisArg) {
-    console.log('map', children, cb)
+//    console.log('map', children, cb)
     if (typeof children === 'object' && children) {
         children = Object.keys(children).map((key) => {
             return children[key];
@@ -46,7 +46,7 @@ function map(children, cb, thisArg) {
         }
         recursion(child, ".", i);
     });
-    console.log('arr', arr);
+//    console.log('arr', arr);
     return arr;
     //    
     //    if (children && children.length === 1 && children[0] === null) {
