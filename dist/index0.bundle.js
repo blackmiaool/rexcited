@@ -82,15 +82,15 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _createElement = __webpack_require__(22);
+var _createElement = __webpack_require__(27);
 
 var _createElement2 = _interopRequireDefault(_createElement);
 
-var _children = __webpack_require__(21);
+var _children = __webpack_require__(26);
 
 var _children2 = _interopRequireDefault(_children);
 
-var _propTypes = __webpack_require__(1);
+var _propTypes = __webpack_require__(10);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
@@ -277,7 +277,7 @@ if (false) {
 } else {
   // By explicitly using `prop-types` you are opting into new production behavior.
   // http://fb.me/prop-types-in-prod
-  module.exports = __webpack_require__(15)();
+  module.exports = __webpack_require__(20)();
 }
 
 /***/ }),
@@ -773,9 +773,10 @@ var ReactCompositeComponentWrapper = function () {
         key: 'updateProps',
         value: function updateProps(nextProps, nextContext) {
             log('updateProps', nextProps, this);
+            this.assignDefaultProps(nextProps);
             if (this._instance.componentWillReceiveProps) {
                 this.isAsyncSetState = true;
-                this.assignDefaultProps(nextProps);
+
                 this._instance.componentWillReceiveProps(nextProps);
                 this.handleStateQueue(nextProps);
             }
@@ -1275,7 +1276,9 @@ module.exports = exports['default'];
 "use strict";
 
 
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.nameShape = undefined;
 exports.transitionTimeout = transitionTimeout;
 
@@ -1287,9 +1290,7 @@ var _propTypes = __webpack_require__(1);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : { default: obj };
-}
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function transitionTimeout(transitionType) {
   var timeoutPropName = 'transition' + transitionType + 'Timeout';
@@ -1332,19 +1333,13 @@ var nameShape = exports.nameShape = _propTypes2.default.oneOfType([_propTypes2.d
 "use strict";
 
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 
-exports.__esModule = true;
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _extends = Object.assign || function (target) {
-  for (var i = 1; i < arguments.length; i++) {
-    var source = arguments[i];for (var key in source) {
-      if (Object.prototype.hasOwnProperty.call(source, key)) {
-        target[key] = source[key];
-      }
-    }
-  }return target;
-};
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _react = __webpack_require__(0);
 
@@ -1354,99 +1349,101 @@ var _propTypes = __webpack_require__(1);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
-var _TransitionGroup = __webpack_require__(18);
+var _TransitionGroup = __webpack_require__(24);
 
 var _TransitionGroup2 = _interopRequireDefault(_TransitionGroup);
 
-var _CSSTransitionGroupChild = __webpack_require__(17);
+var _CSSTransitionGroupChild = __webpack_require__(23);
 
 var _CSSTransitionGroupChild2 = _interopRequireDefault(_CSSTransitionGroupChild);
 
 var _PropTypes = __webpack_require__(4);
 
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : { default: obj };
-}
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-}
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) {
-  if (!self) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }return call && ((typeof call === 'undefined' ? 'undefined' : _typeof(call)) === "object" || typeof call === "function") ? call : self;
-}
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-function _inherits(subClass, superClass) {
-  if (typeof superClass !== "function" && superClass !== null) {
-    throw new TypeError("Super expression must either be null or a function, not " + (typeof superClass === 'undefined' ? 'undefined' : _typeof(superClass)));
-  }subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } });if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
-}
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var propTypes = {
-  transitionName: _PropTypes.nameShape.isRequired,
+    transitionName: _PropTypes.nameShape.isRequired,
 
-  transitionAppear: _propTypes2.default.bool,
-  transitionEnter: _propTypes2.default.bool,
-  transitionLeave: _propTypes2.default.bool,
-  transitionAppearTimeout: (0, _PropTypes.transitionTimeout)('Appear'),
-  transitionEnterTimeout: (0, _PropTypes.transitionTimeout)('Enter'),
-  transitionLeaveTimeout: (0, _PropTypes.transitionTimeout)('Leave')
+    transitionAppear: _propTypes2.default.bool,
+    transitionEnter: _propTypes2.default.bool,
+    transitionLeave: _propTypes2.default.bool,
+    transitionAppearTimeout: (0, _PropTypes.transitionTimeout)('Appear'),
+    transitionEnterTimeout: (0, _PropTypes.transitionTimeout)('Enter'),
+    transitionLeaveTimeout: (0, _PropTypes.transitionTimeout)('Leave')
 };
 
 var defaultProps = {
-  transitionAppear: false,
-  transitionEnter: true,
-  transitionLeave: true
+    transitionAppear: false,
+    transitionEnter: true,
+    transitionLeave: true
 };
 
 var CSSTransitionGroup = function (_React$Component) {
-  _inherits(CSSTransitionGroup, _React$Component);
+    _inherits(CSSTransitionGroup, _React$Component);
 
-  function CSSTransitionGroup() {
-    var _temp, _this, _ret;
+    function CSSTransitionGroup() {
+        var _ref;
 
-    _classCallCheck(this, CSSTransitionGroup);
+        var _temp, _this, _ret;
 
-    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
+        _classCallCheck(this, CSSTransitionGroup);
+
+        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+        }
+
+        return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = CSSTransitionGroup.__proto__ || Object.getPrototypeOf(CSSTransitionGroup)).call.apply(_ref, [this].concat(args))), _this), _this._wrapChild = function (child) {
+            console.log(1111111, _this, {
+                name: _this.props.transitionName,
+                appear: _this.props.transitionAppear,
+                enter: _this.props.transitionEnter,
+                leave: _this.props.transitionLeave,
+                appearTimeout: _this.props.transitionAppearTimeout,
+                enterTimeout: _this.props.transitionEnterTimeout,
+                leaveTimeout: _this.props.transitionLeaveTimeout
+            });
+            return _react2.default.createElement(_CSSTransitionGroupChild2.default, {
+                name: _this.props.transitionName,
+                appear: _this.props.transitionAppear,
+                enter: _this.props.transitionEnter,
+                leave: _this.props.transitionLeave,
+                appearTimeout: _this.props.transitionAppearTimeout,
+                enterTimeout: _this.props.transitionEnterTimeout,
+                leaveTimeout: _this.props.transitionLeaveTimeout
+            }, child);
+        }, _temp), _possibleConstructorReturn(_this, _ret);
     }
 
-    return _ret = (_temp = (_this = _possibleConstructorReturn(this, _React$Component.call.apply(_React$Component, [this].concat(args))), _this), _this._wrapChild = function (child) {
-      return _react2.default.createElement(_CSSTransitionGroupChild2.default, {
-        name: _this.props.transitionName,
-        appear: _this.props.transitionAppear,
-        enter: _this.props.transitionEnter,
-        leave: _this.props.transitionLeave,
-        appearTimeout: _this.props.transitionAppearTimeout,
-        enterTimeout: _this.props.transitionEnterTimeout,
-        leaveTimeout: _this.props.transitionLeaveTimeout
-      }, child);
-    }, _temp), _possibleConstructorReturn(_this, _ret);
-  }
-
-  // We need to provide this childFactory so that
-  // ReactCSSTransitionGroupChild can receive updates to name, enter, and
-  // leave while it is leaving.
+    // We need to provide this childFactory so that
+    // ReactCSSTransitionGroupChild can receive updates to name, enter, and
+    // leave while it is leaving.
 
 
-  CSSTransitionGroup.prototype.render = function render() {
-    return _react2.default.createElement(_TransitionGroup2.default, _extends({}, this.props, { childFactory: this._wrapChild }));
-  };
+    _createClass(CSSTransitionGroup, [{
+        key: 'render',
+        value: function render() {
+            return _react2.default.createElement(_TransitionGroup2.default, _extends({}, this.props, {
+                childFactory: this._wrapChild
+            }));
+        }
+    }]);
 
-  return CSSTransitionGroup;
+    return CSSTransitionGroup;
 }(_react2.default.Component);
 
 CSSTransitionGroup.displayName = 'CSSTransitionGroup';
+
 
 CSSTransitionGroup.propTypes = propTypes;
 CSSTransitionGroup.defaultProps = defaultProps;
 
 exports.default = CSSTransitionGroup;
-module.exports = exports['default'];
 
 /***/ }),
 /* 6 */
@@ -1565,6 +1562,226 @@ var TodoList = function (_React$Component) {
 "use strict";
 
 
+/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ *
+ * 
+ */
+
+function makeEmptyFunction(arg) {
+  return function () {
+    return arg;
+  };
+}
+
+/**
+ * This function accepts and discards inputs; it has no side effects. This is
+ * primarily useful idiomatically for overridable function endpoints which
+ * always need to be callable, since JS lacks a null-call idiom ala Cocoa.
+ */
+var emptyFunction = function emptyFunction() {};
+
+emptyFunction.thatReturns = makeEmptyFunction;
+emptyFunction.thatReturnsFalse = makeEmptyFunction(false);
+emptyFunction.thatReturnsTrue = makeEmptyFunction(true);
+emptyFunction.thatReturnsNull = makeEmptyFunction(null);
+emptyFunction.thatReturnsThis = function () {
+  return this;
+};
+emptyFunction.thatReturnsArgument = function (arg) {
+  return arg;
+};
+
+module.exports = emptyFunction;
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ *
+ */
+
+
+
+/**
+ * Use invariant() to assert state which your program assumes to be true.
+ *
+ * Provide sprintf-style format (only %s is supported) and arguments
+ * to provide information about what broke and what you were
+ * expecting.
+ *
+ * The invariant message will be stripped in production, but the invariant
+ * will remain to ensure logic does not differ in production.
+ */
+
+var validateFormat = function validateFormat(format) {};
+
+if (false) {
+  validateFormat = function validateFormat(format) {
+    if (format === undefined) {
+      throw new Error('invariant requires an error message argument');
+    }
+  };
+}
+
+function invariant(condition, format, a, b, c, d, e, f) {
+  validateFormat(format);
+
+  if (!condition) {
+    var error;
+    if (format === undefined) {
+      error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
+    } else {
+      var args = [a, b, c, d, e, f];
+      var argIndex = 0;
+      error = new Error(format.replace(/%s/g, function () {
+        return args[argIndex++];
+      }));
+      error.name = 'Invariant Violation';
+    }
+
+    error.framesToPop = 1; // we don't care about invariant's own frame
+    throw error;
+  }
+}
+
+module.exports = invariant;
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/**
+ * Copyright 2013-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
+
+
+var emptyFunction = __webpack_require__(7);
+var invariant = __webpack_require__(8);
+var ReactPropTypesSecret = __webpack_require__(11);
+
+module.exports = function () {
+  function shim(props, propName, componentName, location, propFullName, secret) {
+    if (secret === ReactPropTypesSecret) {
+      // It is still safe when called from React.
+      return;
+    }
+    invariant(false, 'Calling PropTypes validators directly is not supported by the `prop-types` package. ' + 'Use PropTypes.checkPropTypes() to call them. ' + 'Read more at http://fb.me/use-check-prop-types');
+  };
+  shim.isRequired = shim;
+  function getShim() {
+    return shim;
+  };
+  // Important!
+  // Keep this list in sync with production version in `./factoryWithTypeCheckers.js`.
+  var ReactPropTypes = {
+    array: shim,
+    bool: shim,
+    func: shim,
+    number: shim,
+    object: shim,
+    string: shim,
+    symbol: shim,
+
+    any: shim,
+    arrayOf: getShim,
+    element: shim,
+    instanceOf: getShim,
+    node: shim,
+    objectOf: getShim,
+    oneOf: getShim,
+    oneOfType: getShim,
+    shape: getShim
+  };
+
+  ReactPropTypes.checkPropTypes = emptyFunction;
+  ReactPropTypes.PropTypes = ReactPropTypes;
+
+  return ReactPropTypes;
+};
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+/**
+ * Copyright 2013-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
+if (false) {
+  var REACT_ELEMENT_TYPE = typeof Symbol === 'function' && Symbol.for && Symbol.for('react.element') || 0xeac7;
+
+  var isValidElement = function isValidElement(object) {
+    return (typeof object === 'undefined' ? 'undefined' : _typeof(object)) === 'object' && object !== null && object.$$typeof === REACT_ELEMENT_TYPE;
+  };
+
+  // By explicitly using `prop-types` you are opting into new development behavior.
+  // http://fb.me/prop-types-in-prod
+  var throwOnDirectAccess = true;
+  module.exports = require('./factoryWithTypeCheckers')(isValidElement, throwOnDirectAccess);
+} else {
+  // By explicitly using `prop-types` you are opting into new production behavior.
+  // http://fb.me/prop-types-in-prod
+  module.exports = __webpack_require__(9)();
+}
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/**
+ * Copyright 2013-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
+
+
+var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
+
+module.exports = ReactPropTypesSecret;
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 module.exports = function chain() {
   var len = arguments.length;
   var args = [];
@@ -1587,7 +1804,7 @@ module.exports = function chain() {
 };
 
 /***/ }),
-/* 8 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1598,7 +1815,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = addClass;
 
-var _hasClass = __webpack_require__(9);
+var _hasClass = __webpack_require__(14);
 
 var _hasClass2 = _interopRequireDefault(_hasClass);
 
@@ -1612,7 +1829,7 @@ function addClass(element, className) {
 module.exports = exports['default'];
 
 /***/ }),
-/* 9 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1628,7 +1845,7 @@ function hasClass(element, className) {
 module.exports = exports["default"];
 
 /***/ }),
-/* 10 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1639,7 +1856,7 @@ module.exports = function removeClass(element, className) {
 };
 
 /***/ }),
-/* 11 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1755,7 +1972,7 @@ function getTransitionProperties() {
 }
 
 /***/ }),
-/* 12 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1816,7 +2033,7 @@ exports.default = compatRaf;
 module.exports = exports['default'];
 
 /***/ }),
-/* 13 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1860,7 +2077,7 @@ emptyFunction.thatReturnsArgument = function (arg) {
 module.exports = emptyFunction;
 
 /***/ }),
-/* 14 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1921,7 +2138,7 @@ function invariant(condition, format, a, b, c, d, e, f) {
 module.exports = invariant;
 
 /***/ }),
-/* 15 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1936,9 +2153,9 @@ module.exports = invariant;
 
 
 
-var emptyFunction = __webpack_require__(13);
-var invariant = __webpack_require__(14);
-var ReactPropTypesSecret = __webpack_require__(16);
+var emptyFunction = __webpack_require__(18);
+var invariant = __webpack_require__(19);
+var ReactPropTypesSecret = __webpack_require__(21);
 
 module.exports = function () {
   function shim(props, propName, componentName, location, propFullName, secret) {
@@ -1946,7 +2163,7 @@ module.exports = function () {
       // It is still safe when called from React.
       return;
     }
-    invariant(false, 'Calling PropTypes validators directly is not supported by the `prop-types` package. ' + 'Use PropTypes.checkPropTypes() to call them. ' + 'Read more at http://fb.me/use-check-prop-types');
+     true ?  false ? invariant(false, 'Calling PropTypes validators directly is not supported by the `prop-types` package. ' + 'Use PropTypes.checkPropTypes() to call them. ' + 'Read more at http://fb.me/use-check-prop-types') : invariant(false) : void 0;
   };
   shim.isRequired = shim;
   function getShim() {
@@ -1981,7 +2198,7 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 16 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2001,39 +2218,92 @@ var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
 module.exports = ReactPropTypesSecret;
 
 /***/ }),
-/* 17 */
+/* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/**
+ * Copyright 2014-2015, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
+
+
+/**
+ * Similar to invariant but only logs a warning if the condition is not met.
+ * This can be used to log issues in development environments in critical
+ * paths. Removing the logging code for production environments will keep the
+ * same logic and follow the same code paths.
+ */
+
+var warning = function warning() {};
+
+if (false) {
+  warning = function warning(condition, format, args) {
+    var len = arguments.length;
+    args = new Array(len > 2 ? len - 2 : 0);
+    for (var key = 2; key < len; key++) {
+      args[key - 2] = arguments[key];
+    }
+    if (format === undefined) {
+      throw new Error('`warning(condition, format, ...args)` requires a warning ' + 'message argument');
+    }
+
+    if (format.length < 10 || /^[s\W]*$/.test(format)) {
+      throw new Error('The warning format should be able to uniquely identify this ' + 'warning. Please, use a more descriptive format than: ' + format);
+    }
+
+    if (!condition) {
+      var argIndex = 0;
+      var message = 'Warning: ' + format.replace(/%s/g, function () {
+        return args[argIndex++];
+      });
+      if (typeof console !== 'undefined') {
+        console.error(message);
+      }
+      try {
+        // This error was thrown as a convenience so that you can use this stack
+        // to find the callsite that caused this warning to fire.
+        throw new Error(message);
+      } catch (x) {}
+    }
+  };
+}
+
+module.exports = warning;
+
+/***/ }),
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 
-exports.__esModule = true;
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _extends = Object.assign || function (target) {
-  for (var i = 1; i < arguments.length; i++) {
-    var source = arguments[i];for (var key in source) {
-      if (Object.prototype.hasOwnProperty.call(source, key)) {
-        target[key] = source[key];
-      }
-    }
-  }return target;
-};
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _addClass = __webpack_require__(8);
+var _addClass = __webpack_require__(13);
 
 var _addClass2 = _interopRequireDefault(_addClass);
 
-var _removeClass = __webpack_require__(10);
+var _removeClass = __webpack_require__(15);
 
 var _removeClass2 = _interopRequireDefault(_removeClass);
 
-var _requestAnimationFrame = __webpack_require__(12);
+var _requestAnimationFrame = __webpack_require__(17);
 
 var _requestAnimationFrame2 = _interopRequireDefault(_requestAnimationFrame);
 
-var _properties = __webpack_require__(11);
+var _properties = __webpack_require__(16);
 
 var _react = __webpack_require__(0);
 
@@ -2047,239 +2317,233 @@ var _reactDom = __webpack_require__(2);
 
 var _PropTypes = __webpack_require__(4);
 
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : { default: obj };
-}
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-}
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) {
-  if (!self) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }return call && ((typeof call === 'undefined' ? 'undefined' : _typeof(call)) === "object" || typeof call === "function") ? call : self;
-}
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-function _inherits(subClass, superClass) {
-  if (typeof superClass !== "function" && superClass !== null) {
-    throw new TypeError("Super expression must either be null or a function, not " + (typeof superClass === 'undefined' ? 'undefined' : _typeof(superClass)));
-  }subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } });if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
-}
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var events = [];
 if (_properties.transitionEnd) events.push(_properties.transitionEnd);
 if (_properties.animationEnd) events.push(_properties.animationEnd);
 
 function addEndListener(node, listener) {
-  if (events.length) {
-    events.forEach(function (e) {
-      return node.addEventListener(e, listener, false);
-    });
-  } else {
-    setTimeout(listener, 0);
-  }
+    if (events.length) {
+        events.forEach(function (e) {
+            return node.addEventListener(e, listener, false);
+        });
+    } else {
+        setTimeout(listener, 0);
+    }
 
-  return function () {
-    if (!events.length) return;
-    events.forEach(function (e) {
-      return node.removeEventListener(e, listener, false);
-    });
-  };
+    return function () {
+        if (!events.length) return;
+        events.forEach(function (e) {
+            return node.removeEventListener(e, listener, false);
+        });
+    };
 }
 
 var propTypes = {
-  children: _propTypes2.default.node,
-  name: _PropTypes.nameShape.isRequired,
+    children: _propTypes2.default.node,
+    name: _PropTypes.nameShape.isRequired,
 
-  // Once we require timeouts to be specified, we can remove the
-  // boolean flags (appear etc.) and just accept a number
-  // or a bool for the timeout flags (appearTimeout etc.)
-  appear: _propTypes2.default.bool,
-  enter: _propTypes2.default.bool,
-  leave: _propTypes2.default.bool,
-  appearTimeout: _propTypes2.default.number,
-  enterTimeout: _propTypes2.default.number,
-  leaveTimeout: _propTypes2.default.number
+    // Once we require timeouts to be specified, we can remove the
+    // boolean flags (appear etc.) and just accept a number
+    // or a bool for the timeout flags (appearTimeout etc.)
+    appear: _propTypes2.default.bool,
+    enter: _propTypes2.default.bool,
+    leave: _propTypes2.default.bool,
+    appearTimeout: _propTypes2.default.number,
+    enterTimeout: _propTypes2.default.number,
+    leaveTimeout: _propTypes2.default.number
 };
 
 var CSSTransitionGroupChild = function (_React$Component) {
-  _inherits(CSSTransitionGroupChild, _React$Component);
+    _inherits(CSSTransitionGroupChild, _React$Component);
 
-  function CSSTransitionGroupChild() {
-    var _temp, _this, _ret;
+    function CSSTransitionGroupChild() {
+        var _ref;
 
-    _classCallCheck(this, CSSTransitionGroupChild);
+        var _temp, _this, _ret;
 
-    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
+        _classCallCheck(this, CSSTransitionGroupChild);
+
+        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+        }
+
+        return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = CSSTransitionGroupChild.__proto__ || Object.getPrototypeOf(CSSTransitionGroupChild)).call.apply(_ref, [this].concat(args))), _this), _this.componentWillAppear = function (done) {
+            if (_this.props.appear) {
+                _this.transition('appear', done, _this.props.appearTimeout);
+            } else {
+                done();
+            }
+        }, _this.componentWillEnter = function (done) {
+            console.log('willenter', _this.props);
+            if (_this.props.enter) {
+                console.log("willenter1");
+                _this.transition('enter', done, _this.props.enterTimeout);
+            } else {
+                console.log('willenter2');
+                done();
+            }
+        }, _this.componentWillLeave = function (done) {
+            if (_this.props.leave) {
+                _this.transition('leave', done, _this.props.leaveTimeout);
+            } else {
+                done();
+            }
+        }, _temp), _possibleConstructorReturn(_this, _ret);
     }
 
-    return _ret = (_temp = (_this = _possibleConstructorReturn(this, _React$Component.call.apply(_React$Component, [this].concat(args))), _this), _this.componentWillAppear = function (done) {
-      if (_this.props.appear) {
-        _this.transition('appear', done, _this.props.appearTimeout);
-      } else {
-        done();
-      }
-    }, _this.componentWillEnter = function (done) {
-      if (_this.props.enter) {
-        _this.transition('enter', done, _this.props.enterTimeout);
-      } else {
-        done();
-      }
-    }, _this.componentWillLeave = function (done) {
-      if (_this.props.leave) {
-        _this.transition('leave', done, _this.props.leaveTimeout);
-      } else {
-        done();
-      }
-    }, _temp), _possibleConstructorReturn(_this, _ret);
-  }
+    _createClass(CSSTransitionGroupChild, [{
+        key: 'componentWillMount',
+        value: function componentWillMount() {
+            this.classNameAndNodeQueue = [];
+            this.transitionTimeouts = [];
+        }
+    }, {
+        key: 'componentWillUnmount',
+        value: function componentWillUnmount() {
+            this.unmounted = true;
 
-  CSSTransitionGroupChild.prototype.componentWillMount = function componentWillMount() {
-    this.classNameAndNodeQueue = [];
-    this.transitionTimeouts = [];
-  };
+            if (this.timeout) {
+                clearTimeout(this.timeout);
+            }
+            this.transitionTimeouts.forEach(function (timeout) {
+                clearTimeout(timeout);
+            });
 
-  CSSTransitionGroupChild.prototype.componentWillUnmount = function componentWillUnmount() {
-    this.unmounted = true;
+            this.classNameAndNodeQueue.length = 0;
+        }
+    }, {
+        key: 'transition',
+        value: function transition(animationType, finishCallback, timeout) {
+            var node = (0, _reactDom.findDOMNode)(this);
 
-    if (this.timeout) {
-      clearTimeout(this.timeout);
-    }
-    this.transitionTimeouts.forEach(function (timeout) {
-      clearTimeout(timeout);
-    });
+            if (!node) {
+                if (finishCallback) {
+                    finishCallback();
+                }
+                return;
+            }
 
-    this.classNameAndNodeQueue.length = 0;
-  };
+            var className = this.props.name[animationType] || this.props.name + '-' + animationType;
+            var activeClassName = this.props.name[animationType + 'Active'] || className + '-active';
+            var timer = null;
+            var removeListeners = void 0;
 
-  CSSTransitionGroupChild.prototype.transition = function transition(animationType, finishCallback, timeout) {
-    var node = (0, _reactDom.findDOMNode)(this);
+            (0, _addClass2.default)(node, className);
 
-    if (!node) {
-      if (finishCallback) {
-        finishCallback();
-      }
-      return;
-    }
+            // Need to do this to actually trigger a transition.
+            this.queueClassAndNode(activeClassName, node);
 
-    var className = this.props.name[animationType] || this.props.name + '-' + animationType;
-    var activeClassName = this.props.name[animationType + 'Active'] || className + '-active';
-    var timer = null;
-    var removeListeners = void 0;
+            // Clean-up the animation after the specified delay
+            var finish = function finish(e) {
+                if (e && e.target !== node) {
+                    return;
+                }
 
-    (0, _addClass2.default)(node, className);
+                clearTimeout(timer);
+                if (removeListeners) removeListeners();
 
-    // Need to do this to actually trigger a transition.
-    this.queueClassAndNode(activeClassName, node);
+                (0, _removeClass2.default)(node, className);
+                (0, _removeClass2.default)(node, activeClassName);
 
-    // Clean-up the animation after the specified delay
-    var finish = function finish(e) {
-      if (e && e.target !== node) {
-        return;
-      }
+                if (removeListeners) removeListeners();
 
-      clearTimeout(timer);
-      if (removeListeners) removeListeners();
+                // Usually this optional callback is used for informing an owner of
+                // a leave animation and telling it to remove the child.
+                if (finishCallback) {
+                    finishCallback();
+                }
+            };
 
-      (0, _removeClass2.default)(node, className);
-      (0, _removeClass2.default)(node, activeClassName);
+            if (timeout) {
+                timer = setTimeout(finish, timeout);
+                this.transitionTimeouts.push(timer);
+            } else if (_properties.transitionEnd) {
+                removeListeners = addEndListener(node, finish);
+            }
+        }
+    }, {
+        key: 'queueClassAndNode',
+        value: function queueClassAndNode(className, node) {
+            var _this2 = this;
 
-      if (removeListeners) removeListeners();
+            this.classNameAndNodeQueue.push({
+                className: className,
+                node: node
+            });
 
-      // Usually this optional callback is used for informing an owner of
-      // a leave animation and telling it to remove the child.
-      if (finishCallback) {
-        finishCallback();
-      }
-    };
+            if (!this.rafHandle) {
+                this.rafHandle = (0, _requestAnimationFrame2.default)(function () {
+                    return _this2.flushClassNameAndNodeQueue();
+                });
+            }
+        }
+    }, {
+        key: 'flushClassNameAndNodeQueue',
+        value: function flushClassNameAndNodeQueue() {
+            if (!this.unmounted) {
+                this.classNameAndNodeQueue.forEach(function (obj) {
+                    // This is for to force a repaint,
+                    // which is necessary in order to transition styles when adding a class name.
+                    /* eslint-disable no-unused-expressions */
+                    obj.node.scrollTop;
+                    /* eslint-enable no-unused-expressions */
+                    (0, _addClass2.default)(obj.node, obj.className);
+                });
+            }
+            this.classNameAndNodeQueue.length = 0;
+            this.rafHandle = null;
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            console.log('!!!rrr');
+            var props = _extends({}, this.props);
+            delete props.name;
+            delete props.appear;
+            delete props.enter;
+            delete props.leave;
+            delete props.appearTimeout;
+            delete props.enterTimeout;
+            delete props.leaveTimeout;
+            delete props.children;
+            return _react2.default.cloneElement(_react2.default.Children.only(this.props.children), props);
+        }
+    }]);
 
-    if (timeout) {
-      timer = setTimeout(finish, timeout);
-      this.transitionTimeouts.push(timer);
-    } else if (_properties.transitionEnd) {
-      removeListeners = addEndListener(node, finish);
-    }
-  };
-
-  CSSTransitionGroupChild.prototype.queueClassAndNode = function queueClassAndNode(className, node) {
-    var _this2 = this;
-
-    this.classNameAndNodeQueue.push({
-      className: className,
-      node: node
-    });
-
-    if (!this.rafHandle) {
-      this.rafHandle = (0, _requestAnimationFrame2.default)(function () {
-        return _this2.flushClassNameAndNodeQueue();
-      });
-    }
-  };
-
-  CSSTransitionGroupChild.prototype.flushClassNameAndNodeQueue = function flushClassNameAndNodeQueue() {
-    if (!this.unmounted) {
-      this.classNameAndNodeQueue.forEach(function (obj) {
-        // This is for to force a repaint,
-        // which is necessary in order to transition styles when adding a class name.
-        /* eslint-disable no-unused-expressions */
-        obj.node.scrollTop;
-        /* eslint-enable no-unused-expressions */
-        (0, _addClass2.default)(obj.node, obj.className);
-      });
-    }
-    this.classNameAndNodeQueue.length = 0;
-    this.rafHandle = null;
-  };
-
-  CSSTransitionGroupChild.prototype.render = function render() {
-    var props = _extends({}, this.props);
-    delete props.name;
-    delete props.appear;
-    delete props.enter;
-    delete props.leave;
-    delete props.appearTimeout;
-    delete props.enterTimeout;
-    delete props.leaveTimeout;
-    delete props.children;
-    return _react2.default.cloneElement(_react2.default.Children.only(this.props.children), props);
-  };
-
-  return CSSTransitionGroupChild;
+    return CSSTransitionGroupChild;
 }(_react2.default.Component);
 
 CSSTransitionGroupChild.displayName = 'CSSTransitionGroupChild';
 
+
 CSSTransitionGroupChild.propTypes = propTypes;
 
 exports.default = CSSTransitionGroupChild;
-module.exports = exports['default'];
 
 /***/ }),
-/* 18 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
-exports.__esModule = true;
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _extends = Object.assign || function (target) {
-  for (var i = 1; i < arguments.length; i++) {
-    var source = arguments[i];for (var key in source) {
-      if (Object.prototype.hasOwnProperty.call(source, key)) {
-        target[key] = source[key];
-      }
-    }
-  }return target;
-};
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _chainFunction = __webpack_require__(7);
+var _chainFunction = __webpack_require__(12);
 
 var _chainFunction2 = _interopRequireDefault(_chainFunction);
 
@@ -2291,33 +2555,19 @@ var _propTypes = __webpack_require__(1);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
-var _warning = __webpack_require__(20);
+var _warning = __webpack_require__(22);
 
 var _warning2 = _interopRequireDefault(_warning);
 
-var _ChildMapping = __webpack_require__(19);
+var _ChildMapping = __webpack_require__(25);
 
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : { default: obj };
-}
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-}
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) {
-  if (!self) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }return call && ((typeof call === 'undefined' ? 'undefined' : _typeof(call)) === "object" || typeof call === "function") ? call : self;
-}
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-function _inherits(subClass, superClass) {
-  if (typeof superClass !== "function" && superClass !== null) {
-    throw new TypeError("Super expression must either be null or a function, not " + (typeof superClass === 'undefined' ? 'undefined' : _typeof(superClass)));
-  }subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } });if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
-}
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var propTypes = {
   component: _propTypes2.default.any,
@@ -2338,7 +2588,7 @@ var TransitionGroup = function (_React$Component) {
   function TransitionGroup(props, context) {
     _classCallCheck(this, TransitionGroup);
 
-    var _this = _possibleConstructorReturn(this, _React$Component.call(this, props, context));
+    var _this = _possibleConstructorReturn(this, (TransitionGroup.__proto__ || Object.getPrototypeOf(TransitionGroup)).call(this, props, context));
 
     _this.performAppear = function (key) {
       _this.currentlyTransitioningKeys[key] = true;
@@ -2441,132 +2691,141 @@ var TransitionGroup = function (_React$Component) {
     return _this;
   }
 
-  TransitionGroup.prototype.componentWillMount = function componentWillMount() {
-    this.currentlyTransitioningKeys = {};
-    this.keysToEnter = [];
-    this.keysToLeave = [];
-  };
-
-  TransitionGroup.prototype.componentDidMount = function componentDidMount() {
-    var initialChildMapping = this.state.children;
-    for (var key in initialChildMapping) {
-      if (initialChildMapping[key]) {
-        this.performAppear(key);
-      }
+  _createClass(TransitionGroup, [{
+    key: 'componentWillMount',
+    value: function componentWillMount() {
+      this.currentlyTransitioningKeys = {};
+      this.keysToEnter = [];
+      this.keysToLeave = [];
     }
-  };
-
-  TransitionGroup.prototype.componentWillReceiveProps = function componentWillReceiveProps(nextProps) {
-    var nextChildMapping = (0, _ChildMapping.getChildMapping)(nextProps.children);
-    var prevChildMapping = this.state.children;
-
-    this.setState({
-      children: (0, _ChildMapping.mergeChildMappings)(prevChildMapping, nextChildMapping)
-    });
-
-    for (var key in nextChildMapping) {
-      var hasPrev = prevChildMapping && prevChildMapping.hasOwnProperty(key);
-      if (nextChildMapping[key] && !hasPrev && !this.currentlyTransitioningKeys[key]) {
-        this.keysToEnter.push(key);
-      }
-    }
-
-    for (var _key in prevChildMapping) {
-      var hasNext = nextChildMapping && nextChildMapping.hasOwnProperty(_key);
-      if (prevChildMapping[_key] && !hasNext && !this.currentlyTransitioningKeys[_key]) {
-        this.keysToLeave.push(_key);
-      }
-    }
-
-    // If we want to someday check for reordering, we could do it here.
-  };
-
-  TransitionGroup.prototype.componentDidUpdate = function componentDidUpdate() {
-    var keysToEnter = this.keysToEnter;
-    this.keysToEnter = [];
-    keysToEnter.forEach(this.performEnter);
-
-    var keysToLeave = this.keysToLeave;
-    this.keysToLeave = [];
-    keysToLeave.forEach(this.performLeave);
-  };
-
-  TransitionGroup.prototype.render = function render() {
-    var _this2 = this;
-
-    // TODO: we could get rid of the need for the wrapper node
-    // by cloning a single child
-    var childrenToRender = [];
-
-    var _loop = function _loop(key) {
-      var child = _this2.state.children[key];
-      if (child) {
-        var isCallbackRef = typeof child.ref !== 'string';
-        var factoryChild = _this2.props.childFactory(child);
-        var ref = function ref(r) {
-          _this2.childRefs[key] = r;
-        };
-
-         false ? (0, _warning2.default)(isCallbackRef, 'string refs are not supported on children of TransitionGroup and will be ignored. ' + 'Please use a callback ref instead: https://facebook.github.io/react/docs/refs-and-the-dom.html#the-ref-callback-attribute') : void 0;
-
-        // Always chaining the refs leads to problems when the childFactory
-        // wraps the child. The child ref callback gets called twice with the
-        // wrapper and the child. So we only need to chain the ref if the
-        // factoryChild is not different from child.
-        if (factoryChild === child && isCallbackRef) {
-          ref = (0, _chainFunction2.default)(child.ref, ref);
+  }, {
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      var initialChildMapping = this.state.children;
+      for (var key in initialChildMapping) {
+        if (initialChildMapping[key]) {
+          this.performAppear(key);
         }
-
-        // You may need to apply reactive updates to a child as it is leaving.
-        // The normal React way to do it won't work since the child will have
-        // already been removed. In case you need this behavior you can provide
-        // a childFactory function to wrap every child, even the ones that are
-        // leaving.
-        childrenToRender.push(_react2.default.cloneElement(factoryChild, {
-          key: key,
-          ref: ref
-        }));
       }
-    };
-
-    for (var key in this.state.children) {
-      _loop(key);
     }
+  }, {
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps(nextProps) {
+      var nextChildMapping = (0, _ChildMapping.getChildMapping)(nextProps.children);
+      var prevChildMapping = this.state.children;
 
-    // Do not forward TransitionGroup props to primitive DOM nodes
-    var props = _extends({}, this.props);
-    delete props.transitionLeave;
-    delete props.transitionName;
-    delete props.transitionAppear;
-    delete props.transitionEnter;
-    delete props.childFactory;
-    delete props.transitionLeaveTimeout;
-    delete props.transitionEnterTimeout;
-    delete props.transitionAppearTimeout;
-    delete props.component;
+      this.setState({
+        children: (0, _ChildMapping.mergeChildMappings)(prevChildMapping, nextChildMapping)
+      });
 
-    return _react2.default.createElement(this.props.component, props, childrenToRender);
-  };
+      for (var key in nextChildMapping) {
+        var hasPrev = prevChildMapping && prevChildMapping.hasOwnProperty(key);
+        if (nextChildMapping[key] && !hasPrev && !this.currentlyTransitioningKeys[key]) {
+          this.keysToEnter.push(key);
+        }
+      }
+
+      for (var _key in prevChildMapping) {
+        var hasNext = nextChildMapping && nextChildMapping.hasOwnProperty(_key);
+        if (prevChildMapping[_key] && !hasNext && !this.currentlyTransitioningKeys[_key]) {
+          this.keysToLeave.push(_key);
+        }
+      }
+
+      // If we want to someday check for reordering, we could do it here.
+    }
+  }, {
+    key: 'componentDidUpdate',
+    value: function componentDidUpdate() {
+      var keysToEnter = this.keysToEnter;
+      this.keysToEnter = [];
+      keysToEnter.forEach(this.performEnter);
+
+      var keysToLeave = this.keysToLeave;
+      this.keysToLeave = [];
+      keysToLeave.forEach(this.performLeave);
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var _this2 = this;
+
+      // TODO: we could get rid of the need for the wrapper node
+      // by cloning a single child
+      var childrenToRender = [];
+
+      var _loop = function _loop(key) {
+        var child = _this2.state.children[key];
+        if (child) {
+          var isCallbackRef = typeof child.ref !== 'string';
+          var factoryChild = _this2.props.childFactory(child);
+          var ref = function ref(r) {
+            _this2.childRefs[key] = r;
+          };
+
+           false ? (0, _warning2.default)(isCallbackRef, 'string refs are not supported on children of TransitionGroup and will be ignored. ' + 'Please use a callback ref instead: https://facebook.github.io/react/docs/refs-and-the-dom.html#the-ref-callback-attribute') : void 0;
+
+          // Always chaining the refs leads to problems when the childFactory
+          // wraps the child. The child ref callback gets called twice with the
+          // wrapper and the child. So we only need to chain the ref if the
+          // factoryChild is not different from child.
+          if (factoryChild === child && isCallbackRef) {
+            ref = (0, _chainFunction2.default)(child.ref, ref);
+          }
+
+          // You may need to apply reactive updates to a child as it is leaving.
+          // The normal React way to do it won't work since the child will have
+          // already been removed. In case you need this behavior you can provide
+          // a childFactory function to wrap every child, even the ones that are
+          // leaving.
+          childrenToRender.push(_react2.default.cloneElement(factoryChild, {
+            key: key,
+            ref: ref
+          }));
+        }
+      };
+
+      for (var key in this.state.children) {
+        _loop(key);
+      }
+
+      // Do not forward TransitionGroup props to primitive DOM nodes
+      var props = _extends({}, this.props);
+      delete props.transitionLeave;
+      delete props.transitionName;
+      delete props.transitionAppear;
+      delete props.transitionEnter;
+      delete props.childFactory;
+      delete props.transitionLeaveTimeout;
+      delete props.transitionEnterTimeout;
+      delete props.transitionAppearTimeout;
+      delete props.component;
+
+      return _react2.default.createElement(this.props.component, props, childrenToRender);
+    }
+  }]);
 
   return TransitionGroup;
 }(_react2.default.Component);
 
 TransitionGroup.displayName = 'TransitionGroup';
 
+
 TransitionGroup.propTypes = propTypes;
 TransitionGroup.defaultProps = defaultProps;
 
 exports.default = TransitionGroup;
-module.exports = exports['default'];
 
 /***/ }),
-/* 19 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.getChildMapping = getChildMapping;
 exports.mergeChildMappings = mergeChildMappings;
 
@@ -2657,66 +2916,7 @@ function mergeChildMappings(prev, next) {
 }
 
 /***/ }),
-/* 20 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/**
- * Copyright 2014-2015, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
-
-
-/**
- * Similar to invariant but only logs a warning if the condition is not met.
- * This can be used to log issues in development environments in critical
- * paths. Removing the logging code for production environments will keep the
- * same logic and follow the same code paths.
- */
-
-var warning = function warning() {};
-
-if (false) {
-  warning = function warning(condition, format, args) {
-    var len = arguments.length;
-    args = new Array(len > 2 ? len - 2 : 0);
-    for (var key = 2; key < len; key++) {
-      args[key - 2] = arguments[key];
-    }
-    if (format === undefined) {
-      throw new Error('`warning(condition, format, ...args)` requires a warning ' + 'message argument');
-    }
-
-    if (format.length < 10 || /^[s\W]*$/.test(format)) {
-      throw new Error('The warning format should be able to uniquely identify this ' + 'warning. Please, use a more descriptive format than: ' + format);
-    }
-
-    if (!condition) {
-      var argIndex = 0;
-      var message = 'Warning: ' + format.replace(/%s/g, function () {
-        return args[argIndex++];
-      });
-      if (typeof console !== 'undefined') {
-        console.error(message);
-      }
-      try {
-        // This error was thrown as a convenience so that you can use this stack
-        // to find the callsite that caused this warning to fire.
-        throw new Error(message);
-      } catch (x) {}
-    }
-  };
-}
-
-module.exports = warning;
-
-/***/ }),
-/* 21 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2821,7 +3021,7 @@ exports.default = {
 };
 
 /***/ }),
-/* 22 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

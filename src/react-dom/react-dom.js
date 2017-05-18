@@ -139,25 +139,25 @@ function equals(x, y) {
             return false;
         }
         switch (typeof (y[p])) {
-        case 'object':
-            if (y[p] instanceof Date) {
-                if (y[p].getTime() !== x[p].getTime()) {
+            case 'object':
+                if (y[p] instanceof Date) {
+                    if (y[p].getTime() !== x[p].getTime()) {
+                        return false;
+                    }
+                }
+                if (!equals(x[p], y[p])) {
+                    return false
+                };
+                break;
+            case 'function':
+                if (typeof (x[p]) == 'undefined' || (p != 'equals')) {
+                    return false;
+                };
+                break;
+            default:
+                if (y[p] != x[p]) {
                     return false;
                 }
-            }
-            if (!equals(x[p], y[p])) {
-                return false
-            };
-            break;
-        case 'function':
-            if (typeof (x[p]) == 'undefined' || (p != 'equals')) {
-                return false;
-            };
-            break;
-        default:
-            if (y[p] != x[p]) {
-                return false;
-            }
         }
     }
 
@@ -457,9 +457,10 @@ class ReactCompositeComponentWrapper {
     }
     updateProps(nextProps, nextContext) {
         log('updateProps', nextProps, this)
+        this.assignDefaultProps(nextProps);
         if (this._instance.componentWillReceiveProps) {
             this.isAsyncSetState = true;
-            this.assignDefaultProps(nextProps);
+
             this._instance.componentWillReceiveProps(nextProps);
             this.handleStateQueue(nextProps);
         }

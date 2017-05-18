@@ -12,7 +12,7 @@ var config = {
             test: /\.jsx?$/,
             loader: 'babel-loader',
             query: {
-                presets: ['stage-0', 'latest', 'react'],
+                presets: ['latest', 'stage-0', 'react'],
                 plugins: []
             },
                 }, {
@@ -40,6 +40,7 @@ var test0Config = Object.assign({}, config, {
         alias: {
             react: path.resolve(path.join(__dirname, 'src', 'react', 'react')),
             'react-dom': path.resolve(path.join(__dirname, 'src', 'react-dom', 'react-dom')),
+            //            "react-transition-group": path.resolve(path.join(__dirname, 'react-transition-group', 'src')),
         },
         //                root: "."
     },
