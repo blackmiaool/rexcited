@@ -5,7 +5,7 @@ import propTypes from 'prop-types'
 const createClassStaticKeys = ['getDefaultProps', 'getInitialState', 'propTypes', 'statics']
 
 function createClass(obj) {
-    console.log('createClass', obj);
+
     class a extends Component {
 
     }
@@ -27,14 +27,14 @@ class Component {
         this.context = context
     }
     setWrapper() {
-        console.log(1)
+
     }
     forceUpdate() {
         const wrapper = this._reactInternalInstance;
         wrapper.doUpdate(this.state, this.props);
     }
     setState(updater, cb) {
-        console.log('setState', updater)
+
         const wrapper = this._reactInternalInstance;
 
         wrapper.stateQueue.push({
@@ -80,6 +80,9 @@ function cloneElement(element, config, ...children) {
 
     element.props.children = element.props.children || [];
 
+    if (!Array.isArray(element.props.children)) {
+        element.props.children = [element.props.children];
+    }
     element.props.children = element.props.children.concat(children).map(function (child) {
         return cloneElement(child);
     });

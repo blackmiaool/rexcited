@@ -37,10 +37,15 @@ var test0Config = Object.assign({}, config, {
         filename: "index0.bundle.js"
     },
     resolve: {
+
+        extensions: ['.js', '.jsx'],
+
         alias: {
             react: path.resolve(path.join(__dirname, 'src', 'react', 'react')),
             'react-dom': path.resolve(path.join(__dirname, 'src', 'react-dom', 'react-dom')),
             "react-transition-group": path.resolve(path.join(__dirname, 'react-transition-group', 'src')),
+            'rc-queue-anim': path.resolve(path.join(__dirname, 'queue-anim', 'src')),
+            'rc-tween-one': path.resolve(path.join(__dirname, 'tween-one', 'src')),
         },
         //                root: "."
     },
@@ -52,8 +57,11 @@ var testConfig = Object.assign({}, config, {
         filename: "index.bundle.js"
     },
     resolve: {
+        extensions: ['.js', '.jsx'],
         alias: {
             "react-transition-group": path.resolve(path.join(__dirname, 'react-transition-group', 'src')),
+            'rc-queue-anim': path.resolve(path.join(__dirname, 'queue-anim', 'src')),
+            'rc-tween-one': path.resolve(path.join(__dirname, 'tween-one', 'src')),
         },
         //                root: "."
     },

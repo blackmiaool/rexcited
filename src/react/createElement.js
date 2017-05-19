@@ -22,8 +22,10 @@ function createElement(type, props, ...children) {
         instance.ref = props.ref;
         delete props.ref
     }
-    if (children.length) {
+    if (children.length > 1) {
         instance.props.children = children;
+    } else if (children.length === 1) {
+        instance.props.children = children[0];
     }
     return instance;
 }

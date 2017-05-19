@@ -3,3 +3,5 @@ react-redux/
 test/
 react-transition-group/
 dist/
+queue-anim/
+tween-one/
