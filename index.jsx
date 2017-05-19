@@ -2,12 +2,24 @@ import QueueAnim from 'rc-queue-anim';
 import React from 'react';
 import ReactDom from 'react-dom';
 
+class A extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+    render() {
+        return <div>enter in queue
+        {this.props.children}
+        </div>
+    }
+}
+
 ReactDom.render(
+    <A>
     <QueueAnim>
-    <div key="1">enter in queue</div>
-    <div key="2">enter in queue</div>
-    <div key="3">enter in queue</div>
-  </QueueAnim>, document.querySelector("#root"));
+        <A key="a"></A>
+    <A key="b"></A>
+    <A key="c"></A>
+  </QueueAnim></A>, document.querySelector("#root"));
 
 //import Tween from 'rc-tween-one';
 //import React from 'react';
