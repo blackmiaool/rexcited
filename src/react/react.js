@@ -31,7 +31,7 @@ class Component {
     }
     forceUpdate() {
         const wrapper = this._reactInternalInstance;
-        wrapper.doUpdate(this.state, this.props);
+        wrapper.forceUpdate(this.state, this.props);
     }
     setState(updater, cb) {
 

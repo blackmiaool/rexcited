@@ -1,5 +1,10 @@
 function only(children) {
-    return children[0];
+    if (Array.isArray(children)) {
+        return children[0];
+    } else {
+        return children;
+    }
+
 }
 
 function isText(key) {
@@ -66,9 +71,14 @@ function forEach(children, cb, thisArg) {
 function count(children) {
     let count = 0;
     if (typeof children === "object" && children) {
-        for (const i in children) {
-            count++;
+        if (children.type) {
+            count = 1;
+        } else {
+            for (const i in children) {
+                count++;
+            }
         }
+
     } else if (Array.isArray(children)) {
         count = children.length;
     }
