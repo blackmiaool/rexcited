@@ -2,9 +2,37 @@ import React from 'react';
 const internalInstanceKey = '__reactInternalInstance$' + Math.random().toString(36).slice(2);
 
 function log() {
-    //    console.log.apply(console, arguments);
+    //        console.log.apply(console, arguments);
 }
-const _correlate = ',x,y,z,left,top,right,bottom,marginTop,marginLeft,marginRight,marginBottom,paddingLeft,paddingTop,paddingRight,paddingBottom,backgroundPosition,backgroundPosition_y,';
+const number2pxKeys = {
+    x: 1,
+    y: 1,
+    z: 1,
+    borderRadius: 1,
+    borderBottomLeftRadius: 1,
+    borderBottomRightRadius: 1,
+    borderTopLeftRadius: 1,
+    borderTopRightRadius: 1,
+    lineHeight: 1,
+    width: 1,
+    height: 1,
+    left: 1,
+    top: 1,
+    right: 1,
+    bottom: 1,
+    margin: 1,
+    marginTop: 1,
+    marginLeft: 1,
+    marginRight: 1,
+    marginBottom: 1,
+    padding: 1,
+    paddingLeft: 1,
+    paddingTop: 1,
+    paddingRight: 1,
+    paddingBottom: 1,
+    backgroundPosition: 1,
+    backgroundPosition_y: 1
+}
 let firstRender = true;
 
 function regiterAttr(name, type, cb) {
@@ -52,15 +80,15 @@ regiterAttr("style", "dom", function (value, previousValue, dom) {
         if (Object.keys(value).length) {
             dom.setAttribute("style", "");
             for (const i in value) {
-                if (typeof value[i] === 'number') {
-                    value[i] += 'px';
+                if (number2pxKeys[i]) {
+                    if (typeof value[i] === 'number') {
+                        value[i] += 'px';
+                    }
                 }
             }
             Object.assign(dom.style, value);
         }
-
     }
-
 });
 regiterAttr("className", "dom", function (value, previousValue, dom) {
     if (!value) {
@@ -81,8 +109,8 @@ regiterAttr("defaultValue", "dom", function (value, previousValue, dom) {
     //    dom.setAttribute("class", value);
 });
 
-
-regiterAttr("children", "", function (value, previousValue, dom) {});
+regiterAttr("key", "", function () {});
+regiterAttr("children", "", function () {});
 
 regiterAttr("ref", "", function (value, previousValue, dom, wrapper, attrName) {
     let ref;
@@ -101,27 +129,50 @@ regiterAttr("ref", "", function (value, previousValue, dom, wrapper, attrName) {
 });
 
 const events = [];
-for (var property in document.documentElement) {
-    var match = property.match(/^on(.+)/);
-    if (match) {
-        const event = match[1];
-        const reactEvent = 'on' + event[0].toUpperCase() + event.slice(1);
-        events.push({
-            event: match[1],
-            reactEvent
-        });
-    }
+
+function firstToUpperCase(word) {
+    return word[0].toUpperCase() + word.slice(1)
 }
 
-function onReactEvent(value, previousValue, dom, wrapper, attr) {
-    const eventName = attr.match(/on(\w+)/i)[1].toLowerCase();
+function addEvent(eventName) {
+    const match = eventName.match(/^on(.+)/);
+    if (match) {
+        const event = match[1];
+        const reg = /((?:mouse)|(?:key)|(?:touch))(\w+)$/;
+        const match2 = event.match(reg);
 
+        if (match2) {
+            const reactEvent = 'on' + firstToUpperCase(match2[1]) + firstToUpperCase(match2[2])
+            events.push({
+                event: match[1],
+                reactEvent
+            });
+        } else {
+            const reactEvent = 'on' + firstToUpperCase(event);
+            events.push({
+                event: match[1],
+                reactEvent
+            });
+        }
+
+    }
+}
+for (const property in document.documentElement) {
+    addEvent(property)
+}
+addEvent('ontap');
+addEvent('ontouchstart');
+addEvent('ontouchend');
+addEvent('ontouchmove');
+
+function onReactEvent(value, previousValue, dom, wrapper, attr) {
+    const eventName = attr.match(/on(\w+)$/i)[1].toLowerCase();
     if (wrapper.eventMap[eventName]) {
         dom.removeEventListener(eventName, wrapper.eventMap[eventName]);
         delete wrapper.eventMap[eventName];
     }
     const listener = function (e) {
-        console.log('onReactEvent', eventName);
+
         e.nativeEvent = e;
         value(e);
     };
@@ -131,11 +182,12 @@ function onReactEvent(value, previousValue, dom, wrapper, attr) {
 
     //    dom.addEventListener(value.match, )
 }
-
+//console.log(events)
 events.forEach(function ({
     event,
     reactEvent
 }) {
+    //    console.log(event,reactEvent)
     regiterAttr(reactEvent, 'dom', onReactEvent);
 });
 
@@ -154,7 +206,7 @@ function equals(x, y) {
     if (cnt > 100) {
         return;
     }
-    for (var p in y) {
+    for (const p in y) {
         if (p === "_owner") {
             continue;
         }
@@ -162,29 +214,29 @@ function equals(x, y) {
             return false;
         }
         switch (typeof (y[p])) {
-        case 'object':
-            if (y[p] instanceof Date) {
-                if (y[p].getTime() !== x[p].getTime()) {
+            case 'object':
+                if (y[p] instanceof Date) {
+                    if (y[p].getTime() !== x[p].getTime()) {
+                        return false;
+                    }
+                }
+                if (!equals(x[p], y[p])) {
+                    return false
+                };
+                break;
+            case 'function':
+                if (typeof (x[p]) == 'undefined' || (p != 'equals')) {
+                    return false;
+                };
+                break;
+            default:
+                if (y[p] != x[p]) {
                     return false;
                 }
-            }
-            if (!equals(x[p], y[p])) {
-                return false
-            };
-            break;
-        case 'function':
-            if (typeof (x[p]) == 'undefined' || (p != 'equals')) {
-                return false;
-            };
-            break;
-        default:
-            if (y[p] != x[p]) {
-                return false;
-            }
         }
     }
 
-    for (var p in x) {
+    for (const p in x) {
         if (typeof (y[p]) == 'undefined') {
             return false;
         }
@@ -263,16 +315,7 @@ function getChildren(parent, children, old = {}, owner, context) {
                         context
                     });
                     append(dom, key);
-                    //                    _renderedChildren[key] = new ReactDOMComponent(child, node, owner);
-                    //                    if (isValidElement(dom[internalInstanceKey]._currentElement)) {
                     _renderedChildren[key] = findOwnerUntil(dom[internalInstanceKey], owner);
-                    //                    } else {
-                    //                        log("else")
-                    //                        _renderedChildren[key] = null;
-                    //                    }
-
-                    //                    info('!!!!!!!!!!!!', _renderedChildren[key], owner)
-
                 } else {
                     if (old[key] instanceof ReactCompositeComponentWrapper) {
 
@@ -290,10 +333,6 @@ function getChildren(parent, children, old = {}, owner, context) {
                             });
                             lastNode.parentElement.replaceChild(dom, lastNode);
                             lastNode = dom;
-                            //                            lastNode = update(old[key]._hostNode, child, {
-                            //                                componentRef: old[key]._instance,
-                            //                                context
-                            //                            });
                         }
                     } else {
                         lastNode = update(old[key]._hostNode, child, {
@@ -334,11 +373,18 @@ class StatelessComponent {
     }
 }
 const renderingComponentStack = [];
-const afterRenderQueue = [];
+const globalAfterRenderQueue = [];
 
-function handleQueue(queue) {
-    queue.forEach(func => func());
-    queue.length = 0;
+function handleQueue(queue0) {
+    const queue = queue0.slice();
+    queue0.length = 0;
+    queue.forEach(func => {
+        func()
+    });
+}
+
+function asyncSetState(mode = true) {
+    React.isAsyncSetState = mode;
 }
 class ReactCompositeComponentWrapper {
     constructor(type, element, owner, context = {}) {
@@ -348,7 +394,7 @@ class ReactCompositeComponentWrapper {
         if (owner) {
             this._currentElement._owner = owner;
         }
-
+        this.isMounted = true;
         this.jsxType = type;
 
         this.assignDefaultProps(element.props);
@@ -396,10 +442,6 @@ class ReactCompositeComponentWrapper {
                     attrMap.component[attrName](element.props[attrName], undefined, instance, this, attrName);
                 }
             }
-
-
-
-
         }
 
 
@@ -409,8 +451,11 @@ class ReactCompositeComponentWrapper {
                 //                setTimeout((() => {
                 //                    
                 //                }));
-                afterRenderQueue.push(() => {
-                    this.isAsyncSetState = true;
+                globalAfterRenderQueue.push(() => {
+                    if (!this.isMounted) {
+                        return;
+                    }
+                    asyncSetState();
                     instance.componentDidMount();
                     this.handleStateQueue(this._instance.props, true);
                 });
@@ -432,30 +477,44 @@ class ReactCompositeComponentWrapper {
     }
     transformRef(element) {
         const that = this;
-        const refKey = element.ref;
-
-
-        if (typeof refKey === "string") {
-            element.ref = function (ref) {
-                log("this", that);
-                that._instance.refs[refKey] = ref;
-            }
-        }
-
-        function handleRef(child) {
-            if (typeof child === "object" && child && child.props) {
-                that.transformRef(child);
-            }
-        }
-
         if (element.props.children) {
-            if (Array.isArray(element.props.children)) {
-                element.props.children.forEach(handleRef);
-            } else {
-                handleRef(element.props.children)
-            }
+            function cb(child) {
+                if (!child) {
+                    return;
+                }
+                const refKey = child.ref;
 
+                if (typeof refKey === "string") {
+                    child.ref = function (ref) {
+                        console.log('bind', that._instance, refKey)
+                        that._instance.refs[refKey] = ref;
+                    }
+                }
+                if (child.type && !isComponent(child)) {
+                    if (child.props && child.props.children) {
+                        React.Children.forEach(child.props.children, cb, that);
+                    }
+                }
+
+            }
+            React.Children.forEach(element.props.children, cb, that);
         }
+
+
+        //        function handleRef(child) {
+        //            if (typeof child === "object" && child && child.props) {
+        //                that.transformRef(child);
+        //            }
+        //        }
+        //
+        //        if (element.props.children) {
+        //            if (Array.isArray(element.props.children)) {
+        //                element.props.children.forEach(handleRef,that);
+        //            } else {
+        //                handleRef(element.props.children)
+        //            }
+        //
+        //        }
     }
     getContext() {
         if (this._instance.getChildContext) {
@@ -488,10 +547,8 @@ class ReactCompositeComponentWrapper {
         this.updateSelfContext();
 
         if (this._instance.componentWillMount) {
-            this.isAsyncSetState = true;
+            asyncSetState();
             this._instance.componentWillMount();
-        }
-        if (this._instance.componentWillMount) {
             this.handleStateQueue(props);
         }
 
@@ -531,7 +588,7 @@ class ReactCompositeComponentWrapper {
         this.assignDefaultProps(nextProps);
         const nextContext = this.getSelfContext();
         if (this._instance.componentWillReceiveProps) {
-            this.isAsyncSetState = true;
+            asyncSetState();
 
             this._instance.componentWillReceiveProps(nextProps, nextContext);
             this.handleStateQueue(nextProps);
@@ -571,15 +628,16 @@ class ReactCompositeComponentWrapper {
         return element;
     }
     remove() {
+        this.isMounted = false;
         if (this._instance.componentWillUnmount) {
-            this.isAsyncSetState = true;
+            asyncSetState();
             this._instance.componentWillUnmount();
             this.handleStateQueue(this._instance.props);
         }
 
     }
     handleStateQueue(props, render) {
-        this.isAsyncSetState = false;
+        asyncSetState(false);
         const instance = this._instance;
         const oldState = instance.state;
         if (!this.stateQueue.length) {
@@ -616,19 +674,13 @@ class ReactCompositeComponentWrapper {
         if (render) {
             this.doUpdate(state, this._instance.props, this._instance.context);
         }
-        if (!renderingComponentStack.length) {
-            if (!firstRender) {
-                handleQueue(afterRenderQueue);
-            }
-        }
+
         //        this.doUpdate(state, this._instance.props);
     }
     forceUpdate(state, props) {
         this.doUpdate(state, props, this.getSelfContext());
-        if (!renderingComponentStack.length) {
-            if (!firstRender) {
-                handleQueue(afterRenderQueue);
-            }
+        if (!renderingComponentStack.length && !firstRender) {
+            handleQueue(globalAfterRenderQueue);
         }
     }
     doUpdate(nextState, nextProps, nextContext) {
@@ -638,7 +690,7 @@ class ReactCompositeComponentWrapper {
 
         let shouldRender;
         if (instance.shouldComponentUpdate) {
-            //            this.isAsyncSetState = true;
+            //            isAsyncSetState = true;
             shouldRender = instance.shouldComponentUpdate(nextProps, nextState, nextContext);
             //            this.handleStateQueue(nextProps,!shouldRender);
         } else {
@@ -649,7 +701,7 @@ class ReactCompositeComponentWrapper {
             const dom = this._hostNode;
 
             if (instance.componentWillUpdate) {
-                this.isAsyncSetState = true;
+                asyncSetState();
                 instance.componentWillUpdate(nextProps, nextState, nextContext)
                 this.handleStateQueue(nextProps);
             }
@@ -666,8 +718,9 @@ class ReactCompositeComponentWrapper {
                             attrMap.component[attrName](nextProps[attrName], this._instance.props[attrName], dom, this, attrName);
                         }
                     }
-                    if (instance.ref) {
-                        attrMap.component.ref(instance.ref, instance.ref, dom, this, "ref");
+
+                    if (this._currentElement.ref) {
+                        attrMap.component.ref(this._currentElement.ref, this._currentElement.ref, dom, this, "ref");
                     }
                 }
                 instance.props = nextProps;
@@ -679,7 +732,10 @@ class ReactCompositeComponentWrapper {
             renderingComponentStack.push(this);
             const element = this.render();
 
-            this.transformRef(element); //they will remove this
+            if (element) {
+                this.transformRef(element); //they will remove this    
+            }
+
             result = update(dom, element, {
                 componentRef: instance,
                 context: this.getContext()
@@ -691,9 +747,12 @@ class ReactCompositeComponentWrapper {
 
 
             if (instance.componentDidUpdate) {
-                this.isAsyncSetState = true;
+                asyncSetState();
                 instance.componentDidUpdate(prevProps, prevState, prevContext)
                 this.handleStateQueue(instance.props, true);
+            }
+            if (!renderingComponentStack.length && !firstRender) {
+                handleQueue(globalAfterRenderQueue);
             }
         } else {
             instance.state = nextState;
@@ -746,10 +805,15 @@ class ReactDOMComponent {
         dom[internalInstanceKey] = this;
 
         for (const attrName in element.props) {
+            const value = element.props[attrName];
             if (attrMap.dom[attrName]) {
-                attrMap.dom[attrName](element.props[attrName], undefined, dom, this, attrName);
+                attrMap.dom[attrName](value, undefined, dom, this, attrName);
             } else {
-                dom.setAttribute(attrName, element.props[attrName])
+                if (value) {
+                    dom.setAttribute(attrName, value);
+                } else {
+                    dom.removeAttribute(attrName)
+                }
             }
         }
         if (element.ref) {
@@ -767,6 +831,7 @@ class ReactDOMTextComponent {
     constructor(element, dom, owner) {
         this._currentElement = element;
         this._hostNode = dom;
+        dom[internalInstanceKey] = this;
         if (owner) {
             this.owner = owner;
         }
@@ -812,17 +877,10 @@ function create(element, {
     const instance = new ReactDOMComponent(type, element, owner);
     const dom = instance._hostNode;
 
-
-    let children = []
-
     if (props.children) {
         let result = getChildren(dom, props.children, {}, owner, context)
         instance._renderedChildren = result.children;
     }
-
-    children.forEach(function (child) {
-        dom.appendChild(child);
-    });
     return dom;
 }
 
@@ -997,13 +1055,19 @@ function update(dom, element, {
             return owner.updateProps(element.props, context);
         } else { //normal dom            
             for (const attrName in element.props) {
-                if (element0.props[attrName] !== element.props[attrName]) {
+                const value = element.props[attrName];
+                const value0 = element0.props[attrName];
+                if (value0 !== value) {
                     //                    log("not");
                     if (attrMap.dom[attrName]) {
-                        attrMap.dom[attrName](element.props[attrName], element0.props[attrName], dom, instance, attrName);
+                        attrMap.dom[attrName](value, value0, dom, instance, attrName);
                     } else {
+                        if (value) {
+                            dom.setAttribute(attrName, value);
+                        } else {
+                            dom.removeAttribute(attrName)
+                        }
 
-                        dom.setAttribute(attrName, element.props[attrName])
                     }
                 }
             }
@@ -1036,7 +1100,7 @@ function update(dom, element, {
 }
 
 function render(element, target) {
-    console.log(element, target)
+
     if (target.childNodes[0]) {
         update(target.childNodes[0], element);
     } else {
@@ -1045,7 +1109,7 @@ function render(element, target) {
         created.setAttribute('data-reactroot', "");
         target.appendChild(created);
     }
-    handleQueue(afterRenderQueue);
+    handleQueue(globalAfterRenderQueue);
     firstRender = false;
 
     //    const targetInstance = target.childNodes[0][internalInstanceKey];

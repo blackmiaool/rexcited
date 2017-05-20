@@ -42,7 +42,7 @@ class Component {
             cb
         });
 
-        if (!wrapper.isAsyncSetState) {
+        if (!exports.isAsyncSetState) {            
             wrapper.handleStateQueue(this.props, true);
         }
 
@@ -83,16 +83,22 @@ function cloneElement(element, config, ...children) {
     if (!Array.isArray(element.props.children)) {
         element.props.children = [element.props.children];
     }
-    element.props.children = element.props.children.concat(children).map(function (child) {
+    if(children.length){        
+        element.props.children=children;
+    }
+    element.props.children = element.props.children.map(function (child) {
         return cloneElement(child);
     });
-    if (!element.props.children.length) {
+    
+    if(element.props.children.length===1){
+        element.props.children=element.props.children[0]
+    }
+    if (Array.isArray(element.props.children)&&!element.props.children.length) {
         delete element.props.children;
     }
-
+    
     return element;
 }
-
 
 let exports = {
     createElement,
@@ -101,9 +107,9 @@ let exports = {
     PropTypes,
     createClass,
     isValidElement,
-    cloneElement
-}
-
+    cloneElement,
+    
+} 
 
 export {
     createElement,
@@ -112,7 +118,8 @@ export {
     PropTypes,
     createClass,
     isValidElement,
-    cloneElement
+    cloneElement,
+    
 };
 export default exports;
 window.React = exports;
