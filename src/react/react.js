@@ -1,4 +1,3 @@
-import createElement from "./createElement.js";
 import Children from "./children.js";
 import propTypes from 'prop-types'
 
@@ -42,7 +41,7 @@ class Component {
             cb
         });
 
-        if (!exports.isAsyncSetState) {            
+        if (!exports.isAsyncSetState) {
             wrapper.handleStateQueue(this.props, true);
         }
 
@@ -83,23 +82,52 @@ function cloneElement(element, config, ...children) {
     if (!Array.isArray(element.props.children)) {
         element.props.children = [element.props.children];
     }
-    if(children.length){        
-        element.props.children=children;
+    if (children.length) {
+        element.props.children = children;
     }
     element.props.children = element.props.children.map(function (child) {
         return cloneElement(child);
     });
-    
-    if(element.props.children.length===1){
-        element.props.children=element.props.children[0]
+
+    if (element.props.children.length === 1) {
+        element.props.children = element.props.children[0]
     }
-    if (Array.isArray(element.props.children)&&!element.props.children.length) {
+    if (Array.isArray(element.props.children) && !element.props.children.length) {
         delete element.props.children;
     }
-    
+
     return element;
 }
 
+function createElement(type, props, ...children) {
+    if (!props) {
+        props = {};
+    }
+
+    const instance = {
+        type,
+        props
+    };
+    if (props.key) {
+        instance.key = props.key;
+        delete props.key
+    }
+    if (props.ref) {
+        instance.ref = props.ref;
+        delete props.ref
+    }
+    if (children.length > 1) {
+        instance.props.children = children;
+    } else if (children.length === 1) {
+        instance.props.children = children[0];
+    }
+    if (renderingComponentStack.length) {
+        instance._owner = renderingComponentStack[renderingComponentStack.length - 1];
+    }
+    return instance;
+}
+
+const renderingComponentStack = [];
 let exports = {
     createElement,
     Component,
@@ -108,8 +136,8 @@ let exports = {
     createClass,
     isValidElement,
     cloneElement,
-    
-} 
+    renderingComponentStack,
+}
 
 export {
     createElement,
@@ -119,7 +147,7 @@ export {
     createClass,
     isValidElement,
     cloneElement,
-    
+    renderingComponentStack,
 };
 export default exports;
 window.React = exports;
