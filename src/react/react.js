@@ -19,6 +19,7 @@ function createClass(obj) {
     a.originalCreateClassObj = obj;
     return a;
 }
+let cnt = 0;
 class Component {
     constructor(props, context) {
         this.props = props;
@@ -29,11 +30,14 @@ class Component {
 
     }
     forceUpdate() {
+        cnt++;
         const wrapper = this._reactInternalInstance;
         wrapper.forceUpdate(this.state, this.props);
+        cnt--;
+        console.log('cnt', cnt);
     }
     setState(updater, cb) {
-
+        cnt++;
         const wrapper = this._reactInternalInstance;
 
         wrapper.stateQueue.push({
@@ -43,7 +47,11 @@ class Component {
 
         if (!exports.isAsyncSetState) {
             wrapper.handleStateQueue(this.props, true);
+        } else {
+            wrapper.addToDirty();
         }
+
+        //        console.log(renderingComponentStack.length);
 
     }
 }
@@ -76,6 +84,8 @@ function cloneElement(element, config, ...children) {
     //    }
     element.key = element.props.key || element.key;
     element.ref = element.props.ref || element.ref;
+    element._owner = element.props._owner || element._owner;
+    element._refowner = element.props._refowner || element._refowner;
 
     element.props.children = element.props.children || [];
 
@@ -100,31 +110,34 @@ function cloneElement(element, config, ...children) {
 }
 
 function createElement(type, props, ...children) {
+
     if (!props) {
         props = {};
     }
-
-    const instance = {
+    props = Object.assign({}, props);
+    const element = {
         type,
         props
     };
     if (props.key) {
-        instance.key = props.key;
+        element.key = props.key;
         delete props.key
     }
     if (props.ref) {
-        instance.ref = props.ref;
+        element.ref = props.ref;
         delete props.ref
     }
     if (children.length > 1) {
-        instance.props.children = children;
+        element.props.children = children;
     } else if (children.length === 1) {
-        instance.props.children = children[0];
+        element.props.children = children[0];
     }
     if (renderingComponentStack.length) {
-        instance._owner = renderingComponentStack[renderingComponentStack.length - 1];
+        element._refowner = renderingComponentStack[renderingComponentStack.length - 1];
+    } else {
+        //        console.trace("no owner", element);
     }
-    return instance;
+    return element;
 }
 
 const renderingComponentStack = [];
