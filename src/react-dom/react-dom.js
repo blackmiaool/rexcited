@@ -425,11 +425,11 @@ class ReactWrapper {
             return;
         }
         //        const owner = renderingComponentStack[renderingComponentStack.length - 1];
-        const owner = this._currentElement._refowner;
+        const owner = this._currentElement._refowner||this._currentElement._owner;
         //        console.console.log('owner', owner._instance, ref, this);
         if (!owner && typeof ref === 'string') {
 
-            console.error(ref, this, ref, this.previousRef);
+            console.error( this, ref, this.previousRef);
             throw "no owner ref";
             return;
         }
@@ -604,10 +604,11 @@ class ReactCompositeComponentWrapper extends ReactWrapper {
             console.log('wrong hostNode', element, this, dom);
         }
         this._hostNode = dom;
-
-        this.handleAfterRenderQueue();
-        //        console.console.log(element);
         this.refAttach(this._currentElement.ref);
+        this.handleAfterRenderQueue();
+        
+        //        console.console.log(element);
+        
         return dom;
     }
     updateProps(nextProps, nextRawContext) {
@@ -706,13 +707,14 @@ class ReactCompositeComponentWrapper extends ReactWrapper {
         });
 
         this.stateQueue.length = 0;
-        cbList.forEach((cb) => {
-            cb.call(instance);
-        });
+        
         instance.state = state;
         if (render) {
             this.doUpdate(state, this._instance.props, this._instance.context);
         }
+        cbList.forEach((cb) => {
+            cb.call(instance);
+        });
 
         //        this.doUpdate(state, this._instance.props);
     }
@@ -823,6 +825,7 @@ class ReactDOMComponent extends ReactWrapper {
 
         const dom = document.createElement(type);
         this.bindDom(dom);
+        
         if (type === 'input') {
             dom.addEventListener("input", function (e) {
                 const target = e.target;
@@ -865,11 +868,12 @@ class ReactDOMComponent extends ReactWrapper {
                 }
             }
         }
+        this.refAttach(element.ref);
         //        if (element.ref) {
         //            attrMap.component.ref(element.ref, dom, dom, this, "ref");
         //        }
         handleQueue(this.afterRenderQueue);
-        this.refAttach(element.ref);
+        
 
     }
     remove() {
@@ -1182,6 +1186,10 @@ function render(element, target) {
 }
 
 function findDOMNode(component) {
+    if(component instanceof Node){
+        return component;
+    }
+    
     if (!component) {
         return;
     }

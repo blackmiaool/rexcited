@@ -3,5 +3,5 @@
         "/.git/",
         "/node_modules/"
     ],
-    "bb.beautify.onSave": true
+    "bb.beautify.onSave": false
 }

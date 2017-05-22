@@ -132,6 +132,7 @@ function createElement(type, props, ...children) {
     } else if (children.length === 1) {
         element.props.children = children[0];
     }
+    
     if (renderingComponentStack.length) {
         element._refowner = renderingComponentStack[renderingComponentStack.length - 1];
     } else {
