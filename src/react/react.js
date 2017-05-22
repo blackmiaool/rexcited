@@ -70,10 +70,6 @@ function cloneElement(element, config, ...children) {
 
     element = Object.assign({}, element);
     element.props = Object.assign({}, element.props, config);
-    //    if (element.props.key) {
-    //        element.key = element.props.key;
-    //        delete element.props.key;
-    //    }
     element.key = element.props.key || element.key;
     element.ref = element.props.ref || element.ref;
     element._owner = element.props._owner || element._owner;

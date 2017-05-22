@@ -1,10 +1,3 @@
-//import $ from "jquery";
-
-
-
-
-
-
 function createElement(type, props, ...children) {
     if (!props) {
         props = {};
@@ -31,4 +24,3 @@ function createElement(type, props, ...children) {
 }
 
 export default createElement;
-//window.React = exports;

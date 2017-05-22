@@ -381,11 +381,7 @@ class ReactWrapper {
 
 
         if (owner && this._currentElement) {
-            //            if (this._currentElement && !this._currentElement._owner) {
             this._currentElement._owner = owner;
-            //            } else {
-
-            //            }
         }
         if (typeof this._currentElement === 'string') {
             this.owner = owner;
@@ -401,9 +397,8 @@ class ReactWrapper {
         if (!ref && !this.previousRef) {
             return;
         }
-        //        const owner = renderingComponentStack[renderingComponentStack.length - 1];
+
         const owner = this._currentElement._refowner || this._currentElement._owner;
-        //        console.console.log('owner', owner._instance, ref, this);
         if (!owner && typeof ref === 'string') {
 
             console.error(this, ref, this.previousRef);
@@ -663,7 +658,6 @@ class ReactCompositeComponentWrapper extends ReactWrapper {
             cb.call(instance);
         });
 
-        //        this.doUpdate(state, this._instance.props);
     }
     forceUpdate(state, props) {
         this.doUpdate(state, props, this.getSelfContext());
@@ -692,9 +686,7 @@ class ReactCompositeComponentWrapper extends ReactWrapper {
 
         let shouldRender;
         if (instance.shouldComponentUpdate) {
-            //            isAsyncSetState = true;
             shouldRender = instance.shouldComponentUpdate(nextProps, nextState, nextContext);
-            //            this.handleStateQueue(nextProps,!shouldRender);
         } else {
             shouldRender = true;
         }
@@ -808,12 +800,7 @@ class ReactDOMComponent extends ReactWrapper {
             }
         }
         this.refAttach(element.ref);
-        //        if (element.ref) {
-        //            attrMap.component.ref(element.ref, dom, dom, this, "ref");
-        //        }
         handleQueue(this.afterRenderQueue);
-
-
     }
     remove() {
 
@@ -926,7 +913,6 @@ function update(dom, element, {
             console.log('dom to comment')
         }
         const comment = document.createComment("react-empty: ?");
-        //        dom[internalInstanceKey].remove&&dom[internalInstanceKey].remove();
         dom.parentElement && dom.parentElement.replaceChild(comment, dom)
         comment[internalInstanceKey] = dom[internalInstanceKey];
         return comment;
@@ -956,23 +942,15 @@ function update(dom, element, {
     }
 
 
-
-
-
     function createAndReplace() {
-
         dom[internalInstanceKey].remove && dom[internalInstanceKey].remove();
         const newDom = create(element, {
             context,
             owner: (componentRef || {})._reactInternalInstance
         });
         if (dom.parentElement) {
-
             dom.parentElement.replaceChild(newDom, dom);
-
-
         }
-
         return newDom;
     }
     if (isHost) {
@@ -1121,4 +1099,4 @@ export {
     findDOMNode
 };
 export default exports;
-//window.ReactDOM = exports;
+window.ReactDOM = exports;

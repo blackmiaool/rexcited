@@ -2,12 +2,12 @@ function only(children) {
     if (Array.isArray(children)) {
         return children[0];
     } else {
-        if(children.type){
-            return children;    
-        }else{
+        if (children.type) {
+            return children;
+        } else {
             return children[Object.keys(children)[0]];
         }
-        
+
     }
 
 }
@@ -15,15 +15,14 @@ function only(children) {
 function isText(key) {
     return typeof key === "string" || typeof key === "number";
 }
-//React.Children.map(children, function[(thisArg)])
-//Invokes a function on every immediate child contained within children with this set to thisArg. If children is a keyed fragment or array it will be traversed: the function will never be passed the container objects. If children is null or undefined, returns null or undefined rather than an array.
+
 function traverse(children, cb, thisArg, addKey) {
-    if (typeof children === 'object' && children&&!children.type) {//map
+    if (typeof children === 'object' && children && !children.type) { //map
         children = Object.keys(children).map((key) => {
             return children[key];
         });
-    }else{
-        children=[children];
+    } else {
+        children = [children];
     }
 
     const arr = [];
@@ -45,11 +44,11 @@ function traverse(children, cb, thisArg, addKey) {
                     return recursion(ele, `${key}:`, j);
                 });
                 return;
-            } else {           
-                if(addKey){
-                child = Object.assign({}, child);    
+            } else {
+                if (addKey) {
+                    child = Object.assign({}, child);
                 }
-                
+
                 if (child && isText(child.key)) {
                     key = `${preKey}\$${child.key}`;
 
