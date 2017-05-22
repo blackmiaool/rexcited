@@ -110,22 +110,6 @@ regiterAttr("defaultValue", "dom", function (value, previousValue, dom) {
 regiterAttr("key", "", function () {});
 regiterAttr("children", "", function () {});
 
-//regiterAttr("ref", "", function (value, previousValue, dom, wrapper, attrName) {
-//    let ref;
-//    const owner = renderingComponentStack[renderingComponentStack.length - 1];
-//    if (owner) {
-//        if (typeof value === "function") {
-//
-//            owner.afterRenderQueue.push(value.bind(undefined, wrapper._instance));
-//        } else {
-//            owner.afterRenderQueue.push(() => {
-//                owner._instance.refs[value] = wrapper._instance;
-//            });
-//        }
-//    }
-//
-//});
-
 const events = [];
 
 function firstToUpperCase(word) {
@@ -207,25 +191,25 @@ function equals(x, y) {
             return false;
         }
         switch (typeof (y[p])) {
-        case 'object':
-            if (y[p] instanceof Date) {
-                if (y[p].getTime() !== x[p].getTime()) {
+            case 'object':
+                if (y[p] instanceof Date) {
+                    if (y[p].getTime() !== x[p].getTime()) {
+                        return false;
+                    }
+                }
+                if (!equals(x[p], y[p])) {
+                    return false
+                };
+                break;
+            case 'function':
+                if (typeof (x[p]) == 'undefined' || (p != 'equals')) {
+                    return false;
+                };
+                break;
+            default:
+                if (y[p] != x[p]) {
                     return false;
                 }
-            }
-            if (!equals(x[p], y[p])) {
-                return false
-            };
-            break;
-        case 'function':
-            if (typeof (x[p]) == 'undefined' || (p != 'equals')) {
-                return false;
-            };
-            break;
-        default:
-            if (y[p] != x[p]) {
-                return false;
-            }
         }
     }
 
@@ -299,13 +283,6 @@ function getChildren(parent, children, old = {}, owner, context, instance) {
                     recursion(ele, `${key}:`, j);
                 });
             } else {
-                //                if (child.props.key) {
-                //                    child.key = child.props.key.match(/\w+$/)[0];
-                //                    delete child.props.key;
-                //                }
-
-
-
                 if (child && isText(child.key)) {
                     key = `${preKey}\$${child.key}`;
 
@@ -425,11 +402,11 @@ class ReactWrapper {
             return;
         }
         //        const owner = renderingComponentStack[renderingComponentStack.length - 1];
-        const owner = this._currentElement._refowner||this._currentElement._owner;
+        const owner = this._currentElement._refowner || this._currentElement._owner;
         //        console.console.log('owner', owner._instance, ref, this);
         if (!owner && typeof ref === 'string') {
 
-            console.error( this, ref, this.previousRef);
+            console.error(this, ref, this.previousRef);
             throw "no owner ref";
             return;
         }
@@ -528,33 +505,6 @@ class ReactCompositeComponentWrapper extends ReactWrapper {
             }
         }
     }
-    transformRef(element) {
-        const that = this;
-        if (element.props.children) {
-            function cb(child) {
-                if (!child) {
-                    return;
-                }
-                const refKey = child.ref;
-
-                if (typeof refKey === "string") {
-                    child.ref = function (ref) {
-                        if (showLog) {
-                            console.log('bind', that._instance, refKey)
-                        }
-                        that._instance.refs[refKey] = ref;
-                    }
-                }
-                if (child.type && !isComponent(child)) {
-                    if (child.props && child.props.children) {
-                        React.Children.forEach(child.props.children, cb, that);
-                    }
-                }
-
-            }
-            React.Children.forEach(element.props.children, cb, that);
-        }
-    }
     getContext() {
         if (this._instance.getChildContext) {
             const context = this._instance.getChildContext();
@@ -601,14 +551,11 @@ class ReactCompositeComponentWrapper extends ReactWrapper {
         });
         renderingComponentStack.pop();
         if (!dom) {
-            console.log('wrong hostNode', element, this, dom);
+            console.warn('wrong hostNode', element, this, dom);
         }
         this._hostNode = dom;
         this.refAttach(this._currentElement.ref);
         this.handleAfterRenderQueue();
-        
-        //        console.console.log(element);
-        
         return dom;
     }
     updateProps(nextProps, nextRawContext) {
@@ -707,13 +654,12 @@ class ReactCompositeComponentWrapper extends ReactWrapper {
         });
 
         this.stateQueue.length = 0;
-        
+
         instance.state = state;
         if (render) {
             this.doUpdate(state, this._instance.props, this._instance.context);
         }
         cbList.forEach((cb) => {
-            console.log(cb);
             cb.call(instance);
         });
 
@@ -774,10 +720,6 @@ class ReactCompositeComponentWrapper extends ReactWrapper {
                             attrMap.component[attrName](nextProps[attrName], this._instance.props[attrName], dom, this, attrName);
                         }
                     }
-
-                    //                    if (this._currentElement.ref) {
-                    //                        attrMap.component.ref(this._currentElement.ref, this._currentElement.ref, dom, this, "ref");
-                    //                    }
                 }
                 instance.props = nextProps;
                 this._currentElement.props = nextProps;
@@ -787,10 +729,6 @@ class ReactCompositeComponentWrapper extends ReactWrapper {
 
             renderingComponentStack.push(this);
             const element = this.render();
-
-            //            if (element) {
-            //                this.transformRef(element); //they will remove this    
-            //            }
 
             result = update(dom, element, {
                 componentRef: instance,
@@ -826,7 +764,7 @@ class ReactDOMComponent extends ReactWrapper {
 
         const dom = document.createElement(type);
         this.bindDom(dom);
-        
+
         if (type === 'input') {
             dom.addEventListener("input", function (e) {
                 const target = e.target;
@@ -874,7 +812,7 @@ class ReactDOMComponent extends ReactWrapper {
         //            attrMap.component.ref(element.ref, dom, dom, this, "ref");
         //        }
         handleQueue(this.afterRenderQueue);
-        
+
 
     }
     remove() {
@@ -979,11 +917,6 @@ function update(dom, element, {
     componentRef,
     context
 } = {}) {
-    //    if (!dom) { //todo
-    //        return create(element, {
-    //            context
-    //        });
-    //    }
     if (showLog) {
         console.log('update', dom, element, context, componentRef)
     }
@@ -998,10 +931,6 @@ function update(dom, element, {
         comment[internalInstanceKey] = dom[internalInstanceKey];
         return comment;
     }
-
-    //    if (element && isStateLess(element.type)) {
-    //        return update(dom, element.type(element.props));
-    //    }
 
     if (dom.nodeType === 8 && element) { //comment, force render
         forceRender = true;
@@ -1085,17 +1014,6 @@ function update(dom, element, {
 
     }
 
-    //    function replace() {
-    //        const newDom = create(element, {
-    //            owner:componentRef._reactInternalInstance,
-    //            context
-    //        });
-    //        if (dom.parentElement) {
-    //            dom.parentElement.replaceChild(newDom, dom);
-    //        }
-    //
-    //        return newDom;
-    //    }
     if (forceRender || typeof element0 !== typeof element) {
         return createAndReplace();
     }
@@ -1181,17 +1099,14 @@ function render(element, target) {
     }
     handleQueue(globalAfterRenderQueue);
     firstRender = false;
-
-    //    const targetInstance = target.childNodes[0][internalInstanceKey];
-    //    console.log(targetInstance)
 }
 
 function findDOMNode(component) {
-    console.log('component',this,component);
-    if(component instanceof Node){
+    console.log('component', this, component);
+    if (component instanceof Node) {
         return component;
     }
-    
+
     if (!component) {
         return;
     }

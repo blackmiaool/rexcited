@@ -19,7 +19,6 @@ function createClass(obj) {
     a.originalCreateClassObj = obj;
     return a;
 }
-let cnt = 0;
 class Component {
     constructor(props, context) {
         this.props = props;
@@ -30,14 +29,10 @@ class Component {
 
     }
     forceUpdate() {
-        cnt++;
         const wrapper = this._reactInternalInstance;
         wrapper.forceUpdate(this.state, this.props);
-        cnt--;
-        console.log('cnt', cnt);
     }
     setState(updater, cb) {
-        cnt++;
         const wrapper = this._reactInternalInstance;
 
         wrapper.stateQueue.push({
@@ -50,9 +45,6 @@ class Component {
         } else {
             wrapper.addToDirty();
         }
-
-        //        console.log(renderingComponentStack.length);
-
     }
 }
 
@@ -87,10 +79,10 @@ function cloneElement(element, config, ...children) {
     element._owner = element.props._owner || element._owner;
     element._refowner = element.props._refowner || element._refowner;
 
-    if(element.ref){
-       element._refowner=renderingComponentStack[renderingComponentStack.length-1] ;
+    if (element.ref) {
+        element._refowner = renderingComponentStack[renderingComponentStack.length - 1];
     }
-    
+
     element.props.children = element.props.children || [];
 
     if (!Array.isArray(element.props.children)) {
@@ -136,7 +128,7 @@ function createElement(type, props, ...children) {
     } else if (children.length === 1) {
         element.props.children = children[0];
     }
-    
+
     if (renderingComponentStack.length) {
         element._refowner = renderingComponentStack[renderingComponentStack.length - 1];
     } else {

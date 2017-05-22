@@ -1,7 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 
-console.log("my webpack");
+
 var config = {
     entry: {
         //        'app': './test/index.js'
@@ -44,7 +44,7 @@ var test0Config = Object.assign({}, config, {
             react: path.resolve(path.join(__dirname, 'src', 'react', 'react')),
             'react-dom': path.resolve(path.join(__dirname, 'src', 'react-dom', 'react-dom')),
             "react-transition-group": path.resolve(path.join(__dirname, 'react-transition-group', 'src')),
-//            'rc-queue-anim': path.resolve(path.join(__dirname, 'queue-anim', 'src')),
+            //            'rc-queue-anim': path.resolve(path.join(__dirname, 'queue-anim', 'src')),
             //            'rc-tween-one': path.resolve(path.join(__dirname, 'tween-one', 'src')),
         },
         //                root: "."
@@ -60,7 +60,7 @@ var testConfig = Object.assign({}, config, {
         extensions: ['.js', '.jsx'],
         alias: {
             "react-transition-group": path.resolve(path.join(__dirname, 'react-transition-group', 'src')),
-//            'rc-queue-anim': path.resolve(path.join(__dirname, 'queue-anim', 'src')),
+            //            'rc-queue-anim': path.resolve(path.join(__dirname, 'queue-anim', 'src')),
             //            'rc-tween-one': path.resolve(path.join(__dirname, 'tween-one', 'src')),
         },
         //                root: "."
