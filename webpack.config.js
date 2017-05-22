@@ -4,8 +4,8 @@ const webpack = require('webpack');
 
 const config = {
     entry: {
-        'react': ['./src/react', './src/react-dom'],
-        'todo': './test/index.jsx'
+        'react': ['./src/react'],
+        'react-dom': ['./src/react-dom']
     },
     module: {
         loaders: [{
