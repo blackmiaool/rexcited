@@ -29,16 +29,17 @@ const config = {
     plugins: [new webpack.DefinePlugin({
         'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production')
     }), new webpack.optimize.CommonsChunkPlugin({
-        names: "react",
+        names: ["react"],
     })],
     devtool: false,
     watch: true,
     output: {
         path: path.resolve(path.join(__dirname, 'dist')),
-        filename: "[name].js"
+        filename: "[name].js",
+        libraryTarget: 'umd'
     },
 };
-const originalConfig = {
+const testConfig = {
     entry: {
         'todo': './test/index.jsx'
     },
@@ -57,8 +58,10 @@ const originalConfig = {
     },
     resolve: {
         alias: {
-            //            react: path.resolve(path.join(__dirname, 'src', 'react', 'react')),
-            //            'react-dom': path.resolve(path.join(__dirname, 'src', 'react-dom', 'react-dom')),
+            'react/lib': path.resolve(path.join(__dirname, 'src', 'react', 'lib')),
+            'react-dom/lib': path.resolve(path.join(__dirname, 'src', 'react-dom', 'lib')),
+            react: path.resolve(path.join(__dirname, 'dist', 'react.js')),
+            'react-dom': path.resolve(path.join(__dirname, 'dist', 'react-dom.js')),
         },
     },
     plugins: [new webpack.DefinePlugin({
@@ -68,7 +71,7 @@ const originalConfig = {
     watch: true,
     output: {
         path: path.resolve(path.join(__dirname, 'dist')),
-        filename: "[name].original.js"
+        filename: "[name].js"
     },
 };
-module.exports = [config, originalConfig];
+module.exports = [config, testConfig];

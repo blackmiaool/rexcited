@@ -1,4 +1,14 @@
-webpackJsonp([0],{
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else {
+		var a = factory();
+		for(var i in a) (typeof exports === 'object' ? exports : root)[i] = a[i];
+	}
+})(this, function() {
+return webpackJsonp([0],{
 
 /***/ 1:
 /***/ (function(module, exports, __webpack_require__) {
@@ -1192,3 +1202,4 @@ module.exports = __webpack_require__(1);
 /***/ })
 
 },[9]);
+});
