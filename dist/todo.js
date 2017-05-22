@@ -3244,7 +3244,6 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
             }
 
             function findDOMNode(component) {
-                console.log('component', this, component);
                 if (component instanceof Node) {
                     return component;
                 }

@@ -1171,7 +1171,6 @@ function render(element, target) {
 }
 
 function findDOMNode(component) {
-    console.log('component', this, component);
     if (component instanceof Node) {
         return component;
     }
