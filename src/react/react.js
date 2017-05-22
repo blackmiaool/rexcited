@@ -87,6 +87,10 @@ function cloneElement(element, config, ...children) {
     element._owner = element.props._owner || element._owner;
     element._refowner = element.props._refowner || element._refowner;
 
+    if(element.ref){
+       element._refowner=renderingComponentStack[renderingComponentStack.length-1] ;
+    }
+    
     element.props.children = element.props.children || [];
 
     if (!Array.isArray(element.props.children)) {

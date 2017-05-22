@@ -713,6 +713,7 @@ class ReactCompositeComponentWrapper extends ReactWrapper {
             this.doUpdate(state, this._instance.props, this._instance.context);
         }
         cbList.forEach((cb) => {
+            console.log(cb);
             cb.call(instance);
         });
 
@@ -1186,6 +1187,7 @@ function render(element, target) {
 }
 
 function findDOMNode(component) {
+    console.log('component',this,component);
     if(component instanceof Node){
         return component;
     }
