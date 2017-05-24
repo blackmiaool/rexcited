@@ -1,0 +1,64 @@
+body {
+    margin: 0;
+    padding: 40px;
+}
+
+#case-select {}
+
+* {
+    box-sizing: border-box;
+}
+
+ul {
+    padding: 0;
+    margin: 0;
+    margin-bottom: 20px;
+}
+
+li {
+    display: inline-block;
+}
+
+#editor {
+    width: 50%;
+    height: 400px;
+}
+
+#preview {
+    display: inline-block;
+    width: 50%;
+    height: 400px;
+    border: 1px solid rgb(169, 169, 169);
+    border-left: none;
+    vertical-align: top;
+    position: relative;
+}
+
+.top-indicator,
+.bottom-indicator {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    margin: 0;
+    font-size: 20px;
+    line-height: 20px;
+}
+
+.top-indicator {
+    top: -20px;
+}
+
+.bottom-indicator {
+    bottom: -20px;
+}
+
+#preview iframe {
+    height: 200px;
+    width: 100%;
+}
+
+#editor textarea {
+    height: 100%;
+    width: 100%;
+}

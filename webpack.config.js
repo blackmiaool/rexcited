@@ -1,6 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
-
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 const config = {
     entry: {
@@ -27,10 +27,12 @@ const config = {
         },
     },
     plugins: [new webpack.DefinePlugin({
-        'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production')
-    }), new webpack.optimize.CommonsChunkPlugin({
-        names: ["react"],
-    })],
+            'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production')
+        }), new webpack.optimize.CommonsChunkPlugin({
+            names: ["react"],
+        }),
+//              new UglifyJSPlugin()
+             ],
     devtool: false,
     watch: true,
     output: {
@@ -38,14 +40,14 @@ const config = {
         filename: "[name].js",
         libraryTarget: 'umd'
     },
+
 };
 const testConfig = {
     entry: {
-        'todo': './test/index.jsx'
+        'demo': './test/demo/index.jsx'
     },
     module: {
-        loaders: [{
-            test: /\.jsx?$/,
+        rules: [{
             loader: 'babel-loader',
             query: {
                 presets: ['latest', 'stage-0', 'react'],
@@ -54,7 +56,11 @@ const testConfig = {
             }, {
             test: /\.json$/,
             loader: "json-loader"
-            }]
+            }, {
+            include: path.resolve(path.join(__dirname, 'test')),
+            test: /official\//,
+            use: 'raw-loader'
+        }]
     },
     resolve: {
         alias: {
@@ -64,9 +70,6 @@ const testConfig = {
             'react-dom': path.resolve(path.join(__dirname, 'dist', 'react-dom.js')),
         },
     },
-    plugins: [new webpack.DefinePlugin({
-        'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production')
-    })],
     devtool: false,
     watch: true,
     output: {

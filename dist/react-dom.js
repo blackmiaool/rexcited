@@ -104,7 +104,11 @@ regiterAttr("style", "dom", function (value, previousValue, dom) {
     if (!value) {
         dom.removeAttribute("style");
     }
-    value = Object.assign({}, value);
+
+    if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object') {
+        value = Object.assign({}, value);
+    }
+
     if (typeof value === "string" && value) {
         dom.setAttribute("style", value);
     } else if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && value) {
@@ -126,6 +130,13 @@ regiterAttr("className", "dom", function (value, previousValue, dom) {
         dom.setAttribute("class", "");
     } else {
         dom.setAttribute("class", value);
+    }
+});
+regiterAttr("value", "dom", function (value, previousValue, dom) {
+    if (dom.tagName === 'TEXTAREA') {
+        dom.value = value || '';
+    } else {
+        dom.setAttribute("value", value);
     }
 });
 regiterAttr("defaultValue", "dom", function (value, previousValue, dom) {
@@ -848,7 +859,7 @@ var ReactDOMComponent = function (_ReactWrapper2) {
         var dom = document.createElement(type);
         _this3.bindDom(dom);
 
-        if (type === 'input') {
+        if (type === 'input' || type === 'textarea') {
             dom.addEventListener("input", function (e) {
                 var target = e.target;
                 var instance = target[internalInstanceKey];
@@ -1164,6 +1175,7 @@ function render(element, target) {
         var created = _create(element);
 
         created.setAttribute('data-reactroot', "");
+        created.setAttribute('data-rexcited', "");
         target.appendChild(created);
     }
     handleQueue(globalAfterRenderQueue);
