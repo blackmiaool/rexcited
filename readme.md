@@ -9,15 +9,16 @@ Lightweight React.
 ### Feature
 
 * Basically compatible with react.
-* Less than 30k after minified.
-* Support string style attribute(style="excited:1;").
-* Support class attribute(class="excited").
+* Less than 30k after being minified.
+* Support string style attribute (style="excited:1;").
+* Support class attribute (class="excited").
 
 ### How to use it
 
 ##### Use it with `<script>`
 
 `<script src="http://blackmiaool.com/rexcited/dist/react.js"></script>`
+
 `<script src="http://blackmiaool.com/rexcited/dist/react-dom.js"></script>`
 
 ##### Use it with webpack
