@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 const context = require.context("../official", false, /\.jsx$/);
 
 function path2name(path) {
-    path = path.match(/\d+(\w+)/)[1];
+    path = path.match(/\d+([\w']+)/)[1];
 
     function replace(match, header) {
         if (match[0] === '_') {
@@ -68,7 +68,12 @@ class Editor extends React.Component {
     }
 }
 
-
+const preScript = ` var origin = location.origin;
+        parent.postMessage(name, origin);
+        var interval_id = setInterval(function(){}, 1e5);
+        for (var i = 1; i <= interval_id; i++){
+            clearInterval(i);            
+        } `;
 class App extends React.Component {
     constructor(props) {
         super(props);
@@ -80,7 +85,13 @@ class App extends React.Component {
         setTimeout(() => {
             this.updatePreview();
         }, 100);
-
+        window.addEventListener('message', (e) => {
+            var msg = e.data;
+            const obj = {
+                [msg]: true
+            };
+            this.setState(obj);
+        });
     }
     componentDidMount() {
         this.setState({
@@ -89,6 +100,7 @@ class App extends React.Component {
     document.getElementById('root')
 );`
         });
+
     }
     setCode(iframe, code) {
         const doc = iframe.contentDocument;
@@ -100,7 +112,12 @@ class App extends React.Component {
         if (!this.refs.preview) {
             return;
         }
-        this.setCode(this.refs['preview'], `
+        this.setState({
+            react: false,
+            rexcited: false,
+        });
+        setTimeout(() => {
+            this.setCode(this.refs['preview'], `
 <!DOCTYPE html>
 <html>
 
@@ -115,17 +132,14 @@ class App extends React.Component {
 <body>
     <div id="root"></div>
     <script>
-        var interval_id = setInterval(function(){}, 1e5);
-        for (var i = 1; i <= interval_id; i++){
-            window.clearInterval(i);
-            console.log(i);
-        }        
+        var name='rexcited';
+        ${preScript}
     </script>
     <script type="text/babel">${this.state.code}</script>
 </body>
 </html>
 `);
-        this.setCode(this.refs['preview-original'], `
+            this.setCode(this.refs['preview-original'], `
 <!DOCTYPE html>
 <html>
 
@@ -140,19 +154,14 @@ class App extends React.Component {
 <body>
     <div id="root"></div>
     <script>
-        var interval_id = setInterval(function(){}, 1e5);
-        for (var i = 1; i <= interval_id; i++){
-            window.clearInterval(i);
-            console.log(i);
-        }        
+        var name='react';
+        ${preScript}
     </script>
     <script type="text/babel">${this.state.code}</script>
 </body>
 </html>
 `);
-
-
-
+        });
     }
     onSelect(name) {
         this.setState({
@@ -170,7 +179,7 @@ class App extends React.Component {
         }
         this.previewTimeout = setTimeout(() => {
             this.updatePreview();
-        }, 2000);
+        }, 1000);
     }
     render() {
 
@@ -180,8 +189,14 @@ class App extends React.Component {
             <Editor onChange={this.onChange} code={this.state.code}/>
             <div id="preview">
                 <h5 class="top-indicator">Rexcited↓</h5>
-                <iframe ref="preview"  src="demo/iframe.html" frameborder="0" style="vertical-align: top;"></iframe>
-                <iframe ref="preview-original" src="demo/iframe.html" frameborder="0" style="vertical-align: top;"></iframe>
+                <div class="preview top">                    
+                    <div class="loading-text"><h1>Loading...</h1></div>
+                    <iframe style={{opacity:this.state.rexcited?1:0.1,'vertical-align': 'top'}} ref="preview" class="top-iframe" src="./demo/iframe.html?name=rexcited" frameborder="0"></iframe>
+                </div>
+                <div class="preview bottom">                    
+                    <div class="loading-text"><h1>Loading...</h1></div>
+                    <iframe style={{opacity:this.state.react?1:0.1,'vertical-align': 'top'}} ref="preview-original" src="./demo/iframe.html?name=react" frameborder="0"></iframe>
+                </div>
                 <h5 class="bottom-indicator">React↑</h5>
             </div>
             

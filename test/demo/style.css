@@ -54,8 +54,29 @@ li {
 }
 
 #preview iframe {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+    background-color: white;
+}
+
+#preview .preview {
     height: 200px;
     width: 100%;
+    position: relative;
+}
+
+#preview .top-iframe {
+    border-bottom: 1px solid rgb(169, 169, 169);
+}
+
+#preview .loading-text {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
 }
 
 #editor textarea {

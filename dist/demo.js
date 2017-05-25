@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 18);
+/******/ 	return __webpack_require__(__webpack_require__.s = 37);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -2160,15 +2160,34 @@ var map = {
 	"./12the_data_flows_down.jsx": 6,
 	"./13handling_events.jsx": 7,
 	"./14conditional_rendering.jsx": 8,
-	"./1hello_world.jsx": 9,
-	"./2embedding_expressions_in_jsx.jsx": 10,
-	"./3react_only_updates_what's_necessary.jsx": 11,
-	"./4rendering_a_component.jsx": 12,
-	"./5composing_components.jsx": 13,
-	"./6extracting_components.jsx": 14,
-	"./7extracting_components2.jsx": 15,
-	"./8state_and_lifecycle.jsx": 16,
-	"./9converting_a_function_to_a_class.jsx": 17
+	"./15element_variables.jsx": 9,
+	"./16inline_if_with_logical_operator.jsx": 10,
+	"./17preventing_component_from_rendering.jsx": 11,
+	"./18rendering_multiple_components.jsx": 12,
+	"./19basic_list_component.jsx": 13,
+	"./1hello_world.jsx": 14,
+	"./20extracting_components_with_keys.jsx": 15,
+	"./21keys_must_only_be_unique_among_siblings.jsx": 16,
+	"./22embedding_map()_in_jsx.jsx": 17,
+	"./23controlled_components.jsx": 18,
+	"./24the_select_tag.jsx": 19,
+	"./25handling_multiple_inputs.jsx": 20,
+	"./26lifting_state_up.jsx": 21,
+	"./27adding_a_second_input.jsx": 22,
+	"./28lifting_state_up2.jsx": 23,
+	"./29containment.jsx": 24,
+	"./2embedding_expressions_in_jsx.jsx": 25,
+	"./30specialization.jsx": 26,
+	"./31exposing_dom_refs_to_parent_components.jsx": 27,
+	"./32uncontrolled_components.jsx": 28,
+	"./33how_to_use_context.jsx": 29,
+	"./3react_only_updates_what's_necessary.jsx": 30,
+	"./4rendering_a_component.jsx": 31,
+	"./5composing_components.jsx": 32,
+	"./6extracting_components.jsx": 33,
+	"./7extracting_components2.jsx": 34,
+	"./8state_and_lifecycle.jsx": 35,
+	"./9converting_a_function_to_a_class.jsx": 36
 };
 function webpackContext(req) {
 	return __webpack_require__(webpackContextResolve(req));
@@ -2238,7 +2257,7 @@ module.exports = "function UserGreeting(props) {\n    return <h1>Welcome back!</
 "use strict";
 
 
-module.exports = "ReactDOM.render(\n    <h1>Hello, world!</h1>,\n    document.getElementById('root')\n);\n";
+module.exports = "class LoginControl extends React.Component {\r\n  constructor(props) {\r\n    super(props);\r\n    this.handleLoginClick = this.handleLoginClick.bind(this);\r\n    this.handleLogoutClick = this.handleLogoutClick.bind(this);\r\n    this.state = {isLoggedIn: false};\r\n  }\r\n\r\n  handleLoginClick() {\r\n    this.setState({isLoggedIn: true});\r\n  }\r\n\r\n  handleLogoutClick() {\r\n    this.setState({isLoggedIn: false});\r\n  }\r\n\r\n  render() {\r\n    const isLoggedIn = this.state.isLoggedIn;\r\n    \r\n    let button = null;\r\n    if (isLoggedIn) {\r\n      button = <LogoutButton onClick={this.handleLogoutClick} />;\r\n    } else {\r\n      button = <LoginButton onClick={this.handleLoginClick} />;\r\n    }\r\n\r\n    return (\r\n      <div>\r\n        <Greeting isLoggedIn={isLoggedIn} />\r\n        {button}\r\n      </div>\r\n    );\r\n  }\r\n}\r\n\r\nfunction UserGreeting(props) {\r\n  return <h1>Welcome back!</h1>;\r\n}\r\n\r\nfunction GuestGreeting(props) {\r\n  return <h1>Please sign up.</h1>;\r\n}\r\n\r\nfunction Greeting(props) {\r\n  const isLoggedIn = props.isLoggedIn;\r\n  if (isLoggedIn) {\r\n    return <UserGreeting />;\r\n  }\r\n  return <GuestGreeting />;\r\n}\r\n\r\nfunction LoginButton(props) {\r\n  return (\r\n    <button onClick={props.onClick}>\r\n      Login\r\n    </button>\r\n  );\r\n}\r\n\r\nfunction LogoutButton(props) {\r\n  return (\r\n    <button onClick={props.onClick}>\r\n      Logout\r\n    </button>\r\n  );\r\n}\r\n\r\nReactDOM.render(\r\n  <LoginControl />,\r\n  document.getElementById('root')\r\n);\r\n";
 
 /***/ }),
 /* 10 */
@@ -2247,7 +2266,7 @@ module.exports = "ReactDOM.render(\n    <h1>Hello, world!</h1>,\n    document.ge
 "use strict";
 
 
-module.exports = "function formatName(user) {\n    return user.firstName + ' ' + user.lastName;\n}\n\nconst user = {\n    firstName: 'Harper',\n    lastName: 'Perez'\n};\n\nconst element = (\n    <h1>\n    Hello, {formatName(user)}!\n  </h1>\n);\n\nReactDOM.render(\n    element,\n    document.getElementById('root')\n);\n";
+module.exports = "function Mailbox(props) {\r\n    const unreadMessages = props.unreadMessages;\r\n    return (\r\n        <div>\r\n      <h1>Hello!</h1>\r\n      {unreadMessages.length > 0 &&\r\n        <h2>\r\n          You have {unreadMessages.length} unread messages.\r\n        </h2>\r\n      }\r\n    </div>\r\n    );\r\n}\r\n\r\nconst messages = ['React', 'Re: React', 'Re:Re: React'];\r\nReactDOM.render(\r\n    <Mailbox unreadMessages={messages} />,\r\n    document.getElementById('root')\r\n);";
 
 /***/ }),
 /* 11 */
@@ -2256,7 +2275,7 @@ module.exports = "function formatName(user) {\n    return user.firstName + ' ' +
 "use strict";
 
 
-module.exports = "function tick() {\n    const element = (\n        <div>\n      <h1>Hello, world!</h1>\n      <h2>It is {new Date().toLocaleTimeString()}.</h2>\n    </div>\n    );\n    ReactDOM.render(\n        element,\n        document.getElementById('root')\n    );\n}\n\nsetInterval(tick, 1000);\n";
+module.exports = "function WarningBanner(props) {\r\n    if (!props.warn) {\r\n        return null;\r\n    }\r\n\r\n    return (\r\n        <div className=\"warning\">\r\n      Warning!\r\n    </div>\r\n    );\r\n}\r\n\r\nclass Page extends React.Component {\r\n    constructor(props) {\r\n        super(props);\r\n        this.state = {\r\n            showWarning: true\r\n        }\r\n        this.handleToggleClick = this.handleToggleClick.bind(this);\r\n    }\r\n\r\n    handleToggleClick() {\r\n        this.setState(prevState => ({\r\n            showWarning: !prevState.showWarning\r\n        }));\r\n    }\r\n\r\n    render() {\r\n        return (\r\n            <div>\r\n        <WarningBanner warn={this.state.showWarning} />\r\n        <button onClick={this.handleToggleClick}>\r\n          {this.state.showWarning ? 'Hide' : 'Show'}\r\n        </button>\r\n      </div>\r\n        );\r\n    }\r\n}\r\n\r\nReactDOM.render(\r\n    <Page />,\r\n    document.getElementById('root')\r\n);";
 
 /***/ }),
 /* 12 */
@@ -2265,7 +2284,7 @@ module.exports = "function tick() {\n    const element = (\n        <div>\n     
 "use strict";
 
 
-module.exports = "function Welcome(props) {\n    return <h1>Hello, {props.name}</h1>;\n}\n\nconst element = <Welcome name=\"Sara\" />;\nReactDOM.render(\n    element,\n    document.getElementById('root')\n);\n";
+module.exports = "const numbers = [1, 2, 3, 4, 5];\r\nconst listItems = numbers.map((numbers) =>\r\n    <li>{numbers}</li>\r\n);\r\n\r\nReactDOM.render(\r\n    <ul>{listItems}</ul>,\r\n    document.getElementById('root')\r\n);";
 
 /***/ }),
 /* 13 */
@@ -2274,7 +2293,7 @@ module.exports = "function Welcome(props) {\n    return <h1>Hello, {props.name}<
 "use strict";
 
 
-module.exports = "function Welcome(props) {\n    return <h1>Hello, {props.name}</h1>;\n}\n\nfunction App() {\n    return (\n        <div>\n      <Welcome name=\"Sara\" />\n      <Welcome name=\"Cahal\" />\n      <Welcome name=\"Edite\" />\n    </div>\n    );\n}\n\nReactDOM.render(\n    <App />,\n    document.getElementById('root')\n);\n";
+module.exports = "function NumberList(props) {\r\n    const numbers = props.numbers;\r\n    const listItems = numbers.map((number) =>\r\n        <li key={number.toString()}>\r\n      {number}\r\n    </li>\r\n    );\r\n    return (\r\n        <ul>{listItems}</ul>\r\n    );\r\n}\r\n\r\nconst numbers = [1, 2, 3, 4, 5];\r\nReactDOM.render(\r\n    <NumberList numbers={numbers} />,\r\n    document.getElementById('root')\r\n);";
 
 /***/ }),
 /* 14 */
@@ -2283,7 +2302,7 @@ module.exports = "function Welcome(props) {\n    return <h1>Hello, {props.name}<
 "use strict";
 
 
-module.exports = "function formatDate(date) {\n    return date.toLocaleDateString();\n}\n\nfunction Comment(props) {\n    return (\n        <div className=\"Comment\">\n      <div className=\"UserInfo\">\n        <img className=\"Avatar\"\n             src={props.author.avatarUrl}\n             alt={props.author.name} />\n        <div className=\"UserInfo-name\">\n          {props.author.name}\n        </div>\n      </div>\n      <div className=\"Comment-text\">\n        {props.text}\n      </div>\n      <div className=\"Comment-date\">\n        {formatDate(props.date)}\n      </div>\n    </div>\n    );\n}\n\nconst comment = {\n    date: new Date(),\n    text: 'I hope you enjoy learning React!',\n    author: {\n        name: 'Hello Kitty',\n        avatarUrl: 'http://placekitten.com/g/64/64'\n    }\n};\nReactDOM.render(\n    <Comment\n    date={comment.date}\n    text={comment.text}\n    author={comment.author} />,\n    document.getElementById('root')\n);\n";
+module.exports = "ReactDOM.render(\n    <h1>Hello, world!</h1>,\n    document.getElementById('root')\n);\n";
 
 /***/ }),
 /* 15 */
@@ -2292,7 +2311,7 @@ module.exports = "function formatDate(date) {\n    return date.toLocaleDateStrin
 "use strict";
 
 
-module.exports = "function formatDate(date) {\n    return date.toLocaleDateString();\n}\n\nfunction Avatar(props) {\n    return (\n        <img className=\"Avatar\"\n         src={props.user.avatarUrl}\n         alt={props.user.name} />\n    );\n}\n\nfunction UserInfo(props) {\n    return (\n        <div className=\"UserInfo\">\n      <Avatar user={props.user} />\n      <div className=\"UserInfo-name\">\n        {props.user.name}\n      </div>\n    </div>\n    );\n}\n\nfunction Comment(props) {\n    return (\n        <div className=\"Comment\">\n      <UserInfo user={props.author} />\n      <div className=\"Comment-text\">\n        {props.text}\n      </div>\n      <div className=\"Comment-date\">\n        {formatDate(props.date)}\n      </div>\n    </div>\n    );\n}\n\nconst comment = {\n    date: new Date(),\n    text: 'I hope you enjoy learning React!',\n    author: {\n        name: 'Hello Kitty',\n        avatarUrl: 'http://placekitten.com/g/64/64'\n    }\n};\nReactDOM.render(\n    <Comment\n    date={comment.date}\n    text={comment.text}\n    author={comment.author} />,\n    document.getElementById('root')\n);\n";
+module.exports = "function ListItem(props) {\r\n    // Correct! There is no need to specify the key here:\r\n    return <li>{props.value}</li>;\r\n}\r\n\r\nfunction NumberList(props) {\r\n    const numbers = props.numbers;\r\n    const listItems = numbers.map((number) =>\r\n        // Correct! Key should be specified inside the array.\r\n        <ListItem key={number.toString()}\r\n              value={number} />\r\n    );\r\n    return (\r\n        <ul>\r\n      {listItems}\r\n    </ul>\r\n    );\r\n}\r\n\r\nconst numbers = [1, 2, 3, 4, 5];\r\nReactDOM.render(\r\n    <NumberList numbers={numbers} />,\r\n    document.getElementById('root')\r\n);";
 
 /***/ }),
 /* 16 */
@@ -2301,7 +2320,7 @@ module.exports = "function formatDate(date) {\n    return date.toLocaleDateStrin
 "use strict";
 
 
-module.exports = "function Clock(props) {\n    return (\n        <div>\n      <h1>Hello, world!</h1>\n      <h2>It is {props.date.toLocaleTimeString()}.</h2>\n    </div>\n    );\n}\n\nfunction tick() {\n    ReactDOM.render(\n        <Clock date={new Date()} />,\n        document.getElementById('root')\n    );\n}\n\nsetInterval(tick, 1000);\n";
+module.exports = "function Blog(props) {\r\n    const sidebar = (\r\n        <ul>\r\n      {props.posts.map((post) =>\r\n        <li key={post.id}>\r\n          {post.title}\r\n        </li>\r\n      )}\r\n    </ul>\r\n    );\r\n    const content = props.posts.map((post) =>\r\n        <div key={post.id}>\r\n      <h3>{post.title}</h3>\r\n      <p>{post.content}</p>\r\n    </div>\r\n    );\r\n    return (\r\n        <div>\r\n      {sidebar}\r\n      <hr />\r\n      {content}\r\n    </div>\r\n    );\r\n}\r\n\r\nconst posts = [\r\n    {\r\n        id: 1,\r\n        title: 'Hello World',\r\n        content: 'Welcome to learning React!'\r\n    },\r\n    {\r\n        id: 2,\r\n        title: 'Installation',\r\n        content: 'You can install React from npm.'\r\n    }\r\n];\r\nReactDOM.render(\r\n    <Blog posts={posts} />,\r\n    document.getElementById('root')\r\n);";
 
 /***/ }),
 /* 17 */
@@ -2310,10 +2329,181 @@ module.exports = "function Clock(props) {\n    return (\n        <div>\n      <h
 "use strict";
 
 
-module.exports = "class Clock extends React.Component {\n    render() {\n        return (\n            <div>\n        <h1>Hello, world!</h1>\n        <h2>It is {this.props.date.toLocaleTimeString()}.</h2>\n      </div>\n        );\n    }\n}\n\nfunction tick() {\n    ReactDOM.render(\n        <Clock date={new Date()} />,\n        document.getElementById('root')\n    );\n}\n\nsetInterval(tick, 1000);\n";
+module.exports = "function ListItem(props) {\r\n    return <li>{props.value}</li>;\r\n}\r\n\r\nfunction NumberList(props) {\r\n    const numbers = props.numbers;\r\n    return (\r\n        <ul>\r\n      {numbers.map((number) =>\r\n        <ListItem key={number.toString()}\r\n                  value={number} />\r\n      )}\r\n    </ul>\r\n    );\r\n}\r\n\r\nconst numbers = [1, 2, 3, 4, 5];\r\nReactDOM.render(\r\n    <NumberList numbers={numbers} />,\r\n    document.getElementById('root')\r\n);";
 
 /***/ }),
 /* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = "class NameForm extends React.Component {\r\n    constructor(props) {\r\n        super(props);\r\n        this.state = {\r\n            value: ''\r\n        };\r\n\r\n        this.handleChange = this.handleChange.bind(this);\r\n        this.handleSubmit = this.handleSubmit.bind(this);\r\n    }\r\n\r\n    handleChange(event) {\r\n        this.setState({\r\n            value: event.target.value\r\n        });\r\n    }\r\n\r\n    handleSubmit(event) {\r\n        alert('A name was submitted: ' + this.state.value);\r\n        event.preventDefault();\r\n    }\r\n\r\n    render() {\r\n        return (\r\n            <form onSubmit={this.handleSubmit}>\r\n        <label>\r\n          Name:\r\n          <input type=\"text\" value={this.state.value} onChange={this.handleChange} />\r\n        </label>\r\n        <input type=\"submit\" value=\"Submit\" />\r\n      </form>\r\n        );\r\n    }\r\n}\r\n\r\nReactDOM.render(\r\n    <NameForm />,\r\n    document.getElementById('root')\r\n);";
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = "class FlavorForm extends React.Component {\r\n    constructor(props) {\r\n        super(props);\r\n        this.state = {\r\n            value: 'coconut'\r\n        };\r\n\r\n        this.handleChange = this.handleChange.bind(this);\r\n        this.handleSubmit = this.handleSubmit.bind(this);\r\n    }\r\n\r\n    handleChange(event) {\r\n        this.setState({\r\n            value: event.target.value\r\n        });\r\n    }\r\n\r\n    handleSubmit(event) {\r\n        alert('Your favorite flavor is: ' + this.state.value);\r\n        event.preventDefault();\r\n    }\r\n\r\n    render() {\r\n        return (\r\n            <form onSubmit={this.handleSubmit}>\r\n        <label>\r\n          Pick your favorite La Croix flavor:\r\n          <select value={this.state.value} onChange={this.handleChange}>\r\n            <option value=\"grapefruit\">Grapefruit</option>\r\n            <option value=\"lime\">Lime</option>\r\n            <option value=\"coconut\">Coconut</option>\r\n            <option value=\"mango\">Mango</option>\r\n          </select>\r\n        </label>\r\n        <input type=\"submit\" value=\"Submit\" />\r\n      </form>\r\n        );\r\n    }\r\n}\r\n\r\nReactDOM.render(\r\n    <FlavorForm />,\r\n    document.getElementById('root')\r\n);";
+
+/***/ }),
+/* 20 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = "class Reservation extends React.Component {\r\n    constructor(props) {\r\n        super(props);\r\n        this.state = {\r\n            isGoing: true,\r\n            numberOfGuests: 2\r\n        };\r\n\r\n        this.handleInputChange = this.handleInputChange.bind(this);\r\n    }\r\n\r\n    handleInputChange(event) {\r\n        const target = event.target;\r\n        const value = target.type === 'checkbox' ? target.checked : target.value;\r\n        const name = target.name;\r\n\r\n        this.setState({\r\n      [name]: value\r\n        });\r\n    }\r\n\r\n    render() {\r\n        return (\r\n            <form>\r\n        <label>\r\n          Is going:\r\n          <input\r\n            name=\"isGoing\"\r\n            type=\"checkbox\"\r\n            checked={this.state.isGoing}\r\n            onChange={this.handleInputChange} />\r\n        </label>\r\n        <br />\r\n        <label>\r\n          Number of guests:\r\n          <input\r\n            name=\"numberOfGuests\"\r\n            type=\"number\"\r\n            value={this.state.numberOfGuests}\r\n            onChange={this.handleInputChange} />\r\n        </label>\r\n      </form>\r\n        );\r\n    }\r\n}\r\n\r\nReactDOM.render(\r\n    <Reservation />,\r\n    document.getElementById('root')\r\n);";
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = "function BoilingVerdict(props) {\r\n    if (props.celsius >= 100) {\r\n        return <p>The water would boil.</p>;\r\n    }\r\n    return <p>The water would not boil.</p>;\r\n}\r\n\r\nclass Calculator extends React.Component {\r\n    constructor(props) {\r\n        super(props);\r\n        this.handleChange = this.handleChange.bind(this);\r\n        this.state = {\r\n            temperature: ''\r\n        };\r\n    }\r\n\r\n    handleChange(e) {\r\n        this.setState({\r\n            temperature: e.target.value\r\n        });\r\n    }\r\n\r\n    render() {\r\n        const temperature = this.state.temperature;\r\n        return (\r\n            <fieldset>\r\n        <legend>Enter temperature in Celsius:</legend>\r\n        <input\r\n          value={temperature}\r\n          onChange={this.handleChange} />\r\n        <BoilingVerdict\r\n          celsius={parseFloat(temperature)} />\r\n      </fieldset>\r\n        );\r\n    }\r\n}\r\n\r\nReactDOM.render(\r\n    <Calculator />,\r\n    document.getElementById('root')\r\n);";
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = "const scaleNames = {\r\n    c: 'Celsius',\r\n    f: 'Fahrenheit'\r\n};\r\n\r\nclass TemperatureInput extends React.Component {\r\n    constructor(props) {\r\n        super(props);\r\n        this.handleChange = this.handleChange.bind(this);\r\n        this.state = {\r\n            temperature: ''\r\n        };\r\n    }\r\n\r\n    handleChange(e) {\r\n        this.setState({\r\n            temperature: e.target.value\r\n        });\r\n    }\r\n\r\n    render() {\r\n        const temperature = this.state.temperature;\r\n        const scale = this.props.scale;\r\n        return (\r\n            <fieldset>\r\n        <legend>Enter temperature in {scaleNames[scale]}:</legend>\r\n        <input value={temperature}\r\n               onChange={this.handleChange} />\r\n      </fieldset>\r\n        );\r\n    }\r\n}\r\n\r\nclass Calculator extends React.Component {\r\n    render() {\r\n        return (\r\n            <div>\r\n        <TemperatureInput scale=\"c\" />\r\n        <TemperatureInput scale=\"f\" />\r\n      </div>\r\n        );\r\n    }\r\n}\r\n\r\nReactDOM.render(\r\n    <Calculator />,\r\n    document.getElementById('root')\r\n);";
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = "const scaleNames = {\r\n    c: 'Celsius',\r\n    f: 'Fahrenheit'\r\n};\r\n\r\nfunction toCelsius(fahrenheit) {\r\n    return (fahrenheit - 32) * 5 / 9;\r\n}\r\n\r\nfunction toFahrenheit(celsius) {\r\n    return (celsius * 9 / 5) + 32;\r\n}\r\n\r\nfunction tryConvert(temperature, convert) {\r\n    const input = parseFloat(temperature);\r\n    if (Number.isNaN(input)) {\r\n        return '';\r\n    }\r\n    const output = convert(input);\r\n    const rounded = Math.round(output * 1000) / 1000;\r\n    return rounded.toString();\r\n}\r\n\r\nfunction BoilingVerdict(props) {\r\n    if (props.celsius >= 100) {\r\n        return <p>The water would boil.</p>;\r\n    }\r\n    return <p>The water would not boil.</p>;\r\n}\r\n\r\nclass TemperatureInput extends React.Component {\r\n    constructor(props) {\r\n        super(props);\r\n        this.handleChange = this.handleChange.bind(this);\r\n    }\r\n\r\n    handleChange(e) {\r\n        this.props.onTemperatureChange(e.target.value);\r\n    }\r\n\r\n    render() {\r\n        const temperature = this.props.temperature;\r\n        const scale = this.props.scale;\r\n        return (\r\n            <fieldset>\r\n        <legend>Enter temperature in {scaleNames[scale]}:</legend>\r\n        <input value={temperature}\r\n               onChange={this.handleChange} />\r\n      </fieldset>\r\n        );\r\n    }\r\n}\r\n\r\nclass Calculator extends React.Component {\r\n    constructor(props) {\r\n        super(props);\r\n        this.handleCelsiusChange = this.handleCelsiusChange.bind(this);\r\n        this.handleFahrenheitChange = this.handleFahrenheitChange.bind(this);\r\n        this.state = {\r\n            temperature: '',\r\n            scale: 'c'\r\n        };\r\n    }\r\n\r\n    handleCelsiusChange(temperature) {\r\n        this.setState({\r\n            scale: 'c',\r\n            temperature\r\n        });\r\n    }\r\n\r\n    handleFahrenheitChange(temperature) {\r\n        this.setState({\r\n            scale: 'f',\r\n            temperature\r\n        });\r\n    }\r\n\r\n    render() {\r\n        const scale = this.state.scale;\r\n        const temperature = this.state.temperature;\r\n        const celsius = scale === 'f' ? tryConvert(temperature, toCelsius) : temperature;\r\n        const fahrenheit = scale === 'c' ? tryConvert(temperature, toFahrenheit) : temperature;\r\n\r\n        return (\r\n            <div>\r\n        <TemperatureInput\r\n          scale=\"c\"\r\n          temperature={celsius}\r\n          onTemperatureChange={this.handleCelsiusChange} />\r\n        <TemperatureInput\r\n          scale=\"f\"\r\n          temperature={fahrenheit}\r\n          onTemperatureChange={this.handleFahrenheitChange} />\r\n        <BoilingVerdict\r\n          celsius={parseFloat(celsius)} />\r\n      </div>\r\n        );\r\n    }\r\n}\r\n\r\nReactDOM.render(\r\n    <Calculator />,\r\n    document.getElementById('root')\r\n);";
+
+/***/ }),
+/* 24 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = "function Contacts() {\r\n    return <div className=\"Contacts\" />;\r\n}\r\n\r\nfunction Chat() {\r\n    return <div className=\"Chat\" />;\r\n}\r\n\r\nfunction SplitPane(props) {\r\n    return (\r\n        <div className=\"SplitPane\">\r\n      <div className=\"SplitPane-left\">\r\n        {props.left}\r\n      </div>\r\n      <div className=\"SplitPane-right\">\r\n        {props.right}\r\n      </div>\r\n    </div>\r\n    );\r\n}\r\n\r\nfunction App() {\r\n    return (\r\n        <SplitPane\r\n      left={\r\n        <Contacts />\r\n      }\r\n      right={\r\n        <Chat />\r\n      } />\r\n    );\r\n}\r\n\r\nReactDOM.render(\r\n    <App />,\r\n    document.getElementById('root')\r\n);";
+
+/***/ }),
+/* 25 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = "function formatName(user) {\n    return user.firstName + ' ' + user.lastName;\n}\n\nconst user = {\n    firstName: 'Harper',\n    lastName: 'Perez'\n};\n\nconst element = (\n    <h1>\n    Hello, {formatName(user)}!\n  </h1>\n);\n\nReactDOM.render(\n    element,\n    document.getElementById('root')\n);\n";
+
+/***/ }),
+/* 26 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = "function FancyBorder(props) {\r\n    return (\r\n        <div className={'FancyBorder FancyBorder-' + props.color}>\r\n      {props.children}\r\n    </div>\r\n    );\r\n}\r\n\r\nfunction Dialog(props) {\r\n    return (\r\n        <FancyBorder color=\"blue\">\r\n      <h1 className=\"Dialog-title\">\r\n        {props.title}\r\n      </h1>\r\n      <p className=\"Dialog-message\">\r\n        {props.message}\r\n      </p>\r\n      {props.children}\r\n    </FancyBorder>\r\n    );\r\n}\r\n\r\nclass SignUpDialog extends React.Component {\r\n    constructor(props) {\r\n        super(props);\r\n        this.handleChange = this.handleChange.bind(this);\r\n        this.handleSignUp = this.handleSignUp.bind(this);\r\n        this.state = {\r\n            login: ''\r\n        };\r\n    }\r\n\r\n    render() {\r\n        return (\r\n            <Dialog title=\"Mars Exploration Program\"\r\n              message=\"How should we refer to you?\">\r\n        <input value={this.state.login}\r\n               onChange={this.handleChange} />\r\n        <button onClick={this.handleSignUp}>\r\n          Sign Me Up!\r\n        </button>\r\n      </Dialog>\r\n        );\r\n    }\r\n\r\n    handleChange(e) {\r\n        this.setState({\r\n            login: e.target.value\r\n        });\r\n    }\r\n\r\n    handleSignUp() {\r\n        alert(`Welcome aboard, ${this.state.login}!`);\r\n    }\r\n}\r\n\r\nReactDOM.render(\r\n    <SignUpDialog />,\r\n    document.getElementById('root')\r\n);";
+
+/***/ }),
+/* 27 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = "function CustomTextInput(props) {\r\n    return (\r\n        <div>\r\n      <input ref={props.inputRef} />\r\n    </div>\r\n    );\r\n}\r\n\r\nfunction Parent(props) {\r\n    return (\r\n        <div>\r\n      My input: <CustomTextInput inputRef={props.inputRef} />\r\n    </div>\r\n    );\r\n}\r\n\r\n\r\nclass Grandparent extends React.Component {\r\n    render() {\r\n        return (\r\n            <Parent\r\n        inputRef={el => this.inputElement = el}\r\n      />\r\n        );\r\n    }\r\n}\r\n\r\nReactDOM.render(\r\n    <Grandparent />,\r\n    document.getElementById('root')\r\n);";
+
+/***/ }),
+/* 28 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = "class NameForm extends React.Component {\r\n    constructor(props) {\r\n        super(props);\r\n        this.handleSubmit = this.handleSubmit.bind(this);\r\n    }\r\n\r\n    handleSubmit(event) {\r\n        alert('A name was submitted: ' + this.input.value);\r\n        event.preventDefault();\r\n    }\r\n\r\n    render() {\r\n        return (\r\n            <form onSubmit={this.handleSubmit}>\r\n      <label>\r\n        Name:\r\n        <input\r\n          defaultValue=\"Bob\"\r\n          type=\"text\"\r\n          ref={(input) => this.input = input} />\r\n      </label>\r\n      <input type=\"submit\" value=\"Submit\" />\r\n    </form>\r\n        );\r\n    }\r\n}\r\n\r\nReactDOM.render(\r\n    <NameForm />,\r\n    document.getElementById('root')\r\n);";
+
+/***/ }),
+/* 29 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = "class Button extends React.Component {\r\n    render() {\r\n        return (\r\n            <button style={{background: this.props.color}}>\r\n        {this.props.children}\r\n      </button>\r\n        );\r\n    }\r\n}\r\n\r\nclass Message extends React.Component {\r\n    render() {\r\n        return (\r\n            <div>\r\n        {this.props.text} <Button color={this.props.color}>Delete</Button>\r\n      </div>\r\n        );\r\n    }\r\n}\r\n\r\nclass MessageList extends React.Component {\r\n    render() {\r\n        const color = \"purple\";\r\n        const children = this.props.messages.map((message, i) =>\r\n            <Message text={message.text} color={color}  key={i}/>\r\n        );\r\n        return <div>{children}</div>;\r\n    }\r\n}\r\nconst messages = [{\r\n    text: 'a'\r\n}, {\r\n    text: 'b'\r\n}, {\r\n    text: 'c'\r\n}, ];\r\n\r\nReactDOM.render(\r\n    <MessageList messages={messages}/>,\r\n    document.getElementById('root')\r\n);\r\n";
+
+/***/ }),
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = "function tick() {\n    const element = (\n        <div>\n      <h1>Hello, world!</h1>\n      <h2>It is {new Date().toLocaleTimeString()}.</h2>\n    </div>\n    );\n    ReactDOM.render(\n        element,\n        document.getElementById('root')\n    );\n}\n\nsetInterval(tick, 1000);\n";
+
+/***/ }),
+/* 31 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = "function Welcome(props) {\n    return <h1>Hello, {props.name}</h1>;\n}\n\nconst element = <Welcome name=\"Sara\" />;\nReactDOM.render(\n    element,\n    document.getElementById('root')\n);\n";
+
+/***/ }),
+/* 32 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = "function Welcome(props) {\n    return <h1>Hello, {props.name}</h1>;\n}\n\nfunction App() {\n    return (\n        <div>\n      <Welcome name=\"Sara\" />\n      <Welcome name=\"Cahal\" />\n      <Welcome name=\"Edite\" />\n    </div>\n    );\n}\n\nReactDOM.render(\n    <App />,\n    document.getElementById('root')\n);\n";
+
+/***/ }),
+/* 33 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = "function formatDate(date) {\n    return date.toLocaleDateString();\n}\n\nfunction Comment(props) {\n    return (\n        <div className=\"Comment\">\n      <div className=\"UserInfo\">\n        <img className=\"Avatar\"\n             src={props.author.avatarUrl}\n             alt={props.author.name} />\n        <div className=\"UserInfo-name\">\n          {props.author.name}\n        </div>\n      </div>\n      <div className=\"Comment-text\">\n        {props.text}\n      </div>\n      <div className=\"Comment-date\">\n        {formatDate(props.date)}\n      </div>\n    </div>\n    );\n}\n\nconst comment = {\n    date: new Date(),\n    text: 'I hope you enjoy learning React!',\n    author: {\n        name: 'Hello Kitty',\n        avatarUrl: 'http://placekitten.com/g/64/64'\n    }\n};\nReactDOM.render(\n    <Comment\n    date={comment.date}\n    text={comment.text}\n    author={comment.author} />,\n    document.getElementById('root')\n);\n";
+
+/***/ }),
+/* 34 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = "function formatDate(date) {\n    return date.toLocaleDateString();\n}\n\nfunction Avatar(props) {\n    return (\n        <img className=\"Avatar\"\n         src={props.user.avatarUrl}\n         alt={props.user.name} />\n    );\n}\n\nfunction UserInfo(props) {\n    return (\n        <div className=\"UserInfo\">\n      <Avatar user={props.user} />\n      <div className=\"UserInfo-name\">\n        {props.user.name}\n      </div>\n    </div>\n    );\n}\n\nfunction Comment(props) {\n    return (\n        <div className=\"Comment\">\n      <UserInfo user={props.author} />\n      <div className=\"Comment-text\">\n        {props.text}\n      </div>\n      <div className=\"Comment-date\">\n        {formatDate(props.date)}\n      </div>\n    </div>\n    );\n}\n\nconst comment = {\n    date: new Date(),\n    text: 'I hope you enjoy learning React!',\n    author: {\n        name: 'Hello Kitty',\n        avatarUrl: 'http://placekitten.com/g/64/64'\n    }\n};\nReactDOM.render(\n    <Comment\n    date={comment.date}\n    text={comment.text}\n    author={comment.author} />,\n    document.getElementById('root')\n);\n";
+
+/***/ }),
+/* 35 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = "function Clock(props) {\n    return (\n        <div>\n      <h1>Hello, world!</h1>\n      <h2>It is {props.date.toLocaleTimeString()}.</h2>\n    </div>\n    );\n}\n\nfunction tick() {\n    ReactDOM.render(\n        <Clock date={new Date()} />,\n        document.getElementById('root')\n    );\n}\n\nsetInterval(tick, 1000);\n";
+
+/***/ }),
+/* 36 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = "class Clock extends React.Component {\n    render() {\n        return (\n            <div>\n        <h1>Hello, world!</h1>\n        <h2>It is {this.props.date.toLocaleTimeString()}.</h2>\n      </div>\n        );\n    }\n}\n\nfunction tick() {\n    ReactDOM.render(\n        <Clock date={new Date()} />,\n        document.getElementById('root')\n    );\n}\n\nsetInterval(tick, 1000);\n";
+
+/***/ }),
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2331,6 +2521,8 @@ var _reactDom2 = _interopRequireDefault(_reactDom);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -2340,7 +2532,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var context = __webpack_require__(3);
 
 function path2name(path) {
-    path = path.match(/\d+(\w+)/)[1];
+    path = path.match(/\d+([\w']+)/)[1];
 
     function replace(match, header) {
         if (match[0] === '_') {
@@ -2447,6 +2639,8 @@ var Editor = function (_React$Component2) {
     return Editor;
 }(_react2.default.Component);
 
+var preScript = ' var origin = location.origin;\n        parent.postMessage(name, origin);\n        var interval_id = setInterval(function(){}, 1e5);\n        for (var i = 1; i <= interval_id; i++){\n            clearInterval(i);            \n        } ';
+
 var App = function (_React$Component3) {
     _inherits(App, _React$Component3);
 
@@ -2463,7 +2657,11 @@ var App = function (_React$Component3) {
         setTimeout(function () {
             _this4.updatePreview();
         }, 100);
-
+        window.addEventListener('message', function (e) {
+            var msg = e.data;
+            var obj = _defineProperty({}, msg, true);
+            _this4.setState(obj);
+        });
         return _this4;
     }
 
@@ -2485,11 +2683,19 @@ var App = function (_React$Component3) {
     }, {
         key: 'updatePreview',
         value: function updatePreview() {
+            var _this5 = this;
+
             if (!this.refs.preview) {
                 return;
             }
-            this.setCode(this.refs['preview'], '\n<!DOCTYPE html>\n<html>\n\n<head>\n    <meta charset="UTF-8" />\n    <title>Hello World</title>\n    <script src="http://blackmiaool.com/rexcited/dist/react.js"></script>\n    <script src="http://blackmiaool.com/rexcited/dist/react-dom.js"></script>\n    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>\n</head>\n\n<body>\n    <div id="root"></div>\n    <script>\n        var interval_id = setInterval(function(){}, 1e5);\n        for (var i = 1; i <= interval_id; i++){\n            window.clearInterval(i);\n            console.log(i);\n        }        \n    </script>\n    <script type="text/babel">' + this.state.code + '</script>\n</body>\n</html>\n');
-            this.setCode(this.refs['preview-original'], '\n<!DOCTYPE html>\n<html>\n\n<head>\n    <meta charset="UTF-8" />\n    <title>Hello World</title>\n    <script src="https://unpkg.com/react@latest/dist/react.js"></script>\n    <script src="https://unpkg.com/react-dom@latest/dist/react-dom.js"></script>\n    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>\n</head>\n\n<body>\n    <div id="root"></div>\n    <script>\n        var interval_id = setInterval(function(){}, 1e5);\n        for (var i = 1; i <= interval_id; i++){\n            window.clearInterval(i);\n            console.log(i);\n        }        \n    </script>\n    <script type="text/babel">' + this.state.code + '</script>\n</body>\n</html>\n');
+            this.setState({
+                react: false,
+                rexcited: false
+            });
+            setTimeout(function () {
+                _this5.setCode(_this5.refs['preview'], '\n<!DOCTYPE html>\n<html>\n\n<head>\n    <meta charset="UTF-8" />\n    <title>Hello World</title>\n    <script src="http://blackmiaool.com/rexcited/dist/react.js"></script>\n    <script src="http://blackmiaool.com/rexcited/dist/react-dom.js"></script>\n    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>\n</head>\n\n<body>\n    <div id="root"></div>\n    <script>\n        var name=\'rexcited\';\n        ' + preScript + '\n    </script>\n    <script type="text/babel">' + _this5.state.code + '</script>\n</body>\n</html>\n');
+                _this5.setCode(_this5.refs['preview-original'], '\n<!DOCTYPE html>\n<html>\n\n<head>\n    <meta charset="UTF-8" />\n    <title>Hello World</title>\n    <script src="https://unpkg.com/react@latest/dist/react.js"></script>\n    <script src="https://unpkg.com/react-dom@latest/dist/react-dom.js"></script>\n    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>\n</head>\n\n<body>\n    <div id="root"></div>\n    <script>\n        var name=\'react\';\n        ' + preScript + '\n    </script>\n    <script type="text/babel">' + _this5.state.code + '</script>\n</body>\n</html>\n');
+            });
         }
     }, {
         key: 'onSelect',
@@ -2502,7 +2708,7 @@ var App = function (_React$Component3) {
     }, {
         key: 'onChange',
         value: function onChange(code) {
-            var _this5 = this;
+            var _this6 = this;
 
             this.setState({
                 code: code
@@ -2512,8 +2718,8 @@ var App = function (_React$Component3) {
                 this.previewTimeout = 0;
             }
             this.previewTimeout = setTimeout(function () {
-                _this5.updatePreview();
-            }, 2000);
+                _this6.updatePreview();
+            }, 1000);
         }
     }, {
         key: 'render',
@@ -2532,8 +2738,34 @@ var App = function (_React$Component3) {
                         { 'class': 'top-indicator' },
                         'Rexcited\u2193'
                     ),
-                    _react2.default.createElement('iframe', { ref: 'preview', src: 'demo/iframe.html', frameborder: '0', style: 'vertical-align: top;' }),
-                    _react2.default.createElement('iframe', { ref: 'preview-original', src: 'demo/iframe.html', frameborder: '0', style: 'vertical-align: top;' }),
+                    _react2.default.createElement(
+                        'div',
+                        { 'class': 'preview top' },
+                        _react2.default.createElement(
+                            'div',
+                            { 'class': 'loading-text' },
+                            _react2.default.createElement(
+                                'h1',
+                                null,
+                                'Loading...'
+                            )
+                        ),
+                        _react2.default.createElement('iframe', { style: { opacity: this.state.rexcited ? 1 : 0.1, 'vertical-align': 'top' }, ref: 'preview', 'class': 'top-iframe', src: './demo/iframe.html?name=rexcited', frameborder: '0' })
+                    ),
+                    _react2.default.createElement(
+                        'div',
+                        { 'class': 'preview bottom' },
+                        _react2.default.createElement(
+                            'div',
+                            { 'class': 'loading-text' },
+                            _react2.default.createElement(
+                                'h1',
+                                null,
+                                'Loading...'
+                            )
+                        ),
+                        _react2.default.createElement('iframe', { style: { opacity: this.state.react ? 1 : 0.1, 'vertical-align': 'top' }, ref: 'preview-original', src: './demo/iframe.html?name=react', frameborder: '0' })
+                    ),
                     _react2.default.createElement(
                         'h5',
                         { 'class': 'bottom-indicator' },
