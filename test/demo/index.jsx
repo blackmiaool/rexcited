@@ -1,6 +1,10 @@
 import React from 'react';
+import {
+    Component
+} from 'react';
 import ReactDOM from 'react-dom';
 const context = require.context("../official", false, /\.jsx$/);
+console.log(Component, React, ReactDOM);
 
 function path2name(path) {
     path = path.match(/\d+([\w']+)/)[1];
@@ -72,7 +76,7 @@ class Editor extends React.Component {
                 this.code = code;
                 this.props.onChange(code);
             });
-        });
+        }, 100);
 
     }
     componentWillReceiveProps(props) {

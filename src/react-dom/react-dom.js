@@ -988,7 +988,7 @@ function update(dom, element, {
             }
 
             if (found) {
-                if (lastOwner) {                    
+                if (lastOwner && lastOwner._currentElement.type === element.type) {
                     return lastOwner.updateProps(element.props, context);
                 } else {
                     //                    return createAndReplace();
@@ -1030,7 +1030,6 @@ function update(dom, element, {
 
     if (!equals(element0.props, element.props)) { //props changed        
         if (isComponent(element.type)) {
-            console.log('b')
             return owner.updateProps(element.props, context);
         } else { //normal dom            
             for (const attrName in element.props) {
@@ -1111,9 +1110,6 @@ const exports = {
     render,
     findDOMNode
 }
-export {
-    render,
-    findDOMNode
-};
-export default exports;
+
+module.exports = exports;
 window.ReactDOM = exports;

@@ -16,11 +16,6 @@ return webpackJsonp([0],{
 "use strict";
 
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.findDOMNode = exports.render = undefined;
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -1088,7 +1083,7 @@ function update(dom, element) {
             }
 
             if (found) {
-                if (lastOwner) {
+                if (lastOwner && lastOwner._currentElement.type === element.type) {
                     return lastOwner.updateProps(element.props, context);
                 } else {
                     //                    return createAndReplace();
@@ -1126,7 +1121,6 @@ function update(dom, element) {
     if (!equals(element0.props, element.props)) {
         //props changed        
         if (isComponent(element.type)) {
-            console.log('b');
             return owner.updateProps(element.props, context);
         } else {
             //normal dom            
@@ -1201,10 +1195,8 @@ var _exports = {
     render: render,
     findDOMNode: findDOMNode
 };
-exports.render = render;
-exports.findDOMNode = findDOMNode;
-exports.default = _exports;
 
+module.exports = _exports;
 window.ReactDOM = _exports;
 
 /***/ }),

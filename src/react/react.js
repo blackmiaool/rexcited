@@ -145,15 +145,5 @@ let exports = {
     renderingComponentStack,
 }
 
-export {
-    createElement,
-    Component,
-    Children,
-    PropTypes,
-    createClass,
-    isValidElement,
-    cloneElement,
-    renderingComponentStack,
-};
-export default exports;
+module.exports = exports;
 window.React = exports;

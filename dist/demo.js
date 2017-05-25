@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 37);
+/******/ 	return __webpack_require__(__webpack_require__.s = 36);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -122,11 +122,6 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
         /***/function _(module, exports, __webpack_require__) {
 
             "use strict";
-
-            Object.defineProperty(exports, "__esModule", {
-                value: true
-            });
-            exports.findDOMNode = exports.render = undefined;
 
             var _createClass = function () {
                 function defineProperties(target, props) {
@@ -1221,7 +1216,7 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
                         }
 
                         if (found) {
-                            if (lastOwner) {
+                            if (lastOwner && lastOwner._currentElement.type === element.type) {
                                 return lastOwner.updateProps(element.props, context);
                             } else {
                                 //                    return createAndReplace();
@@ -1259,7 +1254,6 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
                 if (!equals(element0.props, element.props)) {
                     //props changed        
                     if (isComponent(element.type)) {
-                        console.log('b');
                         return owner.updateProps(element.props, context);
                     } else {
                         //normal dom            
@@ -1334,10 +1328,8 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
                 render: render,
                 findDOMNode: findDOMNode
             };
-            exports.render = render;
-            exports.findDOMNode = findDOMNode;
-            exports.default = _exports;
 
+            module.exports = _exports;
             window.ReactDOM = _exports;
 
             /***/
@@ -1572,11 +1564,6 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
 
             "use strict";
 
-            Object.defineProperty(exports, "__esModule", {
-                value: true
-            });
-            exports.renderingComponentStack = exports.cloneElement = exports.isValidElement = exports.createClass = exports.PropTypes = exports.Children = exports.Component = exports.createElement = undefined;
-
             var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
                 return typeof obj === 'undefined' ? 'undefined' : _typeof2(obj);
             } : function (obj) {
@@ -1794,16 +1781,7 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
                 renderingComponentStack: renderingComponentStack
             };
 
-            exports.createElement = createElement;
-            exports.Component = Component;
-            exports.Children = _children2.default;
-            exports.PropTypes = PropTypes;
-            exports.createClass = createClass;
-            exports.isValidElement = isValidElement;
-            exports.cloneElement = cloneElement;
-            exports.renderingComponentStack = renderingComponentStack;
-            exports.default = _exports;
-
+            module.exports = _exports;
             window.React = _exports;
 
             /***/
@@ -2180,18 +2158,18 @@ var map = {
 	"./26lifting_state_up.jsx": 21,
 	"./27adding_a_second_input.jsx": 22,
 	"./28lifting_state_up2.jsx": 23,
-	"./2embedding_expressions_in_jsx.jsx": 25,
-	"./30specialization.jsx": 26,
-	"./31exposing_dom_refs_to_parent_components.jsx": 27,
-	"./32uncontrolled_components.jsx": 28,
-	"./33how_to_use_context.jsx": 29,
-	"./3react_only_updates_what's_necessary.jsx": 30,
-	"./4rendering_a_component.jsx": 31,
-	"./5composing_components.jsx": 32,
-	"./6extracting_components.jsx": 33,
-	"./7extracting_components2.jsx": 34,
-	"./8state_and_lifecycle.jsx": 35,
-	"./9converting_a_function_to_a_class.jsx": 36
+	"./2embedding_expressions_in_jsx.jsx": 24,
+	"./30specialization.jsx": 25,
+	"./31exposing_dom_refs_to_parent_components.jsx": 26,
+	"./32uncontrolled_components.jsx": 27,
+	"./33how_to_use_context.jsx": 28,
+	"./3react_only_updates_what's_necessary.jsx": 29,
+	"./4rendering_a_component.jsx": 30,
+	"./5composing_components.jsx": 31,
+	"./6extracting_components.jsx": 32,
+	"./7extracting_components2.jsx": 33,
+	"./8state_and_lifecycle.jsx": 34,
+	"./9converting_a_function_to_a_class.jsx": 35
 };
 function webpackContext(req) {
 	return __webpack_require__(webpackContextResolve(req));
@@ -2390,8 +2368,7 @@ module.exports = "const scaleNames = {\r\n    c: 'Celsius',\r\n    f: 'Fahrenhei
 module.exports = "const scaleNames = {\r\n    c: 'Celsius',\r\n    f: 'Fahrenheit'\r\n};\r\n\r\nfunction toCelsius(fahrenheit) {\r\n    return (fahrenheit - 32) * 5 / 9;\r\n}\r\n\r\nfunction toFahrenheit(celsius) {\r\n    return (celsius * 9 / 5) + 32;\r\n}\r\n\r\nfunction tryConvert(temperature, convert) {\r\n    const input = parseFloat(temperature);\r\n    if (Number.isNaN(input)) {\r\n        return '';\r\n    }\r\n    const output = convert(input);\r\n    const rounded = Math.round(output * 1000) / 1000;\r\n    return rounded.toString();\r\n}\r\n\r\nfunction BoilingVerdict(props) {\r\n    if (props.celsius >= 100) {\r\n        return <p>The water would boil.</p>;\r\n    }\r\n    return <p>The water would not boil.</p>;\r\n}\r\n\r\nclass TemperatureInput extends React.Component {\r\n    constructor(props) {\r\n        super(props);\r\n        this.handleChange = this.handleChange.bind(this);\r\n    }\r\n\r\n    handleChange(e) {\r\n        this.props.onTemperatureChange(e.target.value);\r\n    }\r\n\r\n    render() {\r\n        const temperature = this.props.temperature;\r\n        const scale = this.props.scale;\r\n        return (\r\n            <fieldset>\r\n        <legend>Enter temperature in {scaleNames[scale]}:</legend>\r\n        <input value={temperature}\r\n               onChange={this.handleChange} />\r\n      </fieldset>\r\n        );\r\n    }\r\n}\r\n\r\nclass Calculator extends React.Component {\r\n    constructor(props) {\r\n        super(props);\r\n        this.handleCelsiusChange = this.handleCelsiusChange.bind(this);\r\n        this.handleFahrenheitChange = this.handleFahrenheitChange.bind(this);\r\n        this.state = {\r\n            temperature: '',\r\n            scale: 'c'\r\n        };\r\n    }\r\n\r\n    handleCelsiusChange(temperature) {\r\n        this.setState({\r\n            scale: 'c',\r\n            temperature\r\n        });\r\n    }\r\n\r\n    handleFahrenheitChange(temperature) {\r\n        this.setState({\r\n            scale: 'f',\r\n            temperature\r\n        });\r\n    }\r\n\r\n    render() {\r\n        const scale = this.state.scale;\r\n        const temperature = this.state.temperature;\r\n        const celsius = scale === 'f' ? tryConvert(temperature, toCelsius) : temperature;\r\n        const fahrenheit = scale === 'c' ? tryConvert(temperature, toFahrenheit) : temperature;\r\n\r\n        return (\r\n            <div>\r\n        <TemperatureInput\r\n          scale=\"c\"\r\n          temperature={celsius}\r\n          onTemperatureChange={this.handleCelsiusChange} />\r\n        <TemperatureInput\r\n          scale=\"f\"\r\n          temperature={fahrenheit}\r\n          onTemperatureChange={this.handleFahrenheitChange} />\r\n        <BoilingVerdict\r\n          celsius={parseFloat(celsius)} />\r\n      </div>\r\n        );\r\n    }\r\n}\r\n\r\nReactDOM.render(\r\n    <Calculator />,\r\n    document.getElementById('root')\r\n);";
 
 /***/ }),
-/* 24 */,
-/* 25 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2400,7 +2377,7 @@ module.exports = "const scaleNames = {\r\n    c: 'Celsius',\r\n    f: 'Fahrenhei
 module.exports = "function formatName(user) {\n    return user.firstName + ' ' + user.lastName;\n}\n\nconst user = {\n    firstName: 'Harper',\n    lastName: 'Perez'\n};\n\nconst element = (\n    <h1>\n    Hello, {formatName(user)}!\n  </h1>\n);\n\nReactDOM.render(\n    element,\n    document.getElementById('root')\n);\n";
 
 /***/ }),
-/* 26 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2409,7 +2386,7 @@ module.exports = "function formatName(user) {\n    return user.firstName + ' ' +
 module.exports = "function FancyBorder(props) {\r\n    return (\r\n        <div className={'FancyBorder FancyBorder-' + props.color}>\r\n      {props.children}\r\n    </div>\r\n    );\r\n}\r\n\r\nfunction Dialog(props) {\r\n    return (\r\n        <FancyBorder color=\"blue\">\r\n      <h1 className=\"Dialog-title\">\r\n        {props.title}\r\n      </h1>\r\n      <p className=\"Dialog-message\">\r\n        {props.message}\r\n      </p>\r\n      {props.children}\r\n    </FancyBorder>\r\n    );\r\n}\r\n\r\nclass SignUpDialog extends React.Component {\r\n    constructor(props) {\r\n        super(props);\r\n        this.handleChange = this.handleChange.bind(this);\r\n        this.handleSignUp = this.handleSignUp.bind(this);\r\n        this.state = {\r\n            login: ''\r\n        };\r\n    }\r\n\r\n    render() {\r\n        return (\r\n            <Dialog title=\"Mars Exploration Program\"\r\n              message=\"How should we refer to you?\">\r\n        <input value={this.state.login}\r\n               onChange={this.handleChange} />\r\n        <button onClick={this.handleSignUp}>\r\n          Sign Me Up!\r\n        </button>\r\n      </Dialog>\r\n        );\r\n    }\r\n\r\n    handleChange(e) {\r\n        this.setState({\r\n            login: e.target.value\r\n        });\r\n    }\r\n\r\n    handleSignUp() {\r\n        alert(`Welcome aboard, ${this.state.login}!`);\r\n    }\r\n}\r\n\r\nReactDOM.render(\r\n    <SignUpDialog />,\r\n    document.getElementById('root')\r\n);";
 
 /***/ }),
-/* 27 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2418,7 +2395,7 @@ module.exports = "function FancyBorder(props) {\r\n    return (\r\n        <div 
 module.exports = "function CustomTextInput(props) {\r\n    return (\r\n        <div>\r\n      <input ref={props.inputRef} />\r\n    </div>\r\n    );\r\n}\r\n\r\nfunction Parent(props) {\r\n    return (\r\n        <div>\r\n      My input: <CustomTextInput inputRef={props.inputRef} />\r\n    </div>\r\n    );\r\n}\r\n\r\n\r\nclass Grandparent extends React.Component {\r\n    render() {\r\n        return (\r\n            <Parent\r\n        inputRef={el => this.inputElement = el}\r\n      />\r\n        );\r\n    }\r\n}\r\n\r\nReactDOM.render(\r\n    <Grandparent />,\r\n    document.getElementById('root')\r\n);";
 
 /***/ }),
-/* 28 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2427,7 +2404,7 @@ module.exports = "function CustomTextInput(props) {\r\n    return (\r\n        <
 module.exports = "class NameForm extends React.Component {\r\n    constructor(props) {\r\n        super(props);\r\n        this.handleSubmit = this.handleSubmit.bind(this);\r\n    }\r\n\r\n    handleSubmit(event) {\r\n        alert('A name was submitted: ' + this.input.value);\r\n        event.preventDefault();\r\n    }\r\n\r\n    render() {\r\n        return (\r\n            <form onSubmit={this.handleSubmit}>\r\n      <label>\r\n        Name:\r\n        <input\r\n          defaultValue=\"Bob\"\r\n          type=\"text\"\r\n          ref={(input) => this.input = input} />\r\n      </label>\r\n      <input type=\"submit\" value=\"Submit\" />\r\n    </form>\r\n        );\r\n    }\r\n}\r\n\r\nReactDOM.render(\r\n    <NameForm />,\r\n    document.getElementById('root')\r\n);";
 
 /***/ }),
-/* 29 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2436,7 +2413,7 @@ module.exports = "class NameForm extends React.Component {\r\n    constructor(pr
 module.exports = "class Button extends React.Component {\r\n    render() {\r\n        return (\r\n            <button style={{background: this.props.color}}>\r\n        {this.props.children}\r\n      </button>\r\n        );\r\n    }\r\n}\r\n\r\nclass Message extends React.Component {\r\n    render() {\r\n        return (\r\n            <div>\r\n        {this.props.text} <Button color={this.props.color}>Delete</Button>\r\n      </div>\r\n        );\r\n    }\r\n}\r\n\r\nclass MessageList extends React.Component {\r\n    render() {\r\n        const color = \"purple\";\r\n        const children = this.props.messages.map((message, i) =>\r\n            <Message text={message.text} color={color}  key={i}/>\r\n        );\r\n        return <div>{children}</div>;\r\n    }\r\n}\r\nconst messages = [{\r\n    text: 'a'\r\n}, {\r\n    text: 'b'\r\n}, {\r\n    text: 'c'\r\n}, ];\r\n\r\nReactDOM.render(\r\n    <MessageList messages={messages}/>,\r\n    document.getElementById('root')\r\n);\r\n";
 
 /***/ }),
-/* 30 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2445,7 +2422,7 @@ module.exports = "class Button extends React.Component {\r\n    render() {\r\n  
 module.exports = "function tick() {\n    const element = (\n        <div>\n      <h1>Hello, world!</h1>\n      <h2>It is {new Date().toLocaleTimeString()}.</h2>\n    </div>\n    );\n    ReactDOM.render(\n        element,\n        document.getElementById('root')\n    );\n}\n\nsetInterval(tick, 1000);\n";
 
 /***/ }),
-/* 31 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2454,7 +2431,7 @@ module.exports = "function tick() {\n    const element = (\n        <div>\n     
 module.exports = "function Welcome(props) {\n    return <h1>Hello, {props.name}</h1>;\n}\n\nconst element = <Welcome name=\"Sara\" />;\nReactDOM.render(\n    element,\n    document.getElementById('root')\n);\n";
 
 /***/ }),
-/* 32 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2463,7 +2440,7 @@ module.exports = "function Welcome(props) {\n    return <h1>Hello, {props.name}<
 module.exports = "function Welcome(props) {\n    return <h1>Hello, {props.name}</h1>;\n}\n\nfunction App() {\n    return (\n        <div>\n      <Welcome name=\"Sara\" />\n      <Welcome name=\"Cahal\" />\n      <Welcome name=\"Edite\" />\n    </div>\n    );\n}\n\nReactDOM.render(\n    <App />,\n    document.getElementById('root')\n);\n";
 
 /***/ }),
-/* 33 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2472,7 +2449,7 @@ module.exports = "function Welcome(props) {\n    return <h1>Hello, {props.name}<
 module.exports = "function formatDate(date) {\n    return date.toLocaleDateString();\n}\n\nfunction Comment(props) {\n    return (\n        <div className=\"Comment\">\n      <div className=\"UserInfo\">\n        <img className=\"Avatar\"\n             src={props.author.avatarUrl}\n             alt={props.author.name} />\n        <div className=\"UserInfo-name\">\n          {props.author.name}\n        </div>\n      </div>\n      <div className=\"Comment-text\">\n        {props.text}\n      </div>\n      <div className=\"Comment-date\">\n        {formatDate(props.date)}\n      </div>\n    </div>\n    );\n}\n\nconst comment = {\n    date: new Date(),\n    text: 'I hope you enjoy learning React!',\n    author: {\n        name: 'Hello Kitty',\n        avatarUrl: 'http://placekitten.com/g/64/64'\n    }\n};\nReactDOM.render(\n    <Comment\n    date={comment.date}\n    text={comment.text}\n    author={comment.author} />,\n    document.getElementById('root')\n);\n";
 
 /***/ }),
-/* 34 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2481,7 +2458,7 @@ module.exports = "function formatDate(date) {\n    return date.toLocaleDateStrin
 module.exports = "function formatDate(date) {\n    return date.toLocaleDateString();\n}\n\nfunction Avatar(props) {\n    return (\n        <img className=\"Avatar\"\n         src={props.user.avatarUrl}\n         alt={props.user.name} />\n    );\n}\n\nfunction UserInfo(props) {\n    return (\n        <div className=\"UserInfo\">\n      <Avatar user={props.user} />\n      <div className=\"UserInfo-name\">\n        {props.user.name}\n      </div>\n    </div>\n    );\n}\n\nfunction Comment(props) {\n    return (\n        <div className=\"Comment\">\n      <UserInfo user={props.author} />\n      <div className=\"Comment-text\">\n        {props.text}\n      </div>\n      <div className=\"Comment-date\">\n        {formatDate(props.date)}\n      </div>\n    </div>\n    );\n}\n\nconst comment = {\n    date: new Date(),\n    text: 'I hope you enjoy learning React!',\n    author: {\n        name: 'Hello Kitty',\n        avatarUrl: 'http://placekitten.com/g/64/64'\n    }\n};\nReactDOM.render(\n    <Comment\n    date={comment.date}\n    text={comment.text}\n    author={comment.author} />,\n    document.getElementById('root')\n);\n";
 
 /***/ }),
-/* 35 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2490,7 +2467,7 @@ module.exports = "function formatDate(date) {\n    return date.toLocaleDateStrin
 module.exports = "function Clock(props) {\n    return (\n        <div>\n      <h1>Hello, world!</h1>\n      <h2>It is {props.date.toLocaleTimeString()}.</h2>\n    </div>\n    );\n}\n\nfunction tick() {\n    ReactDOM.render(\n        <Clock date={new Date()} />,\n        document.getElementById('root')\n    );\n}\n\nsetInterval(tick, 1000);\n";
 
 /***/ }),
-/* 36 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2499,7 +2476,7 @@ module.exports = "function Clock(props) {\n    return (\n        <div>\n      <h
 module.exports = "class Clock extends React.Component {\n    render() {\n        return (\n            <div>\n        <h1>Hello, world!</h1>\n        <h2>It is {this.props.date.toLocaleTimeString()}.</h2>\n      </div>\n        );\n    }\n}\n\nfunction tick() {\n    ReactDOM.render(\n        <Clock date={new Date()} />,\n        document.getElementById('root')\n    );\n}\n\nsetInterval(tick, 1000);\n";
 
 /***/ }),
-/* 37 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2526,6 +2503,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var context = __webpack_require__(3);
+console.log(_react.Component, _react2.default, _reactDom2.default);
 
 function path2name(path) {
     path = path.match(/\d+([\w']+)/)[1];
@@ -2631,7 +2609,7 @@ var Editor = function (_React$Component2) {
                     _this4.code = code;
                     _this4.props.onChange(code);
                 });
-            });
+            }, 100);
         }
     }, {
         key: 'componentWillReceiveProps',

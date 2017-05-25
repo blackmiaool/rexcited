@@ -169,11 +169,6 @@ return /******/ (function(modules) { // webpackBootstrap
 "use strict";
 
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.renderingComponentStack = exports.cloneElement = exports.isValidElement = exports.createClass = exports.PropTypes = exports.Children = exports.Component = exports.createElement = undefined;
-
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -365,16 +360,7 @@ var _exports = {
     renderingComponentStack: renderingComponentStack
 };
 
-exports.createElement = createElement;
-exports.Component = Component;
-exports.Children = _children2.default;
-exports.PropTypes = PropTypes;
-exports.createClass = createClass;
-exports.isValidElement = isValidElement;
-exports.cloneElement = cloneElement;
-exports.renderingComponentStack = renderingComponentStack;
-exports.default = _exports;
-
+module.exports = _exports;
 window.React = _exports;
 
 /***/ }),
