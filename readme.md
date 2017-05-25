@@ -27,14 +27,14 @@ Lightweight React.
 In your webpack.config.js:
 
 ```javascript
-    resolve:{
-        alias: {
-            'react/lib': 'rexcited/src/react/lib',
-            'react-dom/lib': 'rexcited/src/react-dom/lib',
-            react: 'rexcited/dist/react.js',
-            'react-dom': 'rexcited/dist/react-dom.js',            
-        },
+resolve:{
+    alias: {
+        'react/lib': 'rexcited/src/react/lib',
+        'react-dom/lib': 'rexcited/src/react-dom/lib',
+        react: 'rexcited/dist/react.js',
+        'react-dom': 'rexcited/dist/react-dom.js',            
     },
+},
 ```
 
 
