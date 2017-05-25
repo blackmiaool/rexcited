@@ -4,7 +4,7 @@ import {
 } from 'react';
 import ReactDOM from 'react-dom';
 const context = require.context("../official", false, /\.jsx$/);
-console.log(Component, React, ReactDOM);
+
 
 function path2name(path) {
     path = path.match(/\d+([\w']+)/)[1];
@@ -36,7 +36,7 @@ Object.keys(testCases).forEach(function (i) {
     testCases[testCase.name] = testCase;
     delete testCases[i];
 });
-console.log(testCases);
+
 
 function bindThis(that, arr) {
     arr.forEach((funcName) => {
@@ -54,18 +54,12 @@ class Header extends React.Component {
     }
 }
 
-//  <Editor/>
-//            <Iframe/>
-
 class Editor extends React.Component {
     constructor(props) {
         super(props);
-        //        bindThis(this, ['onChange']);
-
-
     }
     onEditor(ref) {
-        console.log('ref', ref)
+
         setTimeout(() => {
             this.editor = CodeMirror.fromTextArea(ref, {
                 lineNumbers: true,
@@ -243,6 +237,3 @@ ReactDOM.render(
     <App/>,
     document.getElementById('root')
 );
-
-
-//console.log(context(context.keys()[0]));

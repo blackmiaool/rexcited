@@ -2503,7 +2503,6 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var context = __webpack_require__(3);
-console.log(_react.Component, _react2.default, _reactDom2.default);
 
 function path2name(path) {
     path = path.match(/\d+([\w']+)/)[1];
@@ -2536,7 +2535,6 @@ Object.keys(testCases).forEach(function (i) {
     testCases[testCase.name] = testCase;
     delete testCases[i];
 });
-console.log(testCases);
 
 function bindThis(that, arr) {
     arr.forEach(function (funcName) {
@@ -2579,9 +2577,6 @@ var Header = function (_React$Component) {
     return Header;
 }(_react2.default.Component);
 
-//  <Editor/>
-//            <Iframe/>
-
 var Editor = function (_React$Component2) {
     _inherits(Editor, _React$Component2);
 
@@ -2589,8 +2584,6 @@ var Editor = function (_React$Component2) {
         _classCallCheck(this, Editor);
 
         return _possibleConstructorReturn(this, (Editor.__proto__ || Object.getPrototypeOf(Editor)).call(this, props));
-        //        bindThis(this, ['onChange']);
-
     }
 
     _createClass(Editor, [{
@@ -2598,7 +2591,6 @@ var Editor = function (_React$Component2) {
         value: function onEditor(ref) {
             var _this4 = this;
 
-            console.log('ref', ref);
             setTimeout(function () {
                 _this4.editor = CodeMirror.fromTextArea(ref, {
                     lineNumbers: true,
@@ -2784,8 +2776,6 @@ var App = function (_React$Component3) {
 }(_react2.default.Component);
 
 _reactDom2.default.render(_react2.default.createElement(App, null), document.getElementById('root'));
-
-//console.log(context(context.keys()[0]));
 
 /***/ })
 /******/ ]);
