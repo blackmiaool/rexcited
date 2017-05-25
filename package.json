@@ -1,6 +1,6 @@
 {
   "name": "rexcited",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "A small react.",
   "main": "dist/react.js",
   "scripts": {
