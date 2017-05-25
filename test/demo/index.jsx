@@ -128,7 +128,6 @@ class App extends React.Component {
         doc.close();
     }
     updatePreview() {
-        console.trace('updatePreview');
         if (!this.refs.preview) {
             return;
         }

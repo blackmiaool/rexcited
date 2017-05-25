@@ -2671,7 +2671,6 @@ var App = function (_React$Component3) {
         value: function updatePreview() {
             var _this6 = this;
 
-            console.trace('updatePreview');
             if (!this.refs.preview) {
                 return;
             }
