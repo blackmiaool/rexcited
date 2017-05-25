@@ -1,4 +1,4 @@
-# Rexcited ![icon](http://blackmiaool.com/rexcited/icon.png)
+# Rexcited ![icon](http://blackmiaool.com/rexcited/icon2.png)
 
 Lightweight React.
 
