@@ -56,14 +56,35 @@ class Header extends React.Component {
 class Editor extends React.Component {
     constructor(props) {
         super(props);
-        bindThis(this, ['onChange']);
+        //        bindThis(this, ['onChange']);
+
+
     }
-    onChange(e) {
-        this.props.onChange(e.target.value);
+    onEditor(ref) {
+        console.log('ref', ref)
+        setTimeout(() => {
+            this.editor = CodeMirror.fromTextArea(ref, {
+                lineNumbers: true,
+                mode: "jsx"
+            });
+            this.editor.on("change", (editor) => {
+                const code = editor.getValue();
+                this.code = code;
+                this.props.onChange(code);
+            });
+        });
+
     }
+    componentWillReceiveProps(props) {
+        if (props.code === this.code) {
+            return;
+        }
+        this.editor && this.editor.setValue(props.code)
+    }
+
     render() {
         return (<div style="display:inline-block;" id="editor">
-            <textarea name="" id="" cols="50" rows="30" onChange={this.onChange} value={this.props.code}></textarea>
+            <textarea ref={this.onEditor} name="" id="" cols="50" rows="30"  value={this.props.code}></textarea>
         </div>);
     }
 }
@@ -109,6 +130,7 @@ class App extends React.Component {
         doc.close();
     }
     updatePreview() {
+        console.trace('updatePreview');
         if (!this.refs.preview) {
             return;
         }
@@ -124,9 +146,9 @@ class App extends React.Component {
 <head>
     <meta charset="UTF-8" />
     <title>Hello World</title>
-    <script src="http://blackmiaool.com/rexcited/dist/react.js"></script>
-    <script src="http://blackmiaool.com/rexcited/dist/react-dom.js"></script>
-    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+    <script src="../dist/react.js"></script>
+    <script src="../dist/react-dom.js"></script>
+    <script src="demo/babel.min.js"></script>
 </head>
 
 <body>
@@ -146,9 +168,9 @@ class App extends React.Component {
 <head>
     <meta charset="UTF-8" />
     <title>Hello World</title>
-    <script src="https://unpkg.com/react@latest/dist/react.js"></script>
-    <script src="https://unpkg.com/react-dom@latest/dist/react-dom.js"></script>
-    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+    <script src="demo/react.js"></script>
+    <script src="demo/react-dom.js"></script>
+    <script src="demo/babel.min.js"></script>
 </head>
 
 <body>
@@ -164,12 +186,21 @@ class App extends React.Component {
         });
     }
     onSelect(name) {
+        const code = testCases[name].code;
+        if (code === this.state.code) {
+            return;
+        }
+
         this.setState({
-            code: testCases[name].code
+            code
         });
         this.updatePreview();
     }
     onChange(code) {
+        if (code.replace(/\s/g, '') === this.state.code.replace(/\s/g, '')) {
+            return;
+        }
+
         this.setState({
             code
         });

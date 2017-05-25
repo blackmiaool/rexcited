@@ -357,7 +357,6 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
                         return;
                     }
                 }
-
                 for (var p in y) {
                     if (p === "_owner" || p === "_refowner") {
                         continue;
@@ -377,10 +376,11 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
                             };
                             break;
                         case 'function':
-                            if (typeof x[p] == 'undefined' || p != 'equals') {
+                            if (y[p] === x[p]) {
+                                continue;
+                            } else {
                                 return false;
-                            };
-                            break;
+                            }
                         default:
                             if (y[p] != x[p]) {
                                 return false;
@@ -480,7 +480,11 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
                                 if (old[key] instanceof ReactCompositeComponentWrapper) {
 
                                     if (child && old[key]._currentElement.type === child.type) {
-                                        lastNode = old[key].updateProps(child.props, context);
+                                        if (equals(old[key]._currentElement.props, child.props)) {
+                                            lastNode = old[key]._hostNode;
+                                        } else {
+                                            lastNode = old[key].updateProps(child.props, context);
+                                        }
                                     } else {
                                         lastNode = old[key]._hostNode;
                                         if (showLog) {
@@ -1255,6 +1259,7 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
                 if (!equals(element0.props, element.props)) {
                     //props changed        
                     if (isComponent(element.type)) {
+                        console.log('b');
                         return owner.updateProps(element.props, context);
                     } else {
                         //normal dom            
@@ -2175,7 +2180,6 @@ var map = {
 	"./26lifting_state_up.jsx": 21,
 	"./27adding_a_second_input.jsx": 22,
 	"./28lifting_state_up2.jsx": 23,
-	"./29containment.jsx": 24,
 	"./2embedding_expressions_in_jsx.jsx": 25,
 	"./30specialization.jsx": 26,
 	"./31exposing_dom_refs_to_parent_components.jsx": 27,
@@ -2386,15 +2390,7 @@ module.exports = "const scaleNames = {\r\n    c: 'Celsius',\r\n    f: 'Fahrenhei
 module.exports = "const scaleNames = {\r\n    c: 'Celsius',\r\n    f: 'Fahrenheit'\r\n};\r\n\r\nfunction toCelsius(fahrenheit) {\r\n    return (fahrenheit - 32) * 5 / 9;\r\n}\r\n\r\nfunction toFahrenheit(celsius) {\r\n    return (celsius * 9 / 5) + 32;\r\n}\r\n\r\nfunction tryConvert(temperature, convert) {\r\n    const input = parseFloat(temperature);\r\n    if (Number.isNaN(input)) {\r\n        return '';\r\n    }\r\n    const output = convert(input);\r\n    const rounded = Math.round(output * 1000) / 1000;\r\n    return rounded.toString();\r\n}\r\n\r\nfunction BoilingVerdict(props) {\r\n    if (props.celsius >= 100) {\r\n        return <p>The water would boil.</p>;\r\n    }\r\n    return <p>The water would not boil.</p>;\r\n}\r\n\r\nclass TemperatureInput extends React.Component {\r\n    constructor(props) {\r\n        super(props);\r\n        this.handleChange = this.handleChange.bind(this);\r\n    }\r\n\r\n    handleChange(e) {\r\n        this.props.onTemperatureChange(e.target.value);\r\n    }\r\n\r\n    render() {\r\n        const temperature = this.props.temperature;\r\n        const scale = this.props.scale;\r\n        return (\r\n            <fieldset>\r\n        <legend>Enter temperature in {scaleNames[scale]}:</legend>\r\n        <input value={temperature}\r\n               onChange={this.handleChange} />\r\n      </fieldset>\r\n        );\r\n    }\r\n}\r\n\r\nclass Calculator extends React.Component {\r\n    constructor(props) {\r\n        super(props);\r\n        this.handleCelsiusChange = this.handleCelsiusChange.bind(this);\r\n        this.handleFahrenheitChange = this.handleFahrenheitChange.bind(this);\r\n        this.state = {\r\n            temperature: '',\r\n            scale: 'c'\r\n        };\r\n    }\r\n\r\n    handleCelsiusChange(temperature) {\r\n        this.setState({\r\n            scale: 'c',\r\n            temperature\r\n        });\r\n    }\r\n\r\n    handleFahrenheitChange(temperature) {\r\n        this.setState({\r\n            scale: 'f',\r\n            temperature\r\n        });\r\n    }\r\n\r\n    render() {\r\n        const scale = this.state.scale;\r\n        const temperature = this.state.temperature;\r\n        const celsius = scale === 'f' ? tryConvert(temperature, toCelsius) : temperature;\r\n        const fahrenheit = scale === 'c' ? tryConvert(temperature, toFahrenheit) : temperature;\r\n\r\n        return (\r\n            <div>\r\n        <TemperatureInput\r\n          scale=\"c\"\r\n          temperature={celsius}\r\n          onTemperatureChange={this.handleCelsiusChange} />\r\n        <TemperatureInput\r\n          scale=\"f\"\r\n          temperature={fahrenheit}\r\n          onTemperatureChange={this.handleFahrenheitChange} />\r\n        <BoilingVerdict\r\n          celsius={parseFloat(celsius)} />\r\n      </div>\r\n        );\r\n    }\r\n}\r\n\r\nReactDOM.render(\r\n    <Calculator />,\r\n    document.getElementById('root')\r\n);";
 
 /***/ }),
-/* 24 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = "function Contacts() {\r\n    return <div className=\"Contacts\" />;\r\n}\r\n\r\nfunction Chat() {\r\n    return <div className=\"Chat\" />;\r\n}\r\n\r\nfunction SplitPane(props) {\r\n    return (\r\n        <div className=\"SplitPane\">\r\n      <div className=\"SplitPane-left\">\r\n        {props.left}\r\n      </div>\r\n      <div className=\"SplitPane-right\">\r\n        {props.right}\r\n      </div>\r\n    </div>\r\n    );\r\n}\r\n\r\nfunction App() {\r\n    return (\r\n        <SplitPane\r\n      left={\r\n        <Contacts />\r\n      }\r\n      right={\r\n        <Chat />\r\n      } />\r\n    );\r\n}\r\n\r\nReactDOM.render(\r\n    <App />,\r\n    document.getElementById('root')\r\n);";
-
-/***/ }),
+/* 24 */,
 /* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -2614,16 +2610,36 @@ var Editor = function (_React$Component2) {
     function Editor(props) {
         _classCallCheck(this, Editor);
 
-        var _this3 = _possibleConstructorReturn(this, (Editor.__proto__ || Object.getPrototypeOf(Editor)).call(this, props));
+        return _possibleConstructorReturn(this, (Editor.__proto__ || Object.getPrototypeOf(Editor)).call(this, props));
+        //        bindThis(this, ['onChange']);
 
-        bindThis(_this3, ['onChange']);
-        return _this3;
     }
 
     _createClass(Editor, [{
-        key: 'onChange',
-        value: function onChange(e) {
-            this.props.onChange(e.target.value);
+        key: 'onEditor',
+        value: function onEditor(ref) {
+            var _this4 = this;
+
+            console.log('ref', ref);
+            setTimeout(function () {
+                _this4.editor = CodeMirror.fromTextArea(ref, {
+                    lineNumbers: true,
+                    mode: "jsx"
+                });
+                _this4.editor.on("change", function (editor) {
+                    var code = editor.getValue();
+                    _this4.code = code;
+                    _this4.props.onChange(code);
+                });
+            });
+        }
+    }, {
+        key: 'componentWillReceiveProps',
+        value: function componentWillReceiveProps(props) {
+            if (props.code === this.code) {
+                return;
+            }
+            this.editor && this.editor.setValue(props.code);
         }
     }, {
         key: 'render',
@@ -2631,7 +2647,7 @@ var Editor = function (_React$Component2) {
             return _react2.default.createElement(
                 'div',
                 { style: 'display:inline-block;', id: 'editor' },
-                _react2.default.createElement('textarea', { name: '', id: '', cols: '50', rows: '30', onChange: this.onChange, value: this.props.code })
+                _react2.default.createElement('textarea', { ref: this.onEditor, name: '', id: '', cols: '50', rows: '30', value: this.props.code })
             );
         }
     }]);
@@ -2647,22 +2663,22 @@ var App = function (_React$Component3) {
     function App(props) {
         _classCallCheck(this, App);
 
-        var _this4 = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
+        var _this5 = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 
-        bindThis(_this4, ['onSelect', 'onChange']);
-        _this4.list = [];
+        bindThis(_this5, ['onSelect', 'onChange']);
+        _this5.list = [];
         for (var name in testCases) {
-            _this4.list.push(name);
+            _this5.list.push(name);
         }
         setTimeout(function () {
-            _this4.updatePreview();
+            _this5.updatePreview();
         }, 100);
         window.addEventListener('message', function (e) {
             var msg = e.data;
             var obj = _defineProperty({}, msg, true);
-            _this4.setState(obj);
+            _this5.setState(obj);
         });
-        return _this4;
+        return _this5;
     }
 
     _createClass(App, [{
@@ -2683,8 +2699,9 @@ var App = function (_React$Component3) {
     }, {
         key: 'updatePreview',
         value: function updatePreview() {
-            var _this5 = this;
+            var _this6 = this;
 
+            console.trace('updatePreview');
             if (!this.refs.preview) {
                 return;
             }
@@ -2693,22 +2710,31 @@ var App = function (_React$Component3) {
                 rexcited: false
             });
             setTimeout(function () {
-                _this5.setCode(_this5.refs['preview'], '\n<!DOCTYPE html>\n<html>\n\n<head>\n    <meta charset="UTF-8" />\n    <title>Hello World</title>\n    <script src="http://blackmiaool.com/rexcited/dist/react.js"></script>\n    <script src="http://blackmiaool.com/rexcited/dist/react-dom.js"></script>\n    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>\n</head>\n\n<body>\n    <div id="root"></div>\n    <script>\n        var name=\'rexcited\';\n        ' + preScript + '\n    </script>\n    <script type="text/babel">' + _this5.state.code + '</script>\n</body>\n</html>\n');
-                _this5.setCode(_this5.refs['preview-original'], '\n<!DOCTYPE html>\n<html>\n\n<head>\n    <meta charset="UTF-8" />\n    <title>Hello World</title>\n    <script src="https://unpkg.com/react@latest/dist/react.js"></script>\n    <script src="https://unpkg.com/react-dom@latest/dist/react-dom.js"></script>\n    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>\n</head>\n\n<body>\n    <div id="root"></div>\n    <script>\n        var name=\'react\';\n        ' + preScript + '\n    </script>\n    <script type="text/babel">' + _this5.state.code + '</script>\n</body>\n</html>\n');
+                _this6.setCode(_this6.refs['preview'], '\n<!DOCTYPE html>\n<html>\n\n<head>\n    <meta charset="UTF-8" />\n    <title>Hello World</title>\n    <script src="../dist/react.js"></script>\n    <script src="../dist/react-dom.js"></script>\n    <script src="demo/babel.min.js"></script>\n</head>\n\n<body>\n    <div id="root"></div>\n    <script>\n        var name=\'rexcited\';\n        ' + preScript + '\n    </script>\n    <script type="text/babel">' + _this6.state.code + '</script>\n</body>\n</html>\n');
+                _this6.setCode(_this6.refs['preview-original'], '\n<!DOCTYPE html>\n<html>\n\n<head>\n    <meta charset="UTF-8" />\n    <title>Hello World</title>\n    <script src="demo/react.js"></script>\n    <script src="demo/react-dom.js"></script>\n    <script src="demo/babel.min.js"></script>\n</head>\n\n<body>\n    <div id="root"></div>\n    <script>\n        var name=\'react\';\n        ' + preScript + '\n    </script>\n    <script type="text/babel">' + _this6.state.code + '</script>\n</body>\n</html>\n');
             });
         }
     }, {
         key: 'onSelect',
         value: function onSelect(name) {
+            var code = testCases[name].code;
+            if (code === this.state.code) {
+                return;
+            }
+
             this.setState({
-                code: testCases[name].code
+                code: code
             });
             this.updatePreview();
         }
     }, {
         key: 'onChange',
         value: function onChange(code) {
-            var _this6 = this;
+            var _this7 = this;
+
+            if (code.replace(/\s/g, '') === this.state.code.replace(/\s/g, '')) {
+                return;
+            }
 
             this.setState({
                 code: code
@@ -2718,7 +2744,7 @@ var App = function (_React$Component3) {
                 this.previewTimeout = 0;
             }
             this.previewTimeout = setTimeout(function () {
-                _this6.updatePreview();
+                _this7.updatePreview();
             }, 1000);
         }
     }, {

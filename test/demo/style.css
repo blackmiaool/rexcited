@@ -1,6 +1,15 @@
 body {
     margin: 0;
-    padding: 40px;
+    padding: 0px 40px;
+    font-family: Arial, Verdana, "\5FAE\8F6F\96C5\9ED1", "\9ED1\4F53", serif;
+    -webkit-font-smoothing: subpixel-antialiased;
+    font-smoothing: subpixel-antialiased;
+}
+
+h3 {
+    margin: 10px;
+    font-size: 25px;
+    text-align: center;
 }
 
 #case-select {}
@@ -22,6 +31,7 @@ li {
 #editor {
     width: 50%;
     height: 400px;
+    border: 1px solid rgb(169, 169, 169);
 }
 
 #preview {
@@ -54,7 +64,7 @@ li {
 }
 
 #preview iframe {
-    height: 100%;
+    height: calc(100% - 2px);
     width: 100%;
     position: relative;
     z-index: 1;
@@ -67,7 +77,7 @@ li {
     position: relative;
 }
 
-#preview .top-iframe {
+#preview .top {
     border-bottom: 1px solid rgb(169, 169, 169);
 }
 
@@ -82,4 +92,9 @@ li {
 #editor textarea {
     height: 100%;
     width: 100%;
+    border: none;
+}
+
+.CodeMirror {
+    height: 100% !important;
 }

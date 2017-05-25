@@ -224,7 +224,6 @@ function equals(x, y) {
             return;
         }
     }
-
     for (var p in y) {
         if (p === "_owner" || p === "_refowner") {
             continue;
@@ -244,10 +243,11 @@ function equals(x, y) {
                 };
                 break;
             case 'function':
-                if (typeof x[p] == 'undefined' || p != 'equals') {
+                if (y[p] === x[p]) {
+                    continue;
+                } else {
                     return false;
-                };
-                break;
+                }
             default:
                 if (y[p] != x[p]) {
                     return false;
@@ -347,7 +347,11 @@ function getChildren(parent, children) {
                     if (old[key] instanceof ReactCompositeComponentWrapper) {
 
                         if (child && old[key]._currentElement.type === child.type) {
-                            lastNode = old[key].updateProps(child.props, context);
+                            if (equals(old[key]._currentElement.props, child.props)) {
+                                lastNode = old[key]._hostNode;
+                            } else {
+                                lastNode = old[key].updateProps(child.props, context);
+                            }
                         } else {
                             lastNode = old[key]._hostNode;
                             if (showLog) {
@@ -1122,6 +1126,7 @@ function update(dom, element) {
     if (!equals(element0.props, element.props)) {
         //props changed        
         if (isComponent(element.type)) {
+            console.log('b');
             return owner.updateProps(element.props, context);
         } else {
             //normal dom            
