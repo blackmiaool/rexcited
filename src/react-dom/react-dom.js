@@ -309,7 +309,7 @@ function getChildren(parent, children, old = {}, owner, context, instance) {
                     if (old[key] instanceof ReactCompositeComponentWrapper) {
 
                         if (child && old[key]._currentElement.type === child.type) {
-                            if (equals(old[key]._currentElement.props, child.props)) {
+                            if (equals(old[key]._currentElement.props, child.props) && false) { //TODO
                                 lastNode = old[key]._hostNode;
                             } else {
                                 lastNode = old[key].updateProps(child.props, context);

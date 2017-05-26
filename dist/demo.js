@@ -475,7 +475,9 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
                                 if (old[key] instanceof ReactCompositeComponentWrapper) {
 
                                     if (child && old[key]._currentElement.type === child.type) {
-                                        if (equals(old[key]._currentElement.props, child.props)) {
+                                        console.log(old[key]._currentElement.props, child.props);
+                                        if (equals(old[key]._currentElement.props, child.props) && false) {
+                                            //TODO
                                             lastNode = old[key]._hostNode;
                                         } else {
                                             lastNode = old[key].updateProps(child.props, context);
