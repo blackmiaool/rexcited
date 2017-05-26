@@ -666,10 +666,10 @@ class ReactCompositeComponentWrapper extends ReactWrapper {
 
         this.stateQueue.length = 0;
 
-        instance.state = state;
         if (render) {
             this.doUpdate(state, this._instance.props, this._instance.context);
         }
+        this._instance.state = state;
         cbList.forEach((cb) => {
             cb.call(instance);
         });

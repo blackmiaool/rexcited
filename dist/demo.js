@@ -871,10 +871,10 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
 
                         this.stateQueue.length = 0;
 
-                        instance.state = state;
                         if (render) {
                             this.doUpdate(state, this._instance.props, this._instance.context);
                         }
+                        this._instance.state = state;
                         cbList.forEach(function (cb) {
                             cb.call(instance);
                         });
@@ -1448,23 +1448,26 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
             /******/ // This file contains only the entry chunk.
             /******/ // The chunk loading function for additional chunks
             /******/__webpack_require__.e = function requireEnsure(chunkId) {
-                /******/if (installedChunks[chunkId] === 0) {
-                    /******/return Promise.resolve();
+                /******/var installedChunkData = installedChunks[chunkId];
+                /******/if (installedChunkData === 0) {
+                    /******/return new Promise(function (resolve) {
+                        resolve();
+                    });
                     /******/
                 }
                 /******/
                 /******/ // a Promise means "currently loading".
-                /******/if (installedChunks[chunkId]) {
-                    /******/return installedChunks[chunkId][2];
+                /******/if (installedChunkData) {
+                    /******/return installedChunkData[2];
                     /******/
                 }
                 /******/
                 /******/ // setup Promise in chunk cache
                 /******/var promise = new Promise(function (resolve, reject) {
-                    /******/installedChunks[chunkId] = [resolve, reject];
+                    /******/installedChunkData = installedChunks[chunkId] = [resolve, reject];
                     /******/
                 });
-                /******/installedChunks[chunkId][2] = promise;
+                /******/installedChunkData[2] = promise;
                 /******/
                 /******/ // start chunk loading
                 /******/var head = document.getElementsByTagName('head')[0];
