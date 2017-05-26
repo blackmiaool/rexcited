@@ -1029,7 +1029,12 @@ function update(dom, element) {
         }
         var comment = document.createComment("react-empty: ?");
         dom.parentElement && dom.parentElement.replaceChild(comment, dom);
-        comment[internalInstanceKey] = dom[internalInstanceKey];
+        var _wrapper = dom[internalInstanceKey];
+        comment[internalInstanceKey] = _wrapper;
+        do {
+            _wrapper._hostNode = comment;
+            _wrapper = _wrapper._currentElement && _wrapper._currentElement._owner;
+        } while (_wrapper && _wrapper._hostNode === dom);
         return comment;
     }
 
@@ -1059,6 +1064,7 @@ function update(dom, element) {
             context: context,
             owner: (componentRef || {})._reactInternalInstance
         });
+
         if (dom.parentElement) {
             dom.parentElement.replaceChild(newDom, dom);
         }
