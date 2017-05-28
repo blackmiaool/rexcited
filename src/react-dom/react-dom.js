@@ -236,14 +236,17 @@ let ccc = 1;
 
 function getChildren(parent, children, old = {}, owner, context, instance) {
     if (showLog) {
-        console.log('oldchildren', old);
-        console.log('getChildren', parent, children, old, owner, context)
+        console.log('getChildren', parent, children, old, owner, context, ccc)
     }
-    ccc++;
     const cc = ccc;
+    ccc++;
+
 
 
     if (!children) {
+        if (showLog) {
+            console.log('no children', cc);
+        }
         return {
             children: {}
         };
@@ -309,7 +312,7 @@ function getChildren(parent, children, old = {}, owner, context, instance) {
                     if (old[key] instanceof ReactCompositeComponentWrapper) {
 
                         if (child && old[key]._currentElement.type === child.type) {
-                            if (equals(old[key]._currentElement.props, child.props) && false) { //TODO
+                            if (equals(old[key]._currentElement.props, child.props) && !old[key].isContextChanged(context)) { //TODO
                                 lastNode = old[key]._hostNode;
                             } else {
                                 lastNode = old[key].updateProps(child.props, context);
@@ -352,9 +355,8 @@ function getChildren(parent, children, old = {}, owner, context, instance) {
     }
     if (showLog) {
 
-        if (Object.keys(_renderedChildren).length == 2) {
-            console.log('_renderedChildren', _renderedChildren, instance, arguments);
-        }
+        console.log('_renderedChildren', _renderedChildren, instance, arguments, cc);
+
     }
 
     return {
@@ -434,6 +436,15 @@ class ReactWrapper {
             this.previousRef = ref;
         }
     }
+    handleRemove() {
+        this.isMounted = false;
+        if (this._instance.componentWillUnmount) {
+            asyncSetState();
+            this._instance.componentWillUnmount();
+            this.handleStateQueue(this._instance.props);
+        }
+    }
+
 }
 class ReactCompositeComponentWrapper extends ReactWrapper {
     constructor(type, element, owner, context = {}) {
@@ -524,18 +535,22 @@ class ReactCompositeComponentWrapper extends ReactWrapper {
             return this._context;
         }
     }
-    getSelfContext() {
-        this._context = this._context || {}
+    getSelfContext(context = this._context) {
+        //        this._context = this._context || {}
         let contextThis = {}
         if (this._currentElement.type.contextTypes) {
             for (const i in this._currentElement.type.contextTypes) {
-                contextThis[i] = this._context[i];
+                contextThis[i] = context[i];
             }
         }
         return contextThis;
     }
     updateSelfContext() {
         this._instance.context = this.getSelfContext();
+    }
+    isContextChanged(context) {
+        const ret = !equals(this._instance.context, this.getSelfContext(context));
+        return ret;
     }
     create(props, context) {
 
@@ -622,14 +637,7 @@ class ReactCompositeComponentWrapper extends ReactWrapper {
         }
         return element;
     }
-    remove() {
-        this.isMounted = false;
-        if (this._instance.componentWillUnmount) {
-            asyncSetState();
-            this._instance.componentWillUnmount();
-            this.handleStateQueue(this._instance.props);
-        }
-    }
+
     handleStateQueue(props, render) {
         asyncSetState(false);
         const index = ReactCompositeComponentWrapper.dirtyQueue.indexOf(this);
@@ -743,7 +751,14 @@ class ReactCompositeComponentWrapper extends ReactWrapper {
                 context: this.getContext()
             });
             renderingComponentStack.pop();
+            const preHostNode = this._hostNode;
             this._hostNode = result;
+            let wrapper = this;
+            while (wrapper._currentElement._owner && wrapper._currentElement._owner._hostNode === preHostNode) {
+                wrapper = wrapper._currentElement._owner;
+                wrapper._hostNode = result;
+
+            }
 
 
             this.handleAfterRenderQueue();
@@ -762,6 +777,14 @@ class ReactCompositeComponentWrapper extends ReactWrapper {
         }
         ReactCompositeComponentWrapper.afterUpdate();
         return result;
+    }
+    remove() {
+        if (!this.isMounted) {
+            return;
+        }
+
+        this.handleRemove();
+        this._hostNode[internalInstanceKey].removeUntil(this);
     }
 
 }
@@ -818,9 +841,41 @@ class ReactDOMComponent extends ReactWrapper {
         this.refAttach(element.ref);
         handleQueue(this.afterRenderQueue);
     }
-    remove() {
-
+    removeUntil(wrapper) {
+        const parent = getOwnerOnSameDom(this._hostNode);
+        parent.some(function (owner) {
+            if (owner === wrapper) {
+                return true;
+            }
+            owner.remove();
+            return false;
+        });
     }
+    remove() {
+        if (!this.isMounted) {
+            return;
+        }
+        console.log('remove', this._hostNode);
+        this.handleRemove();
+
+        function handleChild(child) {
+
+            console.log('child', child);
+            child && child.remove && child.remove();
+            const arr = getOwnerOnSameDom(child._hostNode);
+            arr.forEach(function (owner) {
+                owner.remove();
+            });
+        }
+
+        //        const arr = getOwnerOnSameDom(this._hostNode);
+        //        arr.forEach(function (owner) {
+        //            owner.remove();
+        //        });
+
+        React.Children.forEach(this._renderedChildren, handleChild);
+    }
+
 }
 class ReactDOMTextComponent extends ReactWrapper {
     constructor(element, dom, owner) {
@@ -890,7 +945,7 @@ function isStateLess(type) {
 
 function isReactComponent(type) {
 
-    return type.prototype instanceof React.Component || type.prototype.render;
+    return type.prototype instanceof React.Component || (type.prototype && type.prototype.render);
 }
 
 function findOwnerUntil(owner, top) {
@@ -916,6 +971,16 @@ function findTopOwner(owner) {
     return owner;
 }
 
+function getOwnerOnSameDom(dom) {
+    let wrapper = dom[internalInstanceKey];
+    const ret = []
+    do {
+        ret.push(wrapper);
+        wrapper = wrapper._currentElement && wrapper._currentElement._owner;
+    } while (wrapper && wrapper._hostNode === dom);
+    return ret;
+}
+
 function update(dom, element, {
     componentRef,
     context
@@ -924,26 +989,39 @@ function update(dom, element, {
         console.log('update', dom, element, context, componentRef)
     }
     let forceRender = false;
-    if (!element && dom) { //dom to comment
+    const wrapper = dom && dom[internalInstanceKey];
+    const element0 = wrapper._currentElement;
+
+    if (!element) { //dom to comment        
+        if (dom.nodeName === '#comment') {
+            return dom;
+        } else {
+            const arr = getOwnerOnSameDom(dom);
+            arr[arr.length - 1].remove();
+        }
         if (showLog) {
             console.log('dom to comment')
         }
         const comment = document.createComment("react-empty: ?");
         dom.parentElement && dom.parentElement.replaceChild(comment, dom)
         let wrapper = dom[internalInstanceKey];
-        comment[internalInstanceKey] = wrapper;
-        do {
-            wrapper._hostNode = comment;
-            wrapper = wrapper._currentElement && wrapper._currentElement._owner;
-        } while (wrapper && wrapper._hostNode === dom)
+        //        comment[internalInstanceKey] = wrapper;
+        if (componentRef) {
+            wrapper._currentElement._owner = componentRef._reactInternalInstance;
+        }
+
+        //        comment[internalInstanceKey] = 
+        getOwnerOnSameDom(dom).forEach(function (owner) {
+            owner._hostNode = comment;
+        });
         return comment;
     }
 
     if (dom.nodeType === 8 && element) { //comment, force render
         forceRender = true;
     }
-    const wrapper = dom[internalInstanceKey];
-    const element0 = wrapper._currentElement;
+
+
 
 
     let ownerType;
@@ -964,17 +1042,26 @@ function update(dom, element, {
 
 
     function createAndReplace() {
+        if (showLog) {
+            console.log('createAndReplace');
+        }
         dom[internalInstanceKey].remove && dom[internalInstanceKey].remove();
         const newDom = create(element, {
             context,
             owner: (componentRef || {})._reactInternalInstance
         });
-
+        //        console.trace('createAndReplace', newDom, dom)
+        //        if (newDom.nodeName === '#comment' && dom.nodeName === '#comment') {
+        //
+        //        } else {
         if (dom.parentElement) {
             dom.parentElement.replaceChild(newDom, dom);
         }
+        //        }
+
         return newDom;
     }
+
     if (isHost) {
         if (componentRef) {
             let owner = element0._owner;
@@ -1067,9 +1154,6 @@ function update(dom, element, {
 
         const newChildren = getChildren(dom, element.props.children, oldChildren, owner, context).children;
 
-        if (showLog) {
-            console.log('oldChildren', oldChildren);
-        }
         for (const i in oldChildren) {
             if (!newChildren[i] && oldChildren[i]) {
 
